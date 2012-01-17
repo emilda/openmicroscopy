@@ -149,7 +149,7 @@
    *  + xerces-xml-apis-2.6.2.jar. The Apache Xerces Parser 
    * 					(http://xerces.apache.org/xerces-j/). Version: 2.6.2.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-  <taskdef name="fop" classname="org.apache.fop.tools.anttasks.Fop" /> 
+  <!--<taskdef name="fop" classname="org.apache.fop.tools.anttasks.Fop" /> -->
  
   <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
    * TASK NAME: makexdoc
@@ -509,7 +509,6 @@
    * EXTERNAL DEPENDENCIES:
    *  + jarbundler-1.6.jar: The Jar Bundler jar.  Version: 1.6.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~--> 
-  <taskdef name="jarbundler"
-           classname="net.sourceforge.jarbundler.JarBundler" />
+  <!-- <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" /> -->
 
 </antlib>
