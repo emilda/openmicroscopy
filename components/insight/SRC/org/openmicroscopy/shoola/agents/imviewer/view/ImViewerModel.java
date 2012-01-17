@@ -663,6 +663,8 @@ class ImViewerModel
 	void discard()
 	{
 		state = ImViewer.DISCARDED;
+		if (imageIcon != null) imageIcon.flush();
+		browser.discard();
 		if (image == null) return;
 		//Shut down the service
 		OmeroImageService svr = ImViewerAgent.getRegistry().getImageService();
@@ -1063,7 +1065,7 @@ class ImViewerModel
 	{
 		Renderer rnd = metadataViewer.getRenderer();
 		if (rnd == null) return;
-		rnd.setChannelColor(index, c);
+		rnd.setChannelColor(index, c, false);
 	}
 
 	/**
@@ -1895,7 +1897,7 @@ class ImViewerModel
 		buf.append("\n");
 		buf.append("z-sections: "+(startZ+1)+"-"+(endZ+1));
 		buf.append("\n");
-		String range = "_ZRange_"+(startZ+1)+"_"+(endZ+1)+"_";
+		String range = "ZRange_"+(startZ+1)+"_"+(endZ+1)+"_";
 		int startT = ref.getStartT();
 		int endT = ref.getEndT();
 		if (startT == endT) buf.append("timepoint: "+(startT+1));
@@ -1906,7 +1908,7 @@ class ImViewerModel
 				range+ref.getImageName());
 		param.setDescription(buf.toString());
 		param.setDatasets(ref.getDatasets());
-		param.setDatasetParent(getGrandParent());
+		param.setDatasetParent(ref.getProject());
 		param.setChannels(getActiveChannels());
 		ProjectionSaver loader = new ProjectionSaver(component, param, 
 							ProjectionSaver.PROJECTION, ref.isApplySettings());

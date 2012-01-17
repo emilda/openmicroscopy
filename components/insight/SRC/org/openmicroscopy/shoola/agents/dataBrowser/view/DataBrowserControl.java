@@ -43,7 +43,6 @@ import javax.swing.Action;
 //Third-party libraries
 
 //Application-internal dependencies
-import org.openmicroscopy.shoola.agents.dataBrowser.DataBrowserAgent;
 import org.openmicroscopy.shoola.agents.dataBrowser.actions.CreateExperimentAction;
 import org.openmicroscopy.shoola.agents.dataBrowser.actions.FieldsViewAction;
 import org.openmicroscopy.shoola.agents.dataBrowser.actions.ManageObjectAction;
@@ -60,17 +59,13 @@ import org.openmicroscopy.shoola.agents.dataBrowser.browser.ImageDisplay;
 import org.openmicroscopy.shoola.agents.dataBrowser.browser.ImageNode;
 import org.openmicroscopy.shoola.agents.dataBrowser.browser.RollOverNode;
 import org.openmicroscopy.shoola.agents.dataBrowser.browser.Thumbnail;
-import org.openmicroscopy.shoola.agents.dataBrowser.browser.WellSampleNode;
 import org.openmicroscopy.shoola.agents.dataBrowser.util.FilteringDialog;
 import org.openmicroscopy.shoola.agents.dataBrowser.util.QuickFiltering;
-import org.openmicroscopy.shoola.agents.events.iviewer.ViewImage;
-import org.openmicroscopy.shoola.agents.events.iviewer.ViewImageObject;
 import org.openmicroscopy.shoola.agents.util.SelectionWizard;
 import org.openmicroscopy.shoola.agents.util.ui.EditorDialog;
 import org.openmicroscopy.shoola.agents.util.ui.RollOverThumbnailManager;
 import org.openmicroscopy.shoola.env.data.model.ApplicationData;
 import org.openmicroscopy.shoola.env.data.util.FilterContext;
-import org.openmicroscopy.shoola.env.event.EventBus;
 import org.openmicroscopy.shoola.util.ui.PlateGrid;
 import org.openmicroscopy.shoola.util.ui.PlateGridObject;
 import org.openmicroscopy.shoola.util.ui.search.QuickSearch;
@@ -78,8 +73,6 @@ import org.openmicroscopy.shoola.util.ui.search.SearchComponent;
 import org.openmicroscopy.shoola.util.ui.search.SearchObject;
 import pojos.DataObject;
 import pojos.DatasetData;
-import pojos.ImageData;
-import pojos.WellSampleData;
 
 /** 
  * The DataBrowser's Controller.
@@ -356,37 +349,7 @@ class DataBrowserControl
 	 * 
 	 * @param node The node to handle.
 	 */
-	void viewDisplay(ImageDisplay node)
-	{
-		if (node instanceof ImageNode) {
-			EventBus bus = DataBrowserAgent.getRegistry().getEventBus();
-			DataObject data = null;
-			Object uo = node.getHierarchyObject();
-			ViewImage event;
-			Object go;
-			ViewImageObject object;
-			if (uo instanceof ImageData) {
-				object = new ViewImageObject((ImageData) uo);
-				go =  view.getParentOfNodes();
-				if (go instanceof DataObject) 
-					data = (DataObject) go;
-				object.setContext(data, null);
-				bus.post(new ViewImage(object, null));
-				if (go instanceof DataObject) data = (DataObject) go;
-			} else if (uo instanceof WellSampleData) {
-				object = new ViewImageObject((WellSampleData) uo);
-				WellSampleNode wsn = (WellSampleNode) node;
-				Object parent = wsn.getParentObject();
-				if (parent instanceof DataObject) {
-					go =  view.getGrandParentOfNodes();
-					if (go instanceof DataObject)
-						data = (DataObject) go;
-					object.setContext((DataObject) parent, data);
-				}
-				bus.post(new ViewImage(object, null));
-			}
-		}
-	}
+	void viewDisplay(ImageDisplay node) { model.viewDisplay(node); }
 	
 	/**
 	 * Loads data, filters nodes or sets the selected node.
@@ -399,6 +362,10 @@ class DataBrowserControl
 			ImageDisplay node = (ImageDisplay) evt.getNewValue();
             if (node == null) return;
 			model.setSelectedDisplay(node);
+		} else if (Browser.SELECTED_DATA_BROWSER_NODES_DISPLAY_PROPERTY.equals(
+				name)) {
+			List<ImageDisplay> nodes = (List<ImageDisplay>) evt.getNewValue();
+			model.setSelectedDisplays(nodes);
 		} else if (Browser.UNSELECTED_DATA_BROWSER_NODE_DISPLAY_PROPERTY.equals(
 				name)) {
 			ImageDisplay node = (ImageDisplay) evt.getNewValue();

@@ -45,8 +45,6 @@ except: #pragma: nocover
 from cStringIO import StringIO
 from math import sqrt
 
-import omero_Constants_ice  
-import omero_ROMIO_ice
 from omero.rtypes import rstring, rint, rlong, rbool, rtime, rlist, rdouble, unwrap
 
 def omero_type(val):
@@ -947,7 +945,7 @@ class BlitzObjectWrapper (object):
         @return:        The named attribute.
         @rtype:         method, value (string, long etc)
         """
-
+        
         # handle lookup of 'get' methods, using '_attrs' dict to define how we wrap returned objects. 
         if attr != 'get' and attr.startswith('get') and hasattr(self, '_attrs'):
             tattr = attr[3].lower() + attr[4:]      # 'getName' -> 'name'
@@ -1398,7 +1396,6 @@ class _BlitzGateway (object):
             self._proxies['config'] = ProxyObjectWrapper(self, 'getConfigService')
             self._proxies['container'] = ProxyObjectWrapper(self, 'getContainerService')
             self._proxies['delete'] = ProxyObjectWrapper(self, 'getDeleteService')
-            self._proxies['export'] = ProxyObjectWrapper(self, 'createExporter')
             self._proxies['ldap'] = ProxyObjectWrapper(self, 'getLdapService')
             self._proxies['metadata'] = ProxyObjectWrapper(self, 'getMetadataService')
             self._proxies['query'] = ProxyObjectWrapper(self, 'getQueryService')
@@ -2012,8 +2009,7 @@ class _BlitzGateway (object):
         
         @return:    omero.gateway.ProxyObjectWrapper
         """
-        
-        return self._proxies['export']
+        return ProxyObjectWrapper(self, 'createExporter')
 
     #############################
     # Top level object fetchers #
@@ -2891,21 +2887,23 @@ class _BlitzGateway (object):
                 return KNOWN_WRAPPERS.get(obj_type.lower(), None)
             types = [getWrapper(o) for o in obj_types]
         search = self.createSearchService()
-        if created:
-            search.onlyCreatedBetween(created[0], created[1]);
-        if text[0] in ('?','*'):
-            search.setAllowLeadingWildcard(True)
-        rv = []
-        for t in types:
-            def actualSearch ():
-                search.onlyType(t().OMERO_CLASS)
-                search.byFullText(text)
-            timeit(actualSearch)()
-            if search.hasNext():
-                def searchProcessing ():
-                    rv.extend(map(lambda x: t(self, x), search.results()))
-                timeit(searchProcessing)()
-        search.close()
+        try:
+            if created:
+                search.onlyCreatedBetween(created[0], created[1]);
+            if text[0] in ('?','*'):
+                search.setAllowLeadingWildcard(True)
+            rv = []
+            for t in types:
+                def actualSearch ():
+                    search.onlyType(t().OMERO_CLASS)
+                    search.byFullText(text)
+                timeit(actualSearch)()
+                if search.hasNext():
+                    def searchProcessing ():
+                        rv.extend(map(lambda x: t(self, x), search.results()))
+                    timeit(searchProcessing)()
+        finally:
+            search.close()
         return rv
 
 
@@ -3003,17 +3001,23 @@ class ProxyObjectWrapper (object):
     Handles creation of service when requested. 
     """
     
-    def __init__ (self, conn, func_str):
+    def __init__ (self, conn, func_str, cast_to=None, service_name=None):
         """
         Initialisation of proxy object wrapper. 
         
-        @param conn:        The L{BlitzGateway} connection
-        @type conn:         L{BlitzGateway}
-        @param func_str:    The name of the service creation method. E.g 'getAdminService'
-        @type func_str:     String
+        @param conn:         The L{BlitzGateway} connection
+        @type conn:          L{BlitzGateway}
+        @param func_str:     The name of the service creation method. E.g 'getAdminService'
+        @type func_str:      String
+        @param cast_to:      the checkedCast function to call with service name (only if func_str is None)
+        @type cast_to:       function
+        @param service_name: Service name to use with cast_to (only if func_str is None)
+        
         """
         self._obj = None
         self._func_str = func_str
+        self._cast_to = cast_to
+        self._service_name = service_name
         self._resyncConn(conn)
         self._tainted = False
     
@@ -3026,7 +3030,7 @@ class ProxyObjectWrapper (object):
         @rtype:     L{ProxyObjectWrapper}
         """
         
-        return ProxyObjectWrapper(self._conn, self._func_str)
+        return ProxyObjectWrapper(self._conn, self._func_str, self._cast_to, self._service_name)
 
     def _connect (self, forcejoin=False): #pragma: no cover
         """
@@ -3084,10 +3088,15 @@ class ProxyObjectWrapper (object):
         
         self._conn = conn
         self._sf = conn.c.sf
-        self._create_func = getattr(self._sf, self._func_str)
+        def cf ():
+            if self._func_str is None:
+                return self._cast_to(self._sf.getByName(self._service_name))
+            else:
+                return getattr(self._sf, self._func_str)()
+        self._create_func = cf
         if self._obj is not None:
             try:
-                logger.debug("## - refreshing %s" % (self._func_str))
+                logger.debug("## - refreshing %s" % (self._func_str or self._service_name))
                 obj = conn.c.ic.stringToProxy(str(self._obj))
                 self._obj = self._obj.checkedCast(obj)
             except Ice.ObjectNotExistException:
@@ -4085,18 +4094,6 @@ class _ScreenWrapper (BlitzObjectWrapper):
         self.CHILD_WRAPPER_CLASS = 'PlateWrapper'
         self.PARENT_WRAPPER_CLASS = None
 
-    @timeit
-    def getNumberOfFields (self):
-        """
-        Iterates all wells on all plates for this screen and returns highest well sample count
-        """
-        q = self._conn.getQueryService()
-        query = "select p.id, maxindex(p.wells.wellSamples)+1"
-        query += " from ScreenPlateLink spl join spl.parent s join spl.child p"
-        query += " where s.id=%d group by p.id" % self.getId()
-        return dict(unwrap(q.projection(query, None)))
-
-
 ScreenWrapper = _ScreenWrapper
 
 def _letterGridLabel (i):
@@ -4130,6 +4127,52 @@ class _PlateWrapper (BlitzObjectWrapper):
         self._childcache = None
         self._gridSize = None
 
+    def _loadPlateAcquisitions(self):
+        p = omero.sys.Parameters()
+        p.map = {}
+        p.map["pid"] = self._obj.id
+        sql = "select pa from PlateAcquisition as pa join fetch pa.plate as p where p.id=:pid"
+        self._obj._plateAcquisitionsSeq = self._conn.getQueryService().findAllByQuery(sql, p)
+        self._obj._plateAcquisitionsLoaded = True
+    
+    def countPlateAcquisitions(self):
+        if self._obj.sizeOfPlateAcquisitions() < 0:
+            self._loadPlateAcquisitions()
+        return self._obj.sizeOfPlateAcquisitions()
+    
+    def listPlateAcquisitions(self):
+        if not self._obj._plateAcquisitionsLoaded:
+            self._loadPlateAcquisitions()
+        for pa in self._obj.copyPlateAcquisitions():
+            yield PlateAcquisitionWrapper(self._conn, pa)
+    
+    @timeit
+    def getNumberOfFields (self, pid=None):
+        """
+        Returns tuple of min and max of indexed collection of well samples 
+        per plate acquisition if exists
+        """
+        
+        q = self._conn.getQueryService()
+        sql = "select minIndex(ws), maxIndex(ws) from Well w " \
+            "join w.wellSamples ws where w.plate.id=:oid"
+        
+        p = omero.sys.Parameters()
+        p.map = {}
+        p.map["oid"] = self._obj.id
+        if pid is not None:
+            sql += " and ws.plateAcquisition.id=:pid"
+            p.map["pid"] = rlong(pid)
+        
+        fields = None
+        try:
+            res = [r for r in unwrap(q.projection(sql, p))[0] if r != None]
+            if len(res) == 2:
+                fields = tuple(res)
+        except:
+            pass
+        return fields
+    
     def _listChildren (self, **kwargs):
         """
         Lists Wells in this plate, not sorted. Saves wells to _childcache map, where key is (row, column).
@@ -4203,33 +4246,22 @@ _
         """
         Returns a list of labels for the columns on this plate. E.g. [1, 2, 3...] or ['A', 'B', 'C'...] etc
         """
-        if self.columnNamingConvention is not None and self.columnNamingConvention.lower()=='number':
-            return range(1, self.getGridSize()['columns']+1)
-        else:
+        if self.columnNamingConvention and self.columnNamingConvention.lower()=='letter':
             # this should simply be precalculated!
             return [_letterGridLabel(x) for x in range(self.getGridSize()['columns'])]
+        else:
+            return range(1, self.getGridSize()['columns']+1)
 
     def getRowLabels (self):
         """
         Returns a list of labels for the rows on this plate. E.g. [1, 2, 3...] or ['A', 'B', 'C'...] etc
         """
-        if self.rowNamingConvention is not None and self.rowNamingConvention.lower()=='number':
+        if self.rowNamingConvention and self.rowNamingConvention.lower()=='number':
             return range(1, self.getGridSize()['rows']+1)
         else:
             # this should simply be precalculated!
             return [_letterGridLabel(x) for x in range(self.getGridSize()['rows'])]
-
-    @timeit
-    def getNumberOfFields (self):
-        """
-        Iterates all wells on plate and returns highest well sample count
-        """
-        q = self._conn.getQueryService()
-        query = "select maxindex(p.wells.wellSamples)+1"
-        query += " from Plate p"
-        query += " where p.id=%d group by p.id" % self.getId()
-        return unwrap(q.projection(query, None))[0][0]
-
+    
 #        if self._childcache is None:
 #            q = self._conn.getQueryService()
 #            params = omero.sys.Parameters()
@@ -4264,8 +4296,25 @@ _
               "left outer join fetch spl.parent sc"
         return query
 
-    
 PlateWrapper = _PlateWrapper
+
+class _PlateAcquisitionWrapper (BlitzObjectWrapper):
+
+    def __bstrap__ (self):
+        self.OMERO_CLASS = 'PlateAcquisition'
+    
+    def getName (self):
+        name = super(_PlateAcquisitionWrapper, self).getName()
+        if name is None:
+            if self.startTime is not None and self.endTime is not None:
+                name = "%s - %s" % (datetime.fromtimestamp(self.startTime/1000), datetime.fromtimestamp(self.endTime/1000))
+            else:
+                name = "Plate %i" % self.id
+        return name
+    name = property(getName)
+    
+
+PlateAcquisitionWrapper = _PlateAcquisitionWrapper
 
 class _WellWrapper (BlitzObjectWrapper):
     """
@@ -7247,6 +7296,7 @@ def refreshWrappers ():
                   "image":ImageWrapper,
                   "screen":ScreenWrapper,
                   "plate":PlateWrapper,
+                  "plateacquisition": PlateAcquisitionWrapper,
                   "well":WellWrapper,
                   "experimenter":ExperimenterWrapper,
                   "experimentergroup":ExperimenterGroupWrapper,

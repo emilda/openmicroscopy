@@ -63,6 +63,7 @@ import org.openmicroscopy.shoola.agents.util.browser.TreeImageDisplayVisitor;
 import org.openmicroscopy.shoola.agents.util.browser.TreeImageSet;
 import org.openmicroscopy.shoola.agents.util.browser.TreeImageTimeSet;
 import org.openmicroscopy.shoola.agents.util.browser.TreeViewerTranslator;
+import org.openmicroscopy.shoola.agents.util.dnd.DnDTree;
 import org.openmicroscopy.shoola.env.data.FSAccessException;
 import org.openmicroscopy.shoola.env.data.FSFileSystemView;
 import org.openmicroscopy.shoola.env.log.LogMessage;
@@ -1523,6 +1524,23 @@ class BrowserComponent
 			if (multiSelection) model.addFoundNode(foundNode);
 			else model.setSelectedDisplay(foundNode, true);
 			view.setFoundNode(model.getSelectedDisplays());
+		} else if (selected instanceof List) {
+			NodeSelectionVisitor visitor = new NodeSelectionVisitor(parent, 
+					(List<DataObject>) selected);
+			accept(visitor);
+			List<TreeImageDisplay> nodes = visitor.getSelectedNodes();
+			if (nodes.size() == 0) {
+				view.setFoundNode(null);
+			} else if (nodes.size() == 1) {
+				model.setSelectedDisplay(nodes.get(0), true);
+				view.setFoundNode(model.getSelectedDisplays());
+			} else {
+				model.setSelectedDisplay(null, true);
+				Iterator<TreeImageDisplay> i = nodes.iterator();
+				while (i.hasNext())
+					model.addFoundNode(i.next());
+				view.setFoundNode(model.getSelectedDisplays());
+			}
 		}
 	}
 	
@@ -1900,6 +1918,18 @@ class BrowserComponent
 		if (model.getState() == DISCARDED) return null;
 		if (userID < 0) return null;
 		return view.getNodesForUser(userID);
+	}
+
+	/**
+	 * Implemented as specified by the {@link Browser} interface.
+	 * @see Browser#rejectTransfer()
+	 */
+	public void rejectTransfer()
+	{
+		JTree tree = view.getTreeDisplay();
+		if (tree instanceof DnDTree) {
+			((DnDTree) tree).reset();
+		}
 	}
 
 }

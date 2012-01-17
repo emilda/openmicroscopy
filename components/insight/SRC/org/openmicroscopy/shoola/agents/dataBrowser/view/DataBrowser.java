@@ -125,6 +125,13 @@ public interface DataBrowser
 												"selectedNodeDisplay";
 	
 	/** 
+	 * Bound property name indicating {@link ImageDisplay} objects have been
+	 * selected in the visualization tree. 
+	 */
+	public static final String SELECTED_DATA_BROWSER_NODES_DISPLAY_PROPERTY = 
+		"selectedNodesDisplay";
+	
+	/** 
 	 * Bound property name indicating that nodes have been marked as selected.
 	 */
 	public static final String 		SELECTION_UPDATED_PROPERTY = 
@@ -193,6 +200,8 @@ public interface DataBrowser
 	public static final String		OPEN_EXTERNAL_APPLICATION_PROPERTY = 
 		"openExternalApplication";
 
+	/** Bound property indicating to view the image node. */
+	public static final String		VIEW_IMAGE_NODE_PROPERTY = "viewImageNode";
 	
 	/** Indicates to lay out the nodes as thumbnails. */
 	public static final int			THUMBNAIL_VIEW = 0;
@@ -312,6 +321,13 @@ public interface DataBrowser
      */
 	public void setSelectedDisplay(ImageDisplay node);
 
+    /**
+     * Sets the selected nodes.
+     * 
+     * @param nodes The node to set.
+     */
+	public void setSelectedDisplays(List<ImageDisplay> nodes);
+	
 	/**
 	 * Sets the collection of selected nodes.
 	 * 
@@ -690,4 +706,10 @@ public interface DataBrowser
 	/** Lays out the nodes.*/
 	void layoutDisplay();
 	
+	/**
+	 * Views the passed node if supported.
+	 * 
+	 * @param node The node to handle.
+	 */
+	void viewDisplay(ImageDisplay node);
 }

@@ -13,12 +13,6 @@
 
 from django.conf.urls.defaults import *
 
-appmedia = (r'^appmedia/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'webgateway/media'})
-""" 
-path to media files for webgateway 
-    - path: path to media file
-"""
-
 render_image = (r'^render_image/(?P<iid>[^/]+)/(?P<z>[^/]+)/(?P<t>[^/]+)/$', 'webgateway.views.render_image')
 """
 Returns a jpeg of the OMERO image. See L{views.render_image}. Rendering settings can be specified
@@ -84,6 +78,16 @@ Params in render_thumbnail/<iid>/<w>/<h> are:
     - iid:  Image ID
     - w:    Optional max width
     - h:    Optional max height
+"""
+
+render_roi_thumbnail = (r'^render_roi_thumbnail/(?P<roiId>[^/]+)/?$', 'webgateway.views.render_roi_thumbnail')
+"""
+Returns a thumbnail jpeg of the OMERO ROI. See L{views.render_roi_thumbnail}. Uses current rendering settings. 
+"""
+
+render_shape_thumbnail = (r'^render_shape_thumbnail/(?P<shapeId>[^/]+)/?$', 'webgateway.views.render_shape_thumbnail')
+"""
+Returns a thumbnail jpeg of the OMERO Shape. See L{views.render_shape_thumbnail}. Uses current rendering settings. 
 """
 
 render_birds_eye_view = (r'^render_birds_eye_view/(?P<iid>[^/]+)/(?:(?P<size>[^/]+)/)?$', 'webgateway.views.render_birds_eye_view')
@@ -246,12 +250,13 @@ Returns 'true' if switch went OK.
 """
 
 urlpatterns = patterns('',
-    appmedia,
     render_image,
     render_image_region,
     render_split_channel,
     render_row_plot,
     render_col_plot,
+    render_roi_thumbnail,
+    render_shape_thumbnail,
     render_thumbnail,
     render_birds_eye_view,
     render_ome_tiff,
