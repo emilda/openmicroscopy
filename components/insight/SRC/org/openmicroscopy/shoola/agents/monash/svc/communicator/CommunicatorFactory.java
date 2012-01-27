@@ -25,35 +25,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.util;
+package org.openmicroscopy.shoola.agents.monash.svc.communicator;
+
+import org.openmicroscopy.shoola.svc.SvcActivationException;
+import org.openmicroscopy.shoola.svc.SvcDescriptor;
+import org.openmicroscopy.shoola.svc.communicator.CommunicatorDescriptor;
+import org.openmicroscopy.shoola.svc.transport.ChannelFactory;
+import org.openmicroscopy.shoola.svc.transport.HttpChannel;
+
 /** 
- * Collection of helper methods to format data objects.
+ * Component Factory for the {@link Communicator}.
+ * It creates an object implementing the {@link Communicator} interface.
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
- * @since OME3.0
+ * @since Beta4.4
  */
-public class Constants {
+public class CommunicatorFactory {
 
-	/** Identifies the <code>Collection name</code> field. */
-	public static final String	COLLECTION_NAME = "Collection Name";
-	
-	/** Identifies the <code>Collection description</code> field. */
-	public static final String	COLLECTION_DESCRIPTION = "Collection Description";
-	
-	/** Identifies the <code>Researcher</code> field. */
-	public static final String	RESEARCHER = "The Associated Researcher(s): ";
-	
-	/** Identifies the <code>License</code> field. */
-	public static final String	LICENSE = "License Required: ";
-	
-	/** Field to access the login token to Monash DS.  */
-	public static final String LOGIN_TOKEN = "/services/monash/loginToken";
-	
-	/** Field to access the service token for data registration WS in Monash DS.  */
-	public static final String MDREG_TOKEN = "/services/monash/mdregToken";
-	
-	/** Field to access the service token for Party WS in Monash DS.  */
-	public static final String PARTY_TOKEN = "/services/monash/partyToken";
+	/**
+     * Creates a {@link Communicator}
+     * @param desc
+     * @return A {@link Communicator} or null if none was created.
+     * @throws SvcActivationException 	If an error occurred while creating the 
+     * 									service.
+     */
+	public static Communicator getCommunicator(SvcDescriptor desc)
+		throws SvcActivationException
+	{
+		if (desc == null)
+            throw new NullPointerException("No service descriptor.");
+		
+		CommunicatorDescriptor d = (CommunicatorDescriptor) desc;
+		Communicator service = null;
+		try {
+			HttpChannel channel = ChannelFactory.getChannel(
+									d.getChannelType(), 
+									d.getURL(), d.getConnexionTimeout());
+			service = new CommunicatorProxy(channel);
+		} catch (Exception e) {
+			throw new SvcActivationException("Couldn't activate Communicator.", e);
+		}
+		return (Communicator) service;
+	}
 }

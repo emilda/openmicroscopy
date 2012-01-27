@@ -31,6 +31,8 @@ import java.awt.BorderLayout;
 import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
@@ -40,6 +42,8 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
+import org.jdesktop.swingx.JXLabel;
+import org.jdesktop.swingx.JXPanel;
 import org.openmicroscopy.shoola.util.ui.TitlePanel;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
@@ -58,6 +62,7 @@ public abstract class MonashDialog extends JDialog
 	protected static final Dimension 	DEFAULT_SIZE = new Dimension(700, 400);
 	private Icon icon;
 	private String message;
+	protected JXLabel messageLabel;
 
 	public MonashDialog(JFrame parent, String title, String message, Icon icon) {
 		super(parent);
@@ -84,7 +89,17 @@ public abstract class MonashDialog extends JDialog
 		Container c = getContentPane();
         TitlePanel tp = new TitlePanel(getTitle(), message, icon);
         c.setLayout(new BorderLayout(0, 0));
+        
+        JXPanel mp = new JXPanel();
+        messageLabel = new JXLabel("test");
+        messageLabel.setFont(messageLabel.getFont().deriveFont(Font.BOLD));
+        
+        mp.setLayout(new FlowLayout(FlowLayout.LEFT));
+        mp.add(messageLabel);
+        mp.setBackgroundPainter(tp.getBackgroundPainter());
+		
         c.add(tp, BorderLayout.NORTH);
+        c.add(mp, BorderLayout.LINE_START);
 		c.add(component, BorderLayout.LINE_START);
 		c.add(UIUtilities.buildComponentPanelRight(buildToolBar()), BorderLayout.SOUTH);
 	}

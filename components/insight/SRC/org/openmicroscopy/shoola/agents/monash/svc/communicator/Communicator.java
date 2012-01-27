@@ -25,35 +25,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.util;
+package org.openmicroscopy.shoola.agents.monash.svc.communicator;
+
+//Application-internal dependencies
+import java.util.Map;
+
+import org.openmicroscopy.shoola.svc.transport.TransportException;
+
 /** 
- * Collection of helper methods to format data objects.
+* Methods required to communicate to Monash DS.
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
- * @since OME3.0
+ * @since Beta4.4
  */
-public class Constants {
+public interface Communicator
+{
+	/**
+	 * Search for party in the research master.
+	 * 
+	 * @param cookie	The cookie to pass to Monash DS
+	 * @param params	The request parameters
+	 * @return reply 	The result of the post.
+	 * @throws TransportException 	Thrown if an error occurred while trying 
+	 * 								to communicate with the server.
+	 */
+	public Object searchRM(String cookie, Map<String, String> params)
+					throws TransportException;
 
-	/** Identifies the <code>Collection name</code> field. */
-	public static final String	COLLECTION_NAME = "Collection Name";
-	
-	/** Identifies the <code>Collection description</code> field. */
-	public static final String	COLLECTION_DESCRIPTION = "Collection Description";
-	
-	/** Identifies the <code>Researcher</code> field. */
-	public static final String	RESEARCHER = "The Associated Researcher(s): ";
-	
-	/** Identifies the <code>License</code> field. */
-	public static final String	LICENSE = "License Required: ";
-	
-	/** Field to access the login token to Monash DS.  */
-	public static final String LOGIN_TOKEN = "/services/monash/loginToken";
-	
-	/** Field to access the service token for data registration WS in Monash DS.  */
-	public static final String MDREG_TOKEN = "/services/monash/mdregToken";
-	
-	/** Field to access the service token for Party WS in Monash DS.  */
-	public static final String PARTY_TOKEN = "/services/monash/partyToken";
 }

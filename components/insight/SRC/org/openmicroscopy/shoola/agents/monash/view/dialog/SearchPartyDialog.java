@@ -31,6 +31,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -38,10 +40,17 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.svc.communicator.Communicator;
+import org.openmicroscopy.shoola.agents.monash.svc.communicator.CommunicatorFactory;
+import org.openmicroscopy.shoola.agents.monash.view.AndsPublishModel;
+import org.openmicroscopy.shoola.env.log.LogMessage;
+import org.openmicroscopy.shoola.svc.communicator.CommunicatorDescriptor;
+import org.openmicroscopy.shoola.svc.transport.HttpChannel;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
 /** 
@@ -51,24 +60,18 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
- * @since OME3.3
+ * @since Beta4.4
  */
 public class SearchPartyDialog extends MonashDialog {
 
-	/** Button to add research main page. */
-	private JButton 		backButton;
-	
-	/** Button to search for Party in the Research Master. */
-	private JButton			searchButton;
-	
-	/** The field holding the name of the party to search for. */
-    private JTextField		searchField;
+	/** Description of the panel. */
+    private static final String 	DESCRIPTION = "Enter the researcher name or email below:";
     
-    /** Party searched. */
-	private String 			party = null;
+    /** Error message when party field is null */
+    private static final String 	ERROR_PARTY_NULL = "Please enter the compulsory field";
     
-    /** Description of the panel. */
-    private static final String DESCRIPTION = "Enter the researcher name or email below:";
+    /** Error message when party field is null */
+    private static final String 	ERROR_PARTY_NF = "Party not found";
 	
     /** The tooltip of the {@link #backButton}. */
 	private static final String		BACK_TOOLTIP = "Go back to previous page.";
@@ -81,9 +84,24 @@ public class SearchPartyDialog extends MonashDialog {
 	
 	/** Action ID to go to the next page and close the dialog. */
 	private static final int		SEARCH = 1;
+	
+	/** Button to add research main page. */
+	private JButton 				backButton;
+	
+	/** Button to search for Party in the Research Master. */
+	private JButton					searchButton;
+	
+	/** The field holding the name of the party to search for. */
+    private JTextField				searchField;
+    
+    /** Party searched. */
+	private String 					party = null;
 
-	public SearchPartyDialog(JFrame parent, String title) {
+	private AndsPublishModel 		model;
+    
+	public SearchPartyDialog(JFrame parent, String title, AndsPublishModel model) {
 		super(parent, title, "", null);
+		this.model = model;
 	}
 
 	/**
@@ -100,16 +118,48 @@ public class SearchPartyDialog extends MonashDialog {
 				close();
 				break;
 			case SEARCH:
-				party = searchField.getText();
-				searchRM();
-				close();
+				searchParty();
 				break;
 		}
 	}
 	
-	private void searchRM() {
+	private void searchParty() {
+		party = searchField.getText();
 		System.out.println("Search for party: " + party); // cnOrEmail
-		String token = PublishAgent.getMonashOmeroDS();
+		if (null == party) {
+			messageLabel.setText(ERROR_PARTY_NULL);
+		} else {
+			
+			//String url = (String) reg.lookup(LookupNames.TOKEN_URL);
+			messageLabel.setText("");
+			String cookie = model.getCookie();
+			System.out.println("cookie: " + cookie);
+			
+			String partyWS = PublishAgent.getPartyToken();
+			CommunicatorDescriptor desc = new CommunicatorDescriptor(HttpChannel.CONNECTION_PER_REQUEST, partyWS, -1);
+	        
+	        try {
+				Communicator c = CommunicatorFactory.getCommunicator(desc);
+				Map<String, String> params = new HashMap<String, String>();
+				params.put("party", party);
+				Object partybean = c.searchRM(cookie, params);
+			} catch (Exception e) {
+				LogMessage msg = new LogMessage();
+	            msg.println("Failed to retrieve party information.");
+	            msg.println("Reason: " + e.getMessage());
+	            //Logger logger = container.getRegistry().getLogger();
+	            //logger.error(this, msg);
+				JOptionPane.showMessageDialog(this, msg.toString());
+			}
+			
+			/*partybean Communicator.searchRM(party);
+			if (null == partybean) {
+				messageLabel.setText(ERROR_PARTY_NF);
+			} else {
+				close();
+			}*/
+			close();
+		}
 	}
 
 	/** 

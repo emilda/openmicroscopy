@@ -112,6 +112,7 @@ public class AndsPublishControl implements PropertyChangeListener {
 
 	public void initialize(AndsPublishUI view) {
 		if (view == null) throw new NullPointerException("No view.");
+		System.out.println("initializing AndsPublishControl");
 		this.view = view;
 		createActions();
 		attachListeners();

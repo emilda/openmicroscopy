@@ -22,4 +22,10 @@
        </structuredEntry>
      </fonts>
 </resources>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * General set up for the data manager
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<entry name="/services/monash/loginToken">http://localhost:8080/omeromd/user/userLogin.jspx</entry>
+<entry name="/services/monash/mdregToken">http://localhost:8080/omeromd/data/mdReg.jspx</entry>
+<entry name="/services/monash/partyToken">http://localhost:8080/omeromd/data/searchParty.jspx</entry>
 </agent>

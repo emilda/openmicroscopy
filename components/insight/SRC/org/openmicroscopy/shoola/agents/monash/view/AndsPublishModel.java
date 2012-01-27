@@ -63,6 +63,9 @@ public class AndsPublishModel {
 	/** Collection of Project/ Dataset tagged as <i>Register with RDA</i> */
 	private Collection dataCollection;
 
+	/** Cookie to connect to Monash DS */
+	private String 				cookie;
+
 	/**
 	 * Creates a new instance and sets the state to {@link AndsPublish#NEW}.
 	 */
@@ -227,5 +230,21 @@ public class AndsPublishModel {
 	 */
 	public void setDataCollection(Collection dataCollection) {
 		this.dataCollection = dataCollection;
+	}
+
+	/**
+	 * Cookie to connec to Monash DS
+	 * @param cookie
+	 */
+	public void setCookie(String cookie) {
+		System.out.println("Model received cookie");
+		this.cookie = cookie;
+	}
+
+	/**
+	 * @return the cookie
+	 */
+	public String getCookie() {
+		return cookie;
 	}
 }

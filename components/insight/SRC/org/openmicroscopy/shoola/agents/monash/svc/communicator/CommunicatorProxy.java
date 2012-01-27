@@ -25,35 +25,51 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.util;
+package org.openmicroscopy.shoola.agents.monash.svc.communicator;
+
+import java.io.IOException;
+import java.util.Map;
+
+import org.openmicroscopy.shoola.svc.transport.HttpChannel;
+import org.openmicroscopy.shoola.svc.transport.TransportException;
+
 /** 
- * Collection of helper methods to format data objects.
+ * Activates the {@link Communicator}.
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
- * @since OME3.0
+ * @since Beta4.4
  */
-public class Constants {
+public class CommunicatorProxy extends AbstractProxy implements Communicator {
 
-	/** Identifies the <code>Collection name</code> field. */
-	public static final String	COLLECTION_NAME = "Collection Name";
-	
-	/** Identifies the <code>Collection description</code> field. */
-	public static final String	COLLECTION_DESCRIPTION = "Collection Description";
-	
-	/** Identifies the <code>Researcher</code> field. */
-	public static final String	RESEARCHER = "The Associated Researcher(s): ";
-	
-	/** Identifies the <code>License</code> field. */
-	public static final String	LICENSE = "License Required: ";
-	
-	/** Field to access the login token to Monash DS.  */
-	public static final String LOGIN_TOKEN = "/services/monash/loginToken";
-	
-	/** Field to access the service token for data registration WS in Monash DS.  */
-	public static final String MDREG_TOKEN = "/services/monash/mdregToken";
-	
-	/** Field to access the service token for Party WS in Monash DS.  */
-	public static final String PARTY_TOKEN = "/services/monash/partyToken";
+	/**
+	 * Creates a new instance.
+	 * 
+	 * @param channel The communication link.
+	 */
+	protected CommunicatorProxy(HttpChannel channel) {
+		super(channel);
+	}
+
+	/**
+	 * Implemented as specified by the {@link Communicator} interface.
+	 * @see Communicator#searchRM()
+	 */
+	public Object searchRM(String cookie, Map<String, String> params)
+			throws TransportException 
+	{
+		MessengerRequest out = new MessengerRequest(cookie, params);
+		StringBuilder reply = new StringBuilder();
+		MessengerReply in = new MessengerReply(reply);
+		
+		try {
+			channel.exchange(out, in);
+		} catch (IOException ioe) {
+			throw new TransportException(
+					"Couldn't communicate with server (I/O error).", ioe);
+		}
+		return reply;
+	}
+
 }

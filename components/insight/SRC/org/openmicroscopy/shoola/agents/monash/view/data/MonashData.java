@@ -25,35 +25,91 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.util;
+package org.openmicroscopy.shoola.agents.monash.view.data;
+
+import pojos.DataObject;
+import pojos.DatasetData;
+import pojos.ProjectData;
+
 /** 
- * Collection of helper methods to format data objects.
+ * Java Bean containing the details about the data collection to
+ * register with RDA
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
- * @since OME3.0
+ * @since Beta4.4
  */
-public class Constants {
+public class MonashData {
+	
+	/** Identifies the id field. */
+	private String 			id = null;
+	
+	/** Identifies the title field. */
+	private String 			title = null;
+	
+	/** Identifies the description field. */
+	private String 			description = null;
+	
+	/** Identifies the type i.e Project/Dataset. */
+	private String 			type = null;
+	
+	/** DataObject. */
+	private DataObject 		dataObject = null;
 
-	/** Identifies the <code>Collection name</code> field. */
-	public static final String	COLLECTION_NAME = "Collection Name";
-	
-	/** Identifies the <code>Collection description</code> field. */
-	public static final String	COLLECTION_DESCRIPTION = "Collection Description";
-	
-	/** Identifies the <code>Researcher</code> field. */
-	public static final String	RESEARCHER = "The Associated Researcher(s): ";
-	
-	/** Identifies the <code>License</code> field. */
-	public static final String	LICENSE = "License Required: ";
-	
-	/** Field to access the login token to Monash DS.  */
-	public static final String LOGIN_TOKEN = "/services/monash/loginToken";
-	
-	/** Field to access the service token for data registration WS in Monash DS.  */
-	public static final String MDREG_TOKEN = "/services/monash/mdregToken";
-	
-	/** Field to access the service token for Party WS in Monash DS.  */
-	public static final String PARTY_TOKEN = "/services/monash/partyToken";
+	public MonashData(DataObject dataObject) {
+		this.dataObject = dataObject;
+		
+		if (dataObject instanceof ProjectData) {
+			title = ((ProjectData) dataObject).getName();
+			description = ((ProjectData) dataObject).getDescription();
+			type = "Project";
+		} else if (dataObject instanceof DatasetData) {
+			title = ((DatasetData) dataObject).getName();
+			description = ((DatasetData) dataObject).getDescription();
+			type = "Dataset";
+		}
+	}
+
+	/**
+	 * @return the id
+	 */
+	public long getId() {
+		return dataObject.getId();
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @return the dataObject
+	 */
+	public DataObject getDataObject() {
+		return dataObject;
+	}
+
+	/* 
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return title;
+	}
 }

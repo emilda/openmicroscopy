@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import javax.swing.JFrame;
 
+import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.env.data.model.ImportableObject;
 import org.openmicroscopy.shoola.util.ui.component.AbstractComponent;
@@ -261,11 +262,29 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		if (state != LOADING_DATA)
 			throw new IllegalStateException(
 					"This method can only be invoked in the LOADING_DATA state.");
-		if (result == null) 
-			throw new NullPointerException("No data available to register with RDA.");
+		/*if (result == null) 
+			throw new NullPointerException("No data available to register with RDA.");*/
 
 		model.setState(READY);
 		model.setDataCollection(result);
-		view.setDataCollection(result);
+		view.setListData(result);
 	}
+
+	/** 
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#setDataLoaded()
+	 */
+	public void setDataLoaded(Collection dataloaded) {
+		System.out.println("Load data");
+		if(model.getState() == DISCARDED) return;
+		model.setState(LOADING_DATA);
+		setDataCollection(dataloaded);
+	}
+
+	@Override
+	public void setCookie(String cookie) {
+		System.out.println("setCookie...");
+		model.setCookie(cookie);
+	}
+
 }

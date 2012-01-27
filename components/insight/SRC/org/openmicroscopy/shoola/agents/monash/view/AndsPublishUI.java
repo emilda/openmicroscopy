@@ -61,11 +61,12 @@ import javax.swing.text.Document;
 
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
+import org.openmicroscopy.shoola.agents.monash.IconManager;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
+import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.SearchPartyDialog;
-import org.openmicroscopy.shoola.agents.treeviewer.IconManager;
 import org.openmicroscopy.shoola.agents.util.EditorUtil;
 import org.openmicroscopy.shoola.env.data.DSAccessException;
 import org.openmicroscopy.shoola.env.data.DSOutOfServiceException;
@@ -76,9 +77,7 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
 import pojos.AnnotationData;
 import pojos.DataObject;
-import pojos.DatasetData;
 import pojos.ExperimenterData;
-import pojos.ProjectData;
 import pojos.TagAnnotationData;
 
 public class AndsPublishUI extends TopWindow 
@@ -90,6 +89,9 @@ public class AndsPublishUI extends TopWindow
 	/** Message to display when there is no data collections available to register with RDA */
 	private static final String NO_DATA = "No data collections available to register with RDA";
 
+	/** Tag value identifying the collection to register with RDA */
+	private static final String RDA_TAG = "Register with RDA";
+
 	/** Reference to the model. */
 	private AndsPublishModel	model;
 
@@ -97,7 +99,7 @@ public class AndsPublishUI extends TopWindow
 	private AndsPublishControl	controller;
 
 	/** The total of projects to register with ANDS. */
-	private int total;
+	private int 				total;
 
 	/** The controls bar. */
 	private JComponent 			controlsBar;
@@ -105,8 +107,8 @@ public class AndsPublishUI extends TopWindow
 	/** The component indicating to refresh the containers view.*/
 	private JXLabel 			messageLabel;
 
-	/** The field hosting the login name. */
-	private JTextField			loginArea;
+	/** The field hosting the collection title name. */
+	private JTextField			titleArea;
 
 	/** The field hosting the login name. */
 	private JTextArea			descriptionTxt;	// JTextField
@@ -128,7 +130,7 @@ public class AndsPublishUI extends TopWindow
 	 * on the left and selected collection details on the right 
 	 */
 	private JSplitPane 			splitPane;
-	
+
 	/** contains details about collection to register with ANDS  */
 	private JPanel 				projectPanel;
 
@@ -136,13 +138,10 @@ public class AndsPublishUI extends TopWindow
 	private String 				party;	
 
 	/** The model for the JList {@link #projectList}. */
-	private DefaultListModel listmodel;
+	private DefaultListModel 	listmodel;
 
 	/** list containing the items to be published */
-	private JList projectList;
-
-	/** the data collections to register with RDA */
-	//private Collection dataCollection;
+	private JList 				projectList;
 
 	protected AndsPublishUI(String title) {
 		super(title);
@@ -167,6 +166,7 @@ public class AndsPublishUI extends TopWindow
 	 */
 	void initialize(AndsPublishModel model, AndsPublishControl controller)
 	{
+		System.out.println("initializing AndsPublish UI");
 		this.model = model;
 		this.controller = controller;
 		total = 1;
@@ -186,9 +186,9 @@ public class AndsPublishUI extends TopWindow
 		controlsBar = buildControls();
 		controlsBar.setVisible(true);
 
-		loginArea = new JTextField();
-		loginArea.setEnabled(false);
-		loginArea.setEditable(false);
+		titleArea = new JTextField();
+		titleArea.setEnabled(false);
+		titleArea.setEditable(false);
 
 		descriptionTxt = new JTextArea(5, 20);
 		descriptionTxt.setEnabled(true);
@@ -198,7 +198,7 @@ public class AndsPublishUI extends TopWindow
 
 		researcherButton = new JButton(controller.getAction(AndsPublishControl.PARTY));
 		researcherButton.setBackground(UIUtilities.BACKGROUND_COLOR);
-		
+
 		licenseButton = new JButton(controller.getAction(AndsPublishControl.LICENSE));
 		licenseButton.setBackground(UIUtilities.BACKGROUND_COLOR);
 
@@ -234,38 +234,35 @@ public class AndsPublishUI extends TopWindow
 		splitPane.setPreferredSize(new Dimension(800, 400));
 	}
 
-	private void setListData(Collection dataCollection) {
+	/**
+	 * @param dataCollection	the data collections to register with RDA
+	 */
+	public void setListData(Collection dataCollection) {
+		clearFields();
 		listmodel = new DefaultListModel();
 
 		Iterator i = dataCollection.iterator();
-		DataObject object;
-		String n = "";
 		while (i.hasNext()) {
-			object = (DataObject) i.next();
-			if (object instanceof ProjectData) {
-				n = "PD " + ((ProjectData) object).getName();
-			} else if (object instanceof DatasetData) {
-				n = "DS " + ((DatasetData) object).getName();
-			}
-			System.out.println("DataObject is DatasetData, " + n + " id: " + object.getId());
-			getTagDetails(object);	// TODO remove later
-			listmodel.addElement(n);
+			DataObject object = (DataObject) i.next();
+			MonashData listdata = new MonashData(object);
+			if (getTagDetails(object)) listmodel.addElement(listdata);
 		}
+		System.out.println("Setting new list model object");
 		projectList.setModel(listmodel);
 		if (listmodel.size() > 0) {
-			projectList.setSelectedIndex(0);
+			System.out.println("Setting first element");
 			publishButton.setEnabled(true);
-			System.out.println("list model set, first element selected");
+			projectList.setSelectedIndex(0);
 		}
 	}
 
 	// TODO remove this method later
-	private void getTagDetails(DataObject object) {
+	private boolean getTagDetails(DataObject object) {
+		System.out.println("DataObject, id: " + object.getId());
 		try {
 			Collection tags = PublishAgent.getAnnotations(object);
 			if (tags == null || tags.size() == 0)
-				return;
-			System.out.println("Find tags for id, : " + object.getId());
+				return false;
 			Iterator iterator = tags.iterator();
 			AnnotationData data;
 			TagAnnotationData tag;
@@ -274,8 +271,11 @@ public class AndsPublishUI extends TopWindow
 				if (data instanceof TagAnnotationData) {
 					tag = (TagAnnotationData) data;
 					System.out.println("Tags: " + tag.getTagValue() + " ");
+					if(RDA_TAG.equals(tag.getTagValue())) {
+						return true;
+					}
 				}
-				  
+
 			}
 		} catch (DSOutOfServiceException e) {
 			// TODO Auto-generated catch block
@@ -284,15 +284,28 @@ public class AndsPublishUI extends TopWindow
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return false;
 	}
 
-	private void updateLabel(String value) {
-		if (null == value) {
-			messageLabel.setText(NO_DATA);
-			publishButton.setEnabled(false);
-		} else {
-			messageLabel.setText(value);	
+	private void updateLabel(MonashData object) {
+		if (null != object) {
+			messageLabel.setText(object.getTitle());
+			titleArea.setText(object.getTitle());
+			descriptionTxt.setText(object.getDescription());
 		}
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		System.out.println("List selection event recived");
+		JList list = (JList)e.getSource();
+		int index = list.getSelectedIndex();
+		if (-1 != index) {
+			MonashData object = (MonashData) list.getModel().getElementAt(index);
+			System.out.println("Update messageLabel");
+			updateLabel(object);
+		}
+		//updateLabel((String) list.getSelectedValue());
 	}
 
 	private JPanel buildProjectDetails() {
@@ -307,21 +320,21 @@ public class AndsPublishUI extends TopWindow
 		c.insets = new Insets(10, 10, 5, 0);
 		c.gridx = 0;
 		c.gridy = 0;
-		
+
 		// Add Collection name but cannot edit.
 		JComponent label = EditorUtil.getLabel(Constants.COLLECTION_NAME, false);
 		label.setBackground(UIUtilities.BACKGROUND_COLOR);
 		c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
 		c.weightx = 0.0;  
 		content.add(label, c);
-		
+
 		c.gridx++;
 		content.add(Box.createHorizontalStrut(5), c); 
 		c.gridx++;
 		c.gridwidth = GridBagConstraints.REMAINDER;     //end row
 		c.weightx = 1.0;
-		loginArea.setText(user.getUserName());
-		content.add(loginArea, c);  
+		titleArea.setText("");
+		content.add(titleArea, c);  
 
 		// Add Collection description.
 		c.gridx = 0;
@@ -336,7 +349,7 @@ public class AndsPublishUI extends TopWindow
 		c.gridx++;
 		c.gridwidth = GridBagConstraints.REMAINDER;     //end row
 		c.weightx = 1.0;
-		descriptionTxt.setText("Description for dataset");
+		descriptionTxt.setText("");
 		descriptionTxt.getDocument().addDocumentListener(this);
 		descriptionTxt.getDocument().putProperty("name", "description");
 		content.add(descriptionTxt, c);  
@@ -398,8 +411,8 @@ public class AndsPublishUI extends TopWindow
 		container.setLayout(new BorderLayout(0, 0));
 
 		IconManager icons = IconManager.getInstance();
-		TitlePanel tp = new TitlePanel(TITLE, "", "Register with ANDS", 
-				icons.getIcon(IconManager.FILTER )); // TODO set icon to LOGO_ANDS
+		TitlePanel tp = new TitlePanel(TITLE, "", "Register the following collection with RDA", 
+				icons.getIcon(IconManager.MONASH ));
 		JXPanel p = new JXPanel();
 		JXPanel lp = new JXPanel();
 		lp.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -412,13 +425,6 @@ public class AndsPublishUI extends TopWindow
 		container.add(p, BorderLayout.NORTH);
 		container.add(splitPane, BorderLayout.CENTER);
 		container.add(controlsBar, BorderLayout.SOUTH);
-	}
-
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
-		System.out.println("List selection event, update messageLabel");
-		JList list = (JList)e.getSource();
-		updateLabel((String) list.getSelectedValue());
 	}
 
 	/**
@@ -495,26 +501,26 @@ public class AndsPublishUI extends TopWindow
 	}
 
 	/**
-	 * 
+	 * Show the search researcher dialog
+	 * @return party 	Researcher information
 	 */
 	public String searchResearcher() {
-		SearchPartyDialog spd = new SearchPartyDialog(this, "Adding Researcher Options");
+		SearchPartyDialog spd = new SearchPartyDialog(this, "Adding Researcher Options", model);
 		UIUtilities.centerAndShow(spd);
 		return spd.getParty();
 	}
 
-	/** Refreshes the view on UserGroupSwitched */
-	// TODO remove this method
+	/** Refreshes the view */
 	public void refresh() {
-		System.out.println("Group changed, refresh view");
+		System.out.println("Refreshing view");
+		clearFields();
 		setListData(model.getDataCollection());
 	}
 
-	/**
-	 * @param dataCollection	the data collections to register with RDA
-	 */
-	public void setDataCollection(Collection dataCollection) {
-		//this.dataCollection = dataCollection;
-		setListData(dataCollection);
+	private void clearFields() {
+		messageLabel.setText(NO_DATA);
+		titleArea.setText("");
+		descriptionTxt.setText("");
+		publishButton.setEnabled(false);
 	}
 }

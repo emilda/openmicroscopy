@@ -27,7 +27,9 @@
  */
 package org.openmicroscopy.shoola.agents.monash;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,8 +40,10 @@ import javax.swing.JMenuItem;
 import org.openmicroscopy.shoola.agents.events.treeviewer.ExperimenterLoadedDataEvent;
 import org.openmicroscopy.shoola.agents.monash.action.RegisterAction;
 import org.openmicroscopy.shoola.agents.monash.events.PublishEvent;
+import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
 import org.openmicroscopy.shoola.agents.monash.view.AndsPublishFactory;
+import org.openmicroscopy.shoola.agents.util.browser.TreeImageDisplay;
 import org.openmicroscopy.shoola.env.Agent;
 import org.openmicroscopy.shoola.env.Environment;
 import org.openmicroscopy.shoola.env.LookupNames;
@@ -47,8 +51,6 @@ import org.openmicroscopy.shoola.env.config.Registry;
 import org.openmicroscopy.shoola.env.data.DSAccessException;
 import org.openmicroscopy.shoola.env.data.DSOutOfServiceException;
 import org.openmicroscopy.shoola.env.data.OmeroMetadataService;
-import org.openmicroscopy.shoola.env.data.events.ReconnectedEvent;
-import org.openmicroscopy.shoola.env.data.events.UserGroupSwitched;
 import org.openmicroscopy.shoola.env.data.login.UserCredentials;
 import org.openmicroscopy.shoola.env.data.util.AgentSaveInfo;
 import org.openmicroscopy.shoola.env.event.AgentEvent;
@@ -70,46 +72,46 @@ import pojos.GroupData;
 public class PublishAgent implements Agent, AgentEventListener {
 
 	/** Reference to the registry. */
-    private static Registry         registry;
+	private static Registry         registry;
 
-    //no-arguments constructor required for initialization
-    public PublishAgent() {
-    	System.out.println("PublishAgent constructor");
-    }
-    
-    /**
-     * Helper method. 
-     * 
-     * @return A reference to the {@link Registry}.
-     */
-    public static Registry getRegistry() { return registry; }
+	/** Name of agent **/
+	public static String 			MONASH_AGENT = "Register with RDA";
 
-    //invoked before shutting down the application
-    public boolean canTerminate() { return true; }
+	//no-arguments constructor required for initialization
+	public PublishAgent() {
+		System.out.println("PublishAgent constructor");
+	}
 
-    //not yet implemented: invoked when shutting down the application
-    public Map<String, Set> hasDataToSave() { return null; }
+	/**
+	 * Helper method. 
+	 * 
+	 * @return A reference to the {@link Registry}.
+	 */
+	public static Registry getRegistry() { return registry; }
 
-    //invoked while shutting down the application
-    public void terminate() {}
+	//invoked before shutting down the application
+	public boolean canTerminate() { return true; }
 
-    public void setContext(Registry ctx)
-    {
-    	System.out.println("PublishAgent setContext");
-        //Reference to the Agent Registry to access services.
-        registry = ctx; 
+	//not yet implemented: invoked when shutting down the application
+	public Map<String, Set> hasDataToSave() { return null; }
 
-        //register the events the agent listens to e.g. BrowseImage
-        EventBus bus = registry.getEventBus();
-        bus.register(this, PublishEvent.class);
-        bus.register(this, UserGroupSwitched.class);
-        //bus.register(this, ReconnectedEvent.class);
-        //bus.register(this, BrowserSelectionEvent.class);
-        bus.register(this, ExperimenterLoadedDataEvent.class);
-        register();
-    }
+	//invoked while shutting down the application
+	public void terminate() {}
 
-    /** Registers the agent with the tool bar.*/
+	public void setContext(Registry ctx)
+	{
+		System.out.println("PublishAgent setContext");
+		//Reference to the Agent Registry to access services.
+		registry = ctx; 
+
+		//register the events the agent listens to e.g. BrowseImage
+		EventBus bus = registry.getEventBus();
+		bus.register(this, PublishEvent.class);
+		bus.register(this, ExperimenterLoadedDataEvent.class);
+		register();
+	}
+
+	/** Registers the agent with the tool bar.*/
 	private void register()
 	{
 		TaskBar tb = registry.getTaskBar();
@@ -124,53 +126,54 @@ public class PublishAgent implements Agent, AgentEventListener {
 	}
 
 	/**
-     * Handles the fact that data were loaded.
-     * 
-     * @param e The event to handle.
-     */
-	private void handleExperimenterLoadedDataEvent(ExperimenterLoadedDataEvent e) {
-		// TODO write code to handle the new data loaded
-		System.out.println("ExperimenterLoadedDataEvent fired, write code to handle the new data loaded");
-		AndsPublishFactory.onELoadedDataEvent();
+	 * Handles the fact that data were loaded.
+	 * 
+	 * @param e The event to handle.
+	 */
+	private void handleExperimenterLoadedDataEvent(ExperimenterLoadedDataEvent evt) {
+		System.out.println("ExperimenterLoadedDataEvent fired");
+		if (evt == null) return;
+		AndsPublish viewer = AndsPublishFactory.getViewer();
+		Map<Long, List<TreeImageDisplay>> map = evt.getData();
+		//List<TreeImageDisplay> objects = map.get(getUserDetails().getId());
+		if (viewer != null) {
+			List<Object> values = new ArrayList<Object>();
+			for (List<TreeImageDisplay> listItem : map.values()) {
+				Iterator<TreeImageDisplay> i = listItem.iterator();
+				while (i.hasNext()) {
+					values.add(i.next().getUserObject());
+				}
+			}
+			viewer.setDataLoaded(values);
+		}
 	}
-	
-	/**
-     * Handles the {@link UserGroupSwitched} event.
-     * 
-     * @param evt The event to handle.
-     */
-    private void handleUserGroupSwitched(UserGroupSwitched evt)
-    {
-    	if (evt == null) return;
-    	AndsPublishFactory.onGroupSwitch(evt.isSuccessful());
-    }
 
-    /**
-     * Handles the {@link PublishEvent} event.
-     * 
-     * @param evt The event to handle.
-     */
+	/**
+	 * Handles the {@link PublishEvent} event.
+	 * 
+	 * @param evt The event to handle.
+	 */
 	private void handlePublishEvent(PublishEvent evt) {
 		System.out.println("Publish Event notification received by PublishAgent");
-		
+
 		if (evt == null) return;
-		
+
 		Environment env = (Environment) registry.lookup(LookupNames.ENV);
-    	if (env == null) return;
-    	if (!env.isServerAvailable()) return;
-    	ExperimenterData exp = (ExperimenterData) registry.lookup(
-			        				LookupNames.CURRENT_USER_DETAILS);
-    	if (exp == null) return;
-    	GroupData gp = null;
-    	try {
-    		gp = exp.getDefaultGroup();
+		if (env == null) return;
+		if (!env.isServerAvailable()) return;
+		ExperimenterData exp = (ExperimenterData) registry.lookup(
+				LookupNames.CURRENT_USER_DETAILS);
+		if (exp == null) return;
+		GroupData gp = null;
+		try {
+			gp = exp.getDefaultGroup();
 		} catch (Exception e) {
 			//No default group
 		}
-    	long id = -1;
-    	if (gp != null) id = gp.getId();
+		long id = -1;
+		if (gp != null) id = gp.getId();
 		AndsPublish viewer = AndsPublishFactory.getViewer(exp, id);
-        if (viewer != null) viewer.activate();
+		if (viewer != null) viewer.activate();
 	}
 
 	/**
@@ -190,26 +193,54 @@ public class PublishAgent implements Agent, AgentEventListener {
 	public static ExperimenterData getUserDetails()
 	{ 
 		return (ExperimenterData) registry.lookup(
-								LookupNames.CURRENT_USER_DETAILS);
+				LookupNames.CURRENT_USER_DETAILS);
+	}
+
+	/**
+	 * Helper method returning the login token to Monash DS.
+	 * 
+	 * @return See above.
+	 */
+	public static String getLoginToken()
+	{
+		return (String) registry.lookup(Constants.LOGIN_TOKEN);
 	}
 	
+	/**
+	 * Helper method returning the login token to Monash DS.
+	 * 
+	 * @return See above.
+	 */
+	public static String getPartyToken()
+	{
+		return (String) registry.lookup(Constants.PARTY_TOKEN);
+	}
+
+	/**
+	 * Helper method returning the data registration token to Monash DS.
+	 * 
+	 * @return See above.
+	 */
+	public static String getMdRegToken()
+	{
+		return (String) registry.lookup(Constants.MDREG_TOKEN);
+	}
+
 	/**
 	 * Helper method returning the current user's Monash DS authentication details.
 	 * @return 
 	 * 
 	 * @return See above.
 	 */
-	public static String getMonashOmeroDS()
+	public static void setMonashOmeroDS()
 	{ 
 		Environment env = (Environment) registry.lookup(LookupNames.ENV);
-    	if (env == null) return null;
-    	String cookies = null;  // env.getMonashOmeroDS();
-		System.out.println("Cookie: " + cookies);
-		//UserCredentials uc = (UserCredentials)registry.lookup(LookupNames.USER_CREDENTIALS);
-		//LoginConfig cfg = new LoginConfig(registry);
-		return cookies;
+		if (env == null) return;
+		
+		UserCredentials uc = env.getMonashAuth(MONASH_AGENT);
+		AndsPublishFactory.setCookie(uc);
 	}
-	
+
 	/**
 	 * Helper method returning the current project's Annotations.
 	 * 
@@ -222,7 +253,7 @@ public class PublishAgent implements Agent, AgentEventListener {
 		OmeroMetadataService os = registry.getMetadataService();
 		return os.loadStructuredAnnotations(object.getClass(), object.getId(), -1);
 	}
-	
+
 	/**
 	 * Returns the available user groups.
 	 * 
@@ -232,7 +263,7 @@ public class PublishAgent implements Agent, AgentEventListener {
 	{
 		return (Set) registry.lookup(LookupNames.USER_GROUP_DETAILS);
 	}
-	
+
 	public AgentSaveInfo getDataToSave() {
 		// TODO Auto-generated method stub
 		return null;
@@ -240,23 +271,21 @@ public class PublishAgent implements Agent, AgentEventListener {
 
 	public void save(List<Object> instances) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	/**
-     * Responds to events fired trigger on the bus.
-     * @see AgentEventListener#eventFired(AgentEvent)
-     */
-    public void eventFired(AgentEvent e)
-    {
-    	//Process events
-        if (e instanceof PublishEvent) {
-        	handlePublishEvent((PublishEvent) e);
-        } else if (e instanceof UserGroupSwitched) {
-        	handleUserGroupSwitched((UserGroupSwitched) e);
-    	} else if (e instanceof ExperimenterLoadedDataEvent) {
-    		handleExperimenterLoadedDataEvent((ExperimenterLoadedDataEvent) e);
-    	}
-    }
+	 * Responds to events fired trigger on the bus.
+	 * @see AgentEventListener#eventFired(AgentEvent)
+	 */
+	public void eventFired(AgentEvent e)
+	{
+		//Process events
+		if (e instanceof PublishEvent) {
+			handlePublishEvent((PublishEvent) e);
+		} else if (e instanceof ExperimenterLoadedDataEvent) {
+			handleExperimenterLoadedDataEvent((ExperimenterLoadedDataEvent) e);
+		}
+	}
 
 }

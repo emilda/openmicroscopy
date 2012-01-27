@@ -27,6 +27,8 @@ package org.openmicroscopy.shoola.env;
 //Java imports
 import java.io.File;
 
+import org.openmicroscopy.shoola.env.data.login.UserCredentials;
+
 //Third-party libraries
 
 //Application-internal dependencies
@@ -164,6 +166,17 @@ public class Environment
 		String name = (String) 
 			container.getRegistry().lookup(LookupNames.OMERO_FILES_HOME);
 		return home+File.separator+name;
+	}
+
+	/**
+	 * Returns the user credentials to authenticate to Monash DS
+	 * @return
+	 */
+	public UserCredentials getMonashAuth(String name) {
+		if (name.equals(org.openmicroscopy.shoola.agents.monash.PublishAgent.MONASH_AGENT))
+			return (UserCredentials)
+					container.getRegistry().lookup(LookupNames.USER_CREDENTIALS);
+		return null;
 	}
 	
 }

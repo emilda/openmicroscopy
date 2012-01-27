@@ -28,6 +28,7 @@
 package org.openmicroscopy.shoola.agents.monash.view;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -137,5 +138,13 @@ public interface AndsPublish extends ObservableComponent {
 	 * @param nodes		collection to register with RDA
 	 */
 	public void setDataCollection(Collection result);
-	
+
+	/**
+	 * Sets the data loaded.
+	 * 
+	 * @param result The data loaded
+	 */
+	public void setDataLoaded(Collection result);
+
+	public void setCookie(String monashAuth);
 }
