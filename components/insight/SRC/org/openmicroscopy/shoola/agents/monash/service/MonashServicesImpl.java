@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.svc.communicator;
+package org.openmicroscopy.shoola.agents.monash.service;
 
 import java.io.IOException;
 import java.util.Map;
@@ -34,37 +34,42 @@ import org.openmicroscopy.shoola.svc.transport.HttpChannel;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 
 /** 
- * Activates the {@link Communicator}.
+ * Implementation of services described in {@link MonashServices}.
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
  * @since Beta4.4
  */
-public class CommunicatorProxy extends AbstractProxy implements Communicator {
+public class MonashServicesImpl implements MonashServices {
 
+	/** The channel to communicate. */
+	protected final HttpChannel channel;
+	
 	/**
 	 * Creates a new instance.
 	 * 
 	 * @param channel The communication link.
 	 */
-	protected CommunicatorProxy(HttpChannel channel) {
-		super(channel);
+	protected MonashServicesImpl(HttpChannel channel) {
+		if (channel == null) throw new NullPointerException("No channel.");
+        this.channel = channel;
 	}
 
 	/**
-	 * Implemented as specified by the {@link Communicator} interface.
-	 * @see Communicator#searchRM()
+	 * Implemented as specified by the {@link MonashServices} interface.
+	 * @see MonashServices#searchRM()
 	 */
 	public Object searchRM(String cookie, Map<String, String> params)
 			throws TransportException 
 	{
-		MessengerRequest out = new MessengerRequest(cookie, params);
+		MonashSvcRequest out = new MonashSvcRequest(cookie, params);
 		StringBuilder reply = new StringBuilder();
-		MessengerReply in = new MessengerReply(reply);
+		MonashSvcReply in = new MonashSvcReply(reply);
 		
 		try {
 			channel.exchange(out, in);
+			System.out.println("response from serachRM:" + in.toString()); 
 		} catch (IOException ioe) {
 			throw new TransportException(
 					"Couldn't communicate with server (I/O error).", ioe);

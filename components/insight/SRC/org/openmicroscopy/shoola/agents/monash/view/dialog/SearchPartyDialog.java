@@ -44,9 +44,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.openmicroscopy.shoola.agents.monash.IconManager;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
-import org.openmicroscopy.shoola.agents.monash.svc.communicator.Communicator;
-import org.openmicroscopy.shoola.agents.monash.svc.communicator.CommunicatorFactory;
+import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
+import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
+import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.AndsPublishModel;
 import org.openmicroscopy.shoola.env.log.LogMessage;
 import org.openmicroscopy.shoola.svc.communicator.CommunicatorDescriptor;
@@ -67,12 +69,6 @@ public class SearchPartyDialog extends MonashDialog {
 	/** Description of the panel. */
     private static final String 	DESCRIPTION = "Enter the researcher name or email below:";
     
-    /** Error message when party field is null */
-    private static final String 	ERROR_PARTY_NULL = "Please enter the compulsory field";
-    
-    /** Error message when party field is null */
-    private static final String 	ERROR_PARTY_NF = "Party not found";
-	
     /** The tooltip of the {@link #backButton}. */
 	private static final String		BACK_TOOLTIP = "Go back to previous page.";
 	
@@ -127,7 +123,7 @@ public class SearchPartyDialog extends MonashDialog {
 		party = searchField.getText();
 		System.out.println("Search for party: " + party); // cnOrEmail
 		if (null == party) {
-			messageLabel.setText(ERROR_PARTY_NULL);
+			messageLabel.setText(Constants.ERROR_PARTY_NULL);
 		} else {
 			
 			//String url = (String) reg.lookup(LookupNames.TOKEN_URL);
@@ -139,22 +135,24 @@ public class SearchPartyDialog extends MonashDialog {
 			CommunicatorDescriptor desc = new CommunicatorDescriptor(HttpChannel.CONNECTION_PER_REQUEST, partyWS, -1);
 	        
 	        try {
-				Communicator c = CommunicatorFactory.getCommunicator(desc);
+				MonashServices mSvc = ServiceFactory.getMonashServices(desc);
 				Map<String, String> params = new HashMap<String, String>();
 				params.put("party", party);
-				Object partybean = c.searchRM(cookie, params);
+				Object partybean = mSvc.searchRM(cookie, params);
 			} catch (Exception e) {
 				LogMessage msg = new LogMessage();
 	            msg.println("Failed to retrieve party information.");
 	            msg.println("Reason: " + e.getMessage());
 	            //Logger logger = container.getRegistry().getLogger();
 	            //logger.error(this, msg);
-				JOptionPane.showMessageDialog(this, msg.toString());
+	            IconManager icons = IconManager.getInstance();
+				//JOptionPane.showMessageDialog(this, msg.toString());
+	            JOptionPane.showMessageDialog(this, msg.toString(), Constants.BACKEND_ERROR, JOptionPane.ERROR_MESSAGE, icons.getIcon(ERROR));
 			}
 			
 			/*partybean Communicator.searchRM(party);
 			if (null == partybean) {
-				messageLabel.setText(ERROR_PARTY_NF);
+				messageLabel.setText(Constants.ERROR_PARTY_NF);
 			} else {
 				close();
 			}*/

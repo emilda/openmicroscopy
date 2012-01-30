@@ -30,6 +30,8 @@ package org.openmicroscopy.shoola.agents.monash.view;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -42,10 +44,14 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
+import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
 import org.openmicroscopy.shoola.env.LookupNames;
 import org.openmicroscopy.shoola.env.data.login.UserCredentials;
 import org.openmicroscopy.shoola.env.log.LogMessage;
 import org.openmicroscopy.shoola.env.log.Logger;
+import org.openmicroscopy.shoola.svc.communicator.CommunicatorDescriptor;
+import org.openmicroscopy.shoola.svc.transport.HttpChannel;
 
 import pojos.ExperimenterData;
 /** 
@@ -137,6 +143,25 @@ public class AndsPublishFactory implements ChangeListener {
 		}
 	}
 	
+	/**
+	 * Authenticates to Monash DS. 
+	 * @param uc
+	 * @return
+	 */
+	private static String monashAuth1(UserCredentials uc) 
+	{
+		String loginToken = PublishAgent.getLoginToken();
+		System.out.println("loginToken: " + loginToken);
+		
+		CommunicatorDescriptor desc = new CommunicatorDescriptor(HttpChannel.CONNECTION_PER_REQUEST, loginToken, -1);
+		MonashServices mSvc = ServiceFactory.getMonashServices(desc);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("userName", uc.getUserName());
+		params.put("password", uc.getPassword());
+		//Object partybean = mSvc.login(cookie, params);
+		return null;
+	}
+
 	/**
      * 
      * Authenticates to Monash DS. 

@@ -25,48 +25,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.svc.communicator;
+package org.openmicroscopy.shoola.agents.monash.service;
 
-import org.openmicroscopy.shoola.svc.SvcActivationException;
-import org.openmicroscopy.shoola.svc.SvcDescriptor;
 import org.openmicroscopy.shoola.svc.communicator.CommunicatorDescriptor;
 import org.openmicroscopy.shoola.svc.transport.ChannelFactory;
 import org.openmicroscopy.shoola.svc.transport.HttpChannel;
 
 /** 
- * Component Factory for the {@link Communicator}.
- * It creates an object implementing the {@link Communicator} interface.
+ * Factory for creating an object implementing the {@link MonashServices} interface.
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
  * @since Beta4.4
  */
-public class CommunicatorFactory {
+public class ServiceFactory {
 
 	/**
-     * Creates a {@link Communicator}
-     * @param desc
-     * @return A {@link Communicator} or null if none was created.
-     * @throws SvcActivationException 	If an error occurred while creating the 
-     * 									service.
-     */
-	public static Communicator getCommunicator(SvcDescriptor desc)
-		throws SvcActivationException
+	 * Creates a {@link MonashServices}
+	 * @param desc
+	 * @return A {@link MonashServicesImpl} or null if none was created.
+	 */
+	public static MonashServices getMonashServices(CommunicatorDescriptor desc)
 	{
 		if (desc == null)
-            throw new NullPointerException("No service descriptor.");
-		
-		CommunicatorDescriptor d = (CommunicatorDescriptor) desc;
-		Communicator service = null;
-		try {
-			HttpChannel channel = ChannelFactory.getChannel(
-									d.getChannelType(), 
-									d.getURL(), d.getConnexionTimeout());
-			service = new CommunicatorProxy(channel);
-		} catch (Exception e) {
-			throw new SvcActivationException("Couldn't activate Communicator.", e);
-		}
-		return (Communicator) service;
+			throw new NullPointerException("No service descriptor.");
+
+		HttpChannel channel = ChannelFactory.getChannel(
+				desc.getChannelType(), 
+				desc.getURL(), desc.getConnexionTimeout());
+		return new MonashServicesImpl(channel);
 	}
 }

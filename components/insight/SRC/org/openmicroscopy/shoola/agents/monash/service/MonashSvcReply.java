@@ -1,11 +1,11 @@
-package org.openmicroscopy.shoola.agents.monash.svc.communicator;
+package org.openmicroscopy.shoola.agents.monash.service;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.openmicroscopy.shoola.svc.proxy.Reply;
 import org.openmicroscopy.shoola.svc.transport.HttpChannel;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 
-public class MessengerReply extends Reply {
+public class MonashSvcReply extends Reply {
 
 	/** The reply to send to the user. */
 	private StringBuilder reply;
@@ -15,7 +15,7 @@ public class MessengerReply extends Reply {
 	 * 
 	 * @param reply	The reply to send to user.
 	 */
-	MessengerReply(StringBuilder reply)
+	MonashSvcReply(StringBuilder reply)
 	{
 		this.reply = reply;
 	}
@@ -27,7 +27,15 @@ public class MessengerReply extends Reply {
 	public void unmarshal(HttpMethod response, HttpChannel context) 
 		throws TransportException
 	{
-		if (reply != null)
+		if (reply != null) {
 			reply.append(checkStatusCode(response));
+		}
+	}
+
+	/* 
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return reply.toString();
 	}
 }

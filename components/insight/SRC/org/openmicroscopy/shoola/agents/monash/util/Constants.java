@@ -56,4 +56,13 @@ public class Constants {
 	
 	/** Field to access the service token for Party WS in Monash DS.  */
 	public static final String PARTY_TOKEN = "/services/monash/partyToken";
+
+	/** Error message when party field is null */
+    public static final String 	ERROR_PARTY_NULL = "Please enter the compulsory field";
+    
+    /** Error message when party field is null */
+    public static final String 	ERROR_PARTY_NF = "Party not found";
+
+    /** Error message when Monash DS is not available */
+	public static final String BACKEND_ERROR = "Monash Data Server Error";
 }

@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.svc.communicator;
+package org.openmicroscopy.shoola.agents.monash.service;
 
 //Application-internal dependencies
 import java.util.Map;
@@ -33,14 +33,14 @@ import java.util.Map;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 
 /** 
-* Methods required to communicate to Monash DS.
+ * Services provided by Monash DS.
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
  * @since Beta4.4
  */
-public interface Communicator
+public interface MonashServices
 {
 	/**
 	 * Search for party in the research master.

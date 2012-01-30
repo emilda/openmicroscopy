@@ -1,4 +1,4 @@
-package org.openmicroscopy.shoola.agents.monash.svc.communicator;
+package org.openmicroscopy.shoola.agents.monash.service;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -9,12 +9,12 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.openmicroscopy.shoola.svc.proxy.Request;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 
-public class MessengerRequest extends Request {
+public class MonashSvcRequest extends Request {
 
 	private Map<String, String> info;
 	private String cookie;
 
-	public MessengerRequest(String cookie, Map<String, String> info) {
+	public MonashSvcRequest(String cookie, Map<String, String> info) {
 		this.info = info;
 		this.cookie = cookie;
 	}
@@ -23,9 +23,9 @@ public class MessengerRequest extends Request {
 	public HttpMethod marshal() throws TransportException {
 		//Create request.
         PostMethod request = new PostMethod();
-        request.setRequestHeader("cookie", cookie);
+        if (null != cookie) 
+        	request.setRequestHeader("cookie", cookie);
         //Marshal.
-        //if (email != null) request.addParameter(EMAIL, email);
         Entry entry;
         Iterator k = info.entrySet().iterator();
         while (k.hasNext()) {
