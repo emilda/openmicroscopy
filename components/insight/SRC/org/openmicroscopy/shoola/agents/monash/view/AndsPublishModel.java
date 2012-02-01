@@ -27,9 +27,12 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.openmicroscopy.shoola.agents.monash.DataCollectionLoader;
+import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.openmicroscopy.shoola.agents.treeviewer.view.TreeViewer;
 
 import pojos.ExperimenterData;
@@ -65,6 +68,9 @@ public class AndsPublishModel {
 
 	/** Cookie to connect to Monash DS */
 	private String 				cookie;
+	
+	/** List containing party information */
+	private List<PartyBean> 	partyList;
 
 	/**
 	 * Creates a new instance and sets the state to {@link AndsPublish#NEW}.
@@ -91,6 +97,7 @@ public class AndsPublishModel {
 	private void initialize()
 	{
 		state = AndsPublish.NEW;
+		partyList = new ArrayList<PartyBean>();
 		recycled = false;
 	}
 
@@ -233,7 +240,7 @@ public class AndsPublishModel {
 	}
 
 	/**
-	 * Cookie to connec to Monash DS
+	 * Cookie to connect to Monash DS
 	 * @param cookie
 	 */
 	public void setCookie(String cookie) {
@@ -246,5 +253,13 @@ public class AndsPublishModel {
 	 */
 	public String getCookie() {
 		return cookie;
+	}
+
+	/**
+	 * Adds the given pb to the list {@link #partyList}.
+	 * @param pb	the PartyBean to add
+	 */
+	public void addParty(PartyBean pb) {
+		partyList.add(pb);
 	}
 }

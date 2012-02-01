@@ -27,10 +27,6 @@
  */
 package org.openmicroscopy.shoola.agents.monash.service;
 
-import org.openmicroscopy.shoola.svc.communicator.CommunicatorDescriptor;
-import org.openmicroscopy.shoola.svc.transport.ChannelFactory;
-import org.openmicroscopy.shoola.svc.transport.HttpChannel;
-
 /** 
  * Factory for creating an object implementing the {@link MonashServices} interface.
  *
@@ -43,17 +39,19 @@ public class ServiceFactory {
 
 	/**
 	 * Creates a {@link MonashServices}
-	 * @param desc
+	 * In order to enforce a connection per request model, factory creates
+	 * new channel for communication for each request to service
+	 * 
+	 * @param url			The server's URL.
+     * @param connTimeout	The time before being disconnected.
 	 * @return A {@link MonashServicesImpl} or null if none was created.
 	 */
-	public static MonashServices getMonashServices(CommunicatorDescriptor desc)
+	public static MonashServices getMonashServices(String url, int connTimeout)
 	{
-		if (desc == null)
-			throw new NullPointerException("No service descriptor.");
+		if (url == null)
+			throw new NullPointerException("Please provide server URL.");
 
-		HttpChannel channel = ChannelFactory.getChannel(
-				desc.getChannelType(), 
-				desc.getURL(), desc.getConnexionTimeout());
+		MonashHttpChannel channel = new MonashHttpChannel(url, connTimeout);
 		return new MonashServicesImpl(channel);
 	}
 }

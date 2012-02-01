@@ -135,7 +135,10 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		view.dispose();
 	}
 
-	@Override
+	/**
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#discard()
+	 */
 	public void discard() {
 		if (model.getState() == READY) {
 			view.close();
@@ -149,7 +152,10 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 */
 	public int getState() { return model.getState(); }
 
-	@Override
+	/** 
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#setExistingTags()
+	 */
 	public void setExistingTags() {
 		// TODO Auto-generated method stub
 
@@ -159,7 +165,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#getView()
 	 */
-	@Override
 	public JFrame getView() {
 		return view;
 	}
@@ -168,7 +173,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#cancel()
 	 */
-	@Override
 	public void cancel() {
 		if (model.getState() == LOADING_DATA)
 			model.cancel();
@@ -179,7 +183,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#moveToFront()
 	 */
-	@Override
 	public void moveToFront() {
 		if (model.getState() == DISCARDED)
 			throw new IllegalStateException(
@@ -192,7 +195,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#retryPublish()
 	 */
-	@Override
 	public void retryPublish() {
 		// TODO Auto-generated method stub
 
@@ -202,7 +204,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#publishData(ImportableObject)
 	 */
-	@Override
 	public void publishData(ImportableObject data) {
 		System.out.println("AndsPublishComponent.publishData()");
 
@@ -224,7 +225,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#showAddResearcher(boolean)
 	 */
-	@Override
 	public void showAddResearcher(boolean b) {
 		String option = view.showResearcher();
 		//firePropertyChange(FINDER_VISIBLE_PROPERTY, oldValue, newValue);
@@ -233,10 +233,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 			 * Shows the Search/ Manual add researcher screen based on the user choice.
 			 */
 			if (PartyDialog.PARTY_OPTION_SEARCH.equals(option)) {
-				String party = view.searchResearcher();
-				if (null == party) {
-					showAddResearcher(true);
-				}
+				view.searchResearcher();
 			} else if (PartyDialog.PARTY_OPTION_MANUAL.equals(option)) {
 				//view.manualResearcher();
 			}
@@ -281,7 +278,10 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		setDataCollection(dataloaded);
 	}
 
-	@Override
+	/** 
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#setCookie()
+	 */
 	public void setCookie(String cookie) {
 		System.out.println("setCookie...");
 		model.setCookie(cookie);

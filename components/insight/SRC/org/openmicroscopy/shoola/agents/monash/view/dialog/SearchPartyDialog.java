@@ -40,19 +40,18 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.openmicroscopy.shoola.agents.monash.IconManager;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
+import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
 import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
+import org.openmicroscopy.shoola.agents.monash.util.Unmarshaller;
 import org.openmicroscopy.shoola.agents.monash.view.AndsPublishModel;
-import org.openmicroscopy.shoola.env.log.LogMessage;
-import org.openmicroscopy.shoola.svc.communicator.CommunicatorDescriptor;
-import org.openmicroscopy.shoola.svc.transport.HttpChannel;
+import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
+import org.openmicroscopy.shoola.svc.transport.TransportException;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
 /** 
@@ -67,140 +66,132 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
 public class SearchPartyDialog extends MonashDialog {
 
 	/** Description of the panel. */
-    private static final String 	DESCRIPTION = "Enter the researcher name or email below:";
-    
-    /** The tooltip of the {@link #backButton}. */
+	private static final String 	DESCRIPTION = "Enter the researcher name or email below:";
+
+	/** The tooltip of the {@link #backButton}. */
 	private static final String		BACK_TOOLTIP = "Go back to previous page.";
-	
+
 	/** The tooltip of the {@link #searchButton}. */
 	private static final String		SEARCH_TOOLTIP = "Search for Party in the Research Master.";
 
 	/** Action ID to close the dialog. */
 	private static final int		BACK = 0;
-	
+
 	/** Action ID to go to the next page and close the dialog. */
 	private static final int		SEARCH = 1;
-	
+
 	/** Button to add research main page. */
 	private JButton 				backButton;
-	
+
 	/** Button to search for Party in the Research Master. */
 	private JButton					searchButton;
-	
-	/** The field holding the name of the party to search for. */
-    private JTextField				searchField;
-    
-    /** Party searched. */
-	private String 					party = null;
 
+	/** The field holding the name of the party to search for. */
+	private JTextField				searchField;
+
+	/** Reference to the model. */
 	private AndsPublishModel 		model;
-    
+
+	/** Search if successful sets <code>PartyBean</code>. */
+	private PartyBean 				partyBean = null;
+
 	public SearchPartyDialog(JFrame parent, String title, AndsPublishModel model) {
 		super(parent, title, "", null);
 		this.model = model;
 	}
-
+	
 	/**
 	 * Reacts to click on buttons.
 	 * @see ActionListener#actionPerformed(ActionEvent)
 	 */
-	@Override
 	public void actionPerformed(ActionEvent e) {
-		
+
 		int index = Integer.parseInt(e.getActionCommand());
 		switch (index) {
-			case BACK:
-				party = null;
-				close();
-				break;
-			case SEARCH:
-				searchParty();
-				break;
-		}
-	}
-	
-	private void searchParty() {
-		party = searchField.getText();
-		System.out.println("Search for party: " + party); // cnOrEmail
-		if (null == party) {
-			messageLabel.setText(Constants.ERROR_PARTY_NULL);
-		} else {
-			
-			//String url = (String) reg.lookup(LookupNames.TOKEN_URL);
-			messageLabel.setText("");
-			String cookie = model.getCookie();
-			System.out.println("cookie: " + cookie);
-			
-			String partyWS = PublishAgent.getPartyToken();
-			CommunicatorDescriptor desc = new CommunicatorDescriptor(HttpChannel.CONNECTION_PER_REQUEST, partyWS, -1);
-	        
-	        try {
-				MonashServices mSvc = ServiceFactory.getMonashServices(desc);
-				Map<String, String> params = new HashMap<String, String>();
-				params.put("party", party);
-				Object partybean = mSvc.searchRM(cookie, params);
-			} catch (Exception e) {
-				LogMessage msg = new LogMessage();
-	            msg.println("Failed to retrieve party information.");
-	            msg.println("Reason: " + e.getMessage());
-	            //Logger logger = container.getRegistry().getLogger();
-	            //logger.error(this, msg);
-	            IconManager icons = IconManager.getInstance();
-				//JOptionPane.showMessageDialog(this, msg.toString());
-	            JOptionPane.showMessageDialog(this, msg.toString(), Constants.BACKEND_ERROR, JOptionPane.ERROR_MESSAGE, icons.getIcon(ERROR));
-			}
-			
-			/*partybean Communicator.searchRM(party);
-			if (null == partybean) {
-				messageLabel.setText(Constants.ERROR_PARTY_NF);
-			} else {
-				close();
-			}*/
+		case BACK:
 			close();
+			break;
+		case SEARCH:
+			searchParty();
+			break;
 		}
 	}
 
+	private void searchParty() {
+		setMessage("");
+		String party = searchField.getText();
+		System.out.println("Search for party: " + party + "."); // cnOrEmail
+		if (null == party || Constants.SPACE.equals(party)) {
+			setMessage(Constants.ERROR_NULL_FIELD);
+		} else {
+			String cookie = model.getCookie();
+			System.out.println("cookie: " + cookie);
+
+			String partyWS = PublishAgent.getPartyToken();
+
+			MonashServices mSvc = ServiceFactory.getMonashServices(partyWS, -1);
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("party", party);
+			MonashSvcReply reply = null;
+			try {
+				reply = mSvc.searchRM(cookie, params);
+				String errMsg = reply.getErrMsg();
+				if (errMsg != null) {
+					setMessage(errMsg);
+				} else {
+					String result = reply.getSuccessMsg();
+					partyBean  = Unmarshaller.getPartyBean(result);
+					// TODO Show message dialog with the search result to confirm
+					if (null != partyBean ) System.out.println("partyBean: " + partyBean.toString());
+					close();
+				}
+			} catch (TransportException e) {
+				showErrDialog(this, Constants.ERROR_PARTY_NF, e);
+			}
+		}
+	}
+	
 	/** 
 	 * Implemented as specified by the {@link MonashDialog}.
 	 * @see MonashDialog#buildContentPane()
 	 */
 	protected JComponent buildContentPane() {
-        JPanel box = new JPanel(new GridBagLayout());
-        
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.FIRST_LINE_START;
-        c.weightx = 0.1;
+		JPanel box = new JPanel(new GridBagLayout());
+
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.FIRST_LINE_START;
+		c.weightx = 0.1;
 		c.gridy = 0;
-        
-        JLabel label = new JLabel(DESCRIPTION);
-        box.add(label, c);
-        
-        c.gridy++;
-        box.add(searchField, c);
-        
-        c.gridy++;
+
+		JLabel label = new JLabel(DESCRIPTION);
+		box.add(label, c);
+
+		c.gridy++;
+		box.add(searchField, c);
+
+		c.gridy++;
 		c.weighty = 1.0;
 		c.anchor = GridBagConstraints.PAGE_END; //bottom of pane
-        box.add(Box.createVerticalStrut(5), c);
+		box.add(Box.createVerticalStrut(5), c);
 
-        return box;
+		return box;
 	}
 
 	/**
-     * Builds and lays out the buttons.
-     * 
+	 * Builds and lays out the buttons.
+	 * 
 	 * Implemented as specified by the {@link MonashDialog}.
 	 * @see MonashDialog#buildToolBar()
-     * @return See above.
-     */
+	 * @return See above.
+	 */
 	protected JComponent buildToolBar() {
-    	JPanel bar = new JPanel();
-    	bar.setLayout(new BoxLayout(bar, BoxLayout.X_AXIS));
-    	bar.add(backButton);
-    	bar.add(Box.createHorizontalStrut(5));
-    	bar.add(searchButton);
-    	bar.add(Box.createHorizontalStrut(10));
-    	return bar;
+		JPanel bar = new JPanel();
+		bar.setLayout(new BoxLayout(bar, BoxLayout.X_AXIS));
+		bar.add(backButton);
+		bar.add(Box.createHorizontalStrut(5));
+		bar.add(searchButton);
+		bar.add(Box.createHorizontalStrut(10));
+		return bar;
 	}
 
 	/** 
@@ -208,34 +199,35 @@ public class SearchPartyDialog extends MonashDialog {
 	 * @see MonashDialog#initComponents()
 	 */
 	protected void initComponents() {
-		
+
 		searchField = new JTextField(30);
 		searchField.setBackground(UIUtilities.BACKGROUND_COLOR);
-    	searchField.setEnabled(true);
-    	searchField.setEditable(true);
-    	
-    	//Ensure the text field always gets the first focus.
-        /*addComponentListener(new ComponentAdapter() {
+		searchField.setEnabled(true);
+		searchField.setEditable(true);
+
+		//Ensure the text field always gets the first focus.
+		/*addComponentListener(new ComponentAdapter() {
             public void componentShown(ComponentEvent ce) {
             	searchField.requestFocusInWindow();
             }
         });*/
-        
+
 		backButton = new JButton("Back");
 		formatButton(backButton, 'B', BACK_TOOLTIP, BACK, this);
-		
+
 		searchButton = new JButton("Next");
 		formatButton(searchButton, 'S', SEARCH_TOOLTIP, SEARCH, this);
-		
+
 	}
 
 	/**
-	 * Return the selected party option. 
-	 * Null if user cancels the action or closes the dialog.
-	 * @see #OPTIONS
-	 * @return selected option
+	 * Return the <code>PartyBean</code> if search was successful. 
+	 * Null if user cancels the action, closes the dialog
+	 * or no party information found in <code>Research Master</code>.
+	 * 
+	 * @return the partyBean
 	 */
-	public String getParty() {
-		return party;
+	public PartyBean getPartyBean() {
+		return partyBean;
 	}
 }

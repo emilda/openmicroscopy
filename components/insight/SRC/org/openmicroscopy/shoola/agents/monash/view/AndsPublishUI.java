@@ -38,6 +38,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -65,6 +66,7 @@ import org.openmicroscopy.shoola.agents.monash.IconManager;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
+import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.SearchPartyDialog;
 import org.openmicroscopy.shoola.agents.util.EditorUtil;
@@ -122,8 +124,8 @@ public class AndsPublishUI extends TopWindow
 	/** Add Researcher. */
 	private JButton				researcherButton;
 
-	/** Box to make the selected user the owner of the group is a member of. */
-	private JCheckBox			ownerBox;  // TODO remove later
+	/** researcher associated with the collection. */
+	private JCheckBox			ownerBox;
 
 	/**
 	 * Main panel, with list of collections to register with RDA
@@ -142,7 +144,7 @@ public class AndsPublishUI extends TopWindow
 
 	/** list containing the items to be published */
 	private JList 				projectList;
-
+	
 	protected AndsPublishUI(String title) {
 		super(title);
 	}
@@ -308,6 +310,10 @@ public class AndsPublishUI extends TopWindow
 		//updateLabel((String) list.getSelectedValue());
 	}
 
+	/**
+	 * Build the collection details panel
+	 * @return the panel containing collection details.
+	 */
 	private JPanel buildProjectDetails() {
 		ExperimenterData user = PublishAgent.getUserDetails();
 
@@ -501,13 +507,18 @@ public class AndsPublishUI extends TopWindow
 	}
 
 	/**
-	 * Show the search researcher dialog
-	 * @return party 	Researcher information
+	 * Show the search researcher dialog. On successful search
+	 * the <code>PartyBean</code> is added into the
+	 * {@link AndsPublishModel#partyList}.
 	 */
-	public String searchResearcher() {
+	public void searchResearcher() {
 		SearchPartyDialog spd = new SearchPartyDialog(this, "Adding Researcher Options", model);
 		UIUtilities.centerAndShow(spd);
-		return spd.getParty();
+		PartyBean pb = spd.getPartyBean();
+		if (null != pb)
+			model.addParty(pb);
+		
+		// TODO add party info to view and check it
 	}
 
 	/** Refreshes the view */

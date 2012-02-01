@@ -27,7 +27,6 @@
  */
 package org.openmicroscopy.shoola.agents.monash.service;
 
-//Application-internal dependencies
 import java.util.Map;
 
 import org.openmicroscopy.shoola.svc.transport.TransportException;
@@ -47,11 +46,22 @@ public interface MonashServices
 	 * 
 	 * @param cookie	The cookie to pass to Monash DS
 	 * @param params	The request parameters
-	 * @return reply 	The result of the post.
+	 * @return reply 	The xml output from server
 	 * @throws TransportException 	Thrown if an error occurred while trying 
 	 * 								to communicate with the server.
 	 */
-	public Object searchRM(String cookie, Map<String, String> params)
+	public MonashSvcReply searchRM(String cookie, Map<String, String> params)
+					throws TransportException;
+
+	/**
+	 * Search for party in the research master.
+	 * 
+	 * @param params	The request parameters
+	 * @return cookie	The cookie to communicate with Monash DS
+	 * @throws TransportException 	Thrown if an error occurred while trying 
+	 * 								to communicate with the server.
+	 */
+	public String login(Map<String, String> params)
 					throws TransportException;
 
 }

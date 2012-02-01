@@ -28,6 +28,7 @@
 package org.openmicroscopy.shoola.agents.monash.view.dialog;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -41,9 +42,15 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
+import org.openmicroscopy.shoola.agents.monash.IconManager;
+import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.util.Constants;
+import org.openmicroscopy.shoola.env.log.LogMessage;
+import org.openmicroscopy.shoola.env.log.Logger;
 import org.openmicroscopy.shoola.util.ui.TitlePanel;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
@@ -60,46 +67,49 @@ public abstract class MonashDialog extends JDialog
 	
 	/** The default size of the window. */
 	protected static final Dimension 	DEFAULT_SIZE = new Dimension(700, 400);
-	private Icon icon;
-	private String message;
-	protected JXLabel messageLabel;
-
-	public MonashDialog(JFrame parent, String title, String message, Icon icon) {
+	
+	/** The icon to use for the dialog. */
+	private Icon 						icon;
+	
+	/** Title panel for displaying title as well as other messages in sub-title */
+	private TitlePanel tp;
+	
+	/**
+	 * 
+	 * @param parent	the component
+	 * @param title	the title to display on the dialog
+	 * @param message	the error message to display
+	 * @param icon	the icon for the dialog
+	 */
+	public MonashDialog(JFrame parent, String title, String subtitle, Icon icon) 
+	{
 		super(parent);
 		setModalityType(JDialog.ModalityType.APPLICATION_MODAL);
 		this.icon = icon;
-		this.message = message;
-		initialize(title);
+		initialize(title, subtitle);
 		//setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 	}
 
-	private void initialize(String title) {
+	private void initialize(String title, String subtitle) 
+	{
 		//if (icon == null) icon = UIManager.getIcon("monashIcon");
 		setTitle(title);
 		initComponents();
-		buildGUI();
+		buildGUI(subtitle);
 		pack();
 		setSize(DEFAULT_SIZE);
 	}
 
-	private void buildGUI() {
+	private void buildGUI(String subtitle) 
+	{
 		JComponent component;
 		component = buildContentPane();
 		component.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 0));
 		Container c = getContentPane();
-        TitlePanel tp = new TitlePanel(getTitle(), message, icon);
+        tp = new TitlePanel(getTitle(), subtitle, icon);
         c.setLayout(new BorderLayout(0, 0));
         
-        JXPanel mp = new JXPanel();
-        messageLabel = new JXLabel("test");
-        messageLabel.setFont(messageLabel.getFont().deriveFont(Font.BOLD));
-        
-        mp.setLayout(new FlowLayout(FlowLayout.LEFT));
-        mp.add(messageLabel);
-        mp.setBackgroundPainter(tp.getBackgroundPainter());
-		
         c.add(tp, BorderLayout.NORTH);
-        c.add(mp, BorderLayout.LINE_START);
 		c.add(component, BorderLayout.LINE_START);
 		c.add(UIUtilities.buildComponentPanelRight(buildToolBar()), BorderLayout.SOUTH);
 	}
@@ -152,6 +162,27 @@ public abstract class MonashDialog extends JDialog
      */
 	protected abstract JComponent buildToolBar();
 
+	/**
+	 * @param parent	determines the Frame in which the dialog is displayed; 
+	 * 					if null, or if the parentComponent has no Frame, a 
+	 * 					default Frame is used
+	 * @param message	the error message to display
+	 * @param ex		the exception
+	 */
+	public static void showErrDialog(Component parent, String message, Exception ex)
+	{
+		LogMessage msg = new LogMessage();
+        msg.println(message);
+        msg.println("Reason: " + ex.getMessage());
+        Logger logger = PublishAgent.getRegistry().getLogger();
+        logger.error(parent, msg);
+        IconManager icons = IconManager.getInstance();
+        JOptionPane.showMessageDialog(parent, msg.toString(), 
+        		Constants.BACKEND_ERROR, 	//	the title string for the dialog
+        		JOptionPane.ERROR_MESSAGE, 
+        		icons.getIcon(ERROR));		// an icon to display in the dialog
+	}
+	
 	public Icon getIcon() {
 		return icon;
 	}
@@ -160,11 +191,7 @@ public abstract class MonashDialog extends JDialog
 		this.icon = icon;
 	}
 
-	public String getMessage() {
-		return message;
-	}
-
 	public void setMessage(String message) {
-		this.message = message;
+		tp.setTextHeader(message);
 	}
 }

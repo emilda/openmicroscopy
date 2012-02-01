@@ -25,80 +25,80 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.service;
+package org.openmicroscopy.shoola.agents.monash.util;
 
 import java.io.IOException;
-import java.util.Map;
+import java.io.InputStream;
 
-import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpState;
-import org.openmicroscopy.shoola.svc.transport.TransportException;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 /** 
- * Implementation of services described in {@link MonashServices}.
+ * Helper class using XPath APIs to read the XML file.
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
  * @since Beta4.4
  */
-public class MonashServicesImpl implements MonashServices {
+public class XMLReader {
 
-	/** The channel to communicate. */
-	protected final MonashHttpChannel channel;
-	
+	/** Stream contining the XML document to parse */
+	private InputStream xmlStream;
+
+	private Document 	xmlDocument;
+
+	/** to navigate in XML documents */
+	private XPath 		xPath;
+
 	/**
 	 * Creates a new instance.
 	 * 
-	 * @param channel The communication link.
+	 * @param xmlStream	the Stream containing the XML document to parse.
+	 * @throws ParserConfigurationException 
+	 * @throws IOException 
+	 * @throws SAXException 
 	 */
-	protected MonashServicesImpl(MonashHttpChannel channel) {
-		if (channel == null) throw new NullPointerException("No channel.");
-        this.channel = channel;
+	public XMLReader(InputStream xmlStream) 
+			throws SAXException, IOException, ParserConfigurationException {
+		
+		this.xmlStream = xmlStream;
+		init();
 	}
 
 	/**
-	 * Implemented as specified by the {@link MonashServices} interface.
-	 * @see MonashServices#searchRM()
+	 * Initializes xPath and creates @see Document
+	 * from the {@link #xmlStream}.
 	 */
-	public MonashSvcReply searchRM(String cookie, Map<String, String> params)
-			throws TransportException 
-	{
-		MonashSvcRequest out = new MonashSvcRequest(cookie, params);
-		StringBuilder reply = new StringBuilder();
-		MonashSvcReply in = new MonashSvcReply(reply);
+	private void init() 
+			throws SAXException, IOException, ParserConfigurationException {  
 		
-		try {
-			channel.exchange(out, in);
-			System.out.println("response from serachRM:" + in.toString()); 
-		} catch (IOException ioe) {
-			throw new TransportException(
-					"Couldn't communicate with server (I/O error).", ioe);
-		}
-		return in ;
+		xmlDocument = DocumentBuilderFactory.
+				newInstance().newDocumentBuilder().parse(xmlStream);
+		xPath =  XPathFactory.newInstance().newXPath();     
 	}
 
 	/**
-	 * Implemented as specified by the {@link MonashServices} interface.
-	 * @see MonashServices#login()
+	 * Returns the value of the <code>expression</code> in the format
+	 * specified in <code>returnType</code>
+	 * @param expression the XPath expression
+	 * @param returnType the type of object returned
+	 * @return
 	 */
-	public String login(Map<String, String> params) 
-			throws TransportException 
-	{
-		MonashSvcRequest out = new MonashSvcRequest(null, params);
-		StringBuilder reply = new StringBuilder();
-		MonashSvcReply in = new MonashSvcReply(reply);
-		
+	public Object read(String expression, QName returnType) {
 		try {
-			channel.exchange(out, in);
-			System.out.println("response from login:" + in.toString());
-			
-			return in.getCookie();
-			
-		} catch (IOException ioe) {
-			throw new TransportException(
-					"Couldn't communicate with server (I/O error).", ioe);
+			XPathExpression xPathExpression = xPath.compile(expression);
+			return xPathExpression.evaluate(xmlDocument, returnType);
+		} catch (XPathExpressionException ex) {
+			ex.printStackTrace();
+			return null;
 		}
 	}
 }

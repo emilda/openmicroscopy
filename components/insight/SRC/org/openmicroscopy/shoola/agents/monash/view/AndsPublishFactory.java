@@ -46,12 +46,8 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
 import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
-import org.openmicroscopy.shoola.env.LookupNames;
 import org.openmicroscopy.shoola.env.data.login.UserCredentials;
-import org.openmicroscopy.shoola.env.log.LogMessage;
-import org.openmicroscopy.shoola.env.log.Logger;
-import org.openmicroscopy.shoola.svc.communicator.CommunicatorDescriptor;
-import org.openmicroscopy.shoola.svc.transport.HttpChannel;
+import org.openmicroscopy.shoola.svc.transport.TransportException;
 
 import pojos.ExperimenterData;
 /** 
@@ -144,93 +140,25 @@ public class AndsPublishFactory implements ChangeListener {
 	}
 	
 	/**
-	 * Authenticates to Monash DS. 
-	 * @param uc
-	 * @return
+	 * Authenticates to Monash DS.  
+	 * @param uc	the UserCredentials to authenticate to Monash DS
+	 * @return	the cookie on successful authentication
 	 */
-	private static String monashAuth1(UserCredentials uc) 
+	private static String monashAuth(UserCredentials uc) 
 	{
 		String loginToken = PublishAgent.getLoginToken();
 		System.out.println("loginToken: " + loginToken);
 		
-		CommunicatorDescriptor desc = new CommunicatorDescriptor(HttpChannel.CONNECTION_PER_REQUEST, loginToken, -1);
-		MonashServices mSvc = ServiceFactory.getMonashServices(desc);
+		MonashServices mSvc = ServiceFactory.getMonashServices(loginToken, -1);
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("userName", uc.getUserName());
 		params.put("password", uc.getPassword());
-		//Object partybean = mSvc.login(cookie, params);
+		try {
+			return mSvc.login(params);
+		} catch (TransportException e) {
+			//MonashDialog.showErrDialog(null, Constants.BACKEND_ERROR, e);
+			// TODO fire property change to disable publish button in view.
+		}
 		return null;
 	}
-
-	/**
-     * 
-     * Authenticates to Monash DS. 
-     * TODO Re-work on this method to use <code>Communicator</code> instead of <code>HttpClient</code>
-     * @param uc
-     */
-    private static String monashAuth(UserCredentials uc) { 
-    	System.out.println("monashLogin: " + uc.toString());
-		BufferedReader reader = null;
-
-		HttpClient httpClient = new HttpClient(); 
-		httpClient.getParams().setParameter("http.useragent", "Test Client");
-		//httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY); 
-
-		String loginToken = PublishAgent.getLoginToken();
-		System.out.println("loginToken: " + loginToken);
-		
-		PostMethod postMethod = new PostMethod(loginToken); 
-		
-		// Provide custom retry handler is necessary
-		postMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
-
-		NameValuePair[] data = { 
-				new NameValuePair("userName", uc.getUserName()), 
-				new NameValuePair("password", uc.getPassword()) }; 
-		postMethod.setRequestBody(data); 
-		try { 
-			int statusCode = httpClient.executeMethod(postMethod); 
-			System.out.println("login statusCode: " + statusCode);
-			StringBuffer response = new StringBuffer(); 
-			reader = new BufferedReader(new InputStreamReader(postMethod.getResponseBodyAsStream(), "UTF-8"));	//get response from server
-
-			String line; 
-			while ((line = reader.readLine()) != null) { 
-				response.append(line).append(System.getProperty("line.separator")); 
-			} 
-			System.out.println("login:" + response); 
-			reader.close(); 
-
-			Cookie[] cookies = httpClient.getState().getCookies();//get cookie
-			String tmpcookies = ""; 
-			for(Cookie c:cookies){ 
-				tmpcookies = tmpcookies + c.toString();	//+";"; 
-				System.out.println(c); 
-			} 
-			return tmpcookies;
-			
-		} catch (HttpException e) {
-			System.err.println("Fatal protocol violation: " + e.getMessage());
-			/*LogMessage msg = new LogMessage();
-            msg.println("Fatal protocol violation while connecting to Monash OmeroMD.");
-            msg.println("Reason: " + e.getMessage());
-            Logger logger = container.getRegistry().getLogger();
-            logger.error(this, msg);*/
-			//e.printStackTrace();
-		} catch (IOException e) {
-			System.err.println("Fatal transport error: " + e.getMessage());
-			//e.printStackTrace();
-			/*LogMessage msg = new LogMessage();
-            msg.println("Failed to connect to Monash OmeroMD.");
-            msg.println("Reason: " + e.getMessage());
-            Logger logger = container.getRegistry().getLogger();
-            logger.error(this, msg);*/
-		} finally {
-			// Release the connection.
-			postMethod.releaseConnection(); 
-			if(reader != null) try { reader.close(); } catch (Exception fe) {}
-		}
-		return null;  
-	} 
-
 }

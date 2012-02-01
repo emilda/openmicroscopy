@@ -37,16 +37,16 @@ package org.openmicroscopy.shoola.agents.monash.util;
 public class Constants {
 
 	/** Identifies the <code>Collection name</code> field. */
-	public static final String	COLLECTION_NAME = "Collection Name";
+	public static final String COLLECTION_NAME = "Collection Name";
 	
 	/** Identifies the <code>Collection description</code> field. */
-	public static final String	COLLECTION_DESCRIPTION = "Collection Description";
+	public static final String COLLECTION_DESCRIPTION = "Collection Description";
 	
 	/** Identifies the <code>Researcher</code> field. */
-	public static final String	RESEARCHER = "The Associated Researcher(s): ";
+	public static final String RESEARCHER = "The Associated Researcher(s): ";
 	
 	/** Identifies the <code>License</code> field. */
-	public static final String	LICENSE = "License Required: ";
+	public static final String LICENSE = "License Required: ";
 	
 	/** Field to access the login token to Monash DS.  */
 	public static final String LOGIN_TOKEN = "/services/monash/loginToken";
@@ -58,11 +58,14 @@ public class Constants {
 	public static final String PARTY_TOKEN = "/services/monash/partyToken";
 
 	/** Error message when party field is null */
-    public static final String 	ERROR_PARTY_NULL = "Please enter the compulsory field";
+    public static final String ERROR_NULL_FIELD = "Please enter the compulsory field";
     
-    /** Error message when party field is null */
-    public static final String 	ERROR_PARTY_NF = "Party not found";
+    /** Error message when party is not found in <code>Research Master</code> */
+    public static final String ERROR_PARTY_NF = "Failed to retrieve party information.";
 
-    /** Error message when Monash DS is not available */
+    /** Error message when <code>Monash DS</code> is not available */
 	public static final String BACKEND_ERROR = "Monash Data Server Error";
+
+	/** Blank field */
+	public static final String SPACE = "";
 }

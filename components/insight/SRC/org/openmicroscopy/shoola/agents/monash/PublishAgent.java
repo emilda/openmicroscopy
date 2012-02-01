@@ -126,7 +126,7 @@ public class PublishAgent implements Agent, AgentEventListener {
 	}
 
 	/**
-	 * Handles the fact that data were loaded.
+	 * Handles data loading. Set the viewer with new data loaded.
 	 * 
 	 * @param e The event to handle.
 	 */
@@ -243,7 +243,7 @@ public class PublishAgent implements Agent, AgentEventListener {
 
 	/**
 	 * Helper method returning the current project's Annotations.
-	 * 
+	 * TODO remove this method
 	 * @return 
 	 * @throws DSAccessException 
 	 * @throws DSOutOfServiceException 
