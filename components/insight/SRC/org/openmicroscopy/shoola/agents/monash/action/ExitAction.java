@@ -39,10 +39,10 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
 public class ExitAction extends MonashAction {
 
 	/** The name of the action. */
-    public static final String NAME = "Quit";
+    public static final String NAME = "Cancel";
     
     /** The description of the action. */
-    public static final String DESCRIPTION = "Exit ANDS Register.";
+    public static final String DESCRIPTION = "Cancel Register with RDA.";
     
     /**
      * Creates a new instance.

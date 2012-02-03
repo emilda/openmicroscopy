@@ -58,6 +58,7 @@ public class Unmarshaller {
 			InputStream is = IOUtils.toInputStream(result, "UTF-8");
 			XMLReader reader = new XMLReader(is);
 			PartyBean pb = new PartyBean();
+			pb.setSelected(true);
 
 			// To get a xml attribute, group
 			String expression = PREFIX + "@group";

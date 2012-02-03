@@ -31,8 +31,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -41,70 +39,67 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.text.AbstractDocument.Content;
 
-import org.openmicroscopy.shoola.agents.monash.PublishAgent;
-import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
-import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
-import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
-import org.openmicroscopy.shoola.agents.monash.util.Unmarshaller;
-import org.openmicroscopy.shoola.agents.monash.view.AndsPublishModel;
-import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
-import org.openmicroscopy.shoola.svc.transport.TransportException;
+import org.openmicroscopy.shoola.agents.monash.util.DocumentCharacterLimit;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
 /** 
- * Dialog to Search Party in the Research Master
- * @see #OPTIONS
+ * Dialog to create the User Defined License. 
+ * User Defined License is limited to 4000 characters.
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
  * @since Beta4.4
  */
-public class SearchPartyDialog extends MonashDialog {
+public class UDLicenseDialog extends MonashDialog {
 
 	/** Description of the panel. */
-	private static final String 	DESCRIPTION = "Enter the researcher name or email below:";
+	private static final String 	DESCRIPTION = "4000 character limit";
+	
+	/** User Defined License characters limit. */
+	private static final int 		UDL_CHARAC_LIMIT = 4000;
 
 	/** The tooltip of the {@link #backButton}. */
-	private static final String		BACK_TOOLTIP = "Go back to previous page.";
+	private static final String		BACK_TOOLTIP = "Cancel and go back to previous page.";
 
-	/** The tooltip of the {@link #searchButton}. */
-	private static final String		SEARCH_TOOLTIP = "Search for Party in the Research Master.";
+	/** The tooltip of the {@link #saveButton}. */
+	private static final String		SAVE_TOOLTIP = "Saves the user defined license.";
 
 	/** Action ID to close the dialog. */
 	private static final int		BACK = 0;
 
 	/** Action ID to go to the next page and close the dialog. */
-	private static final int		SEARCH = 1;
+	private static final int		SAVE = 1;
 
 	/** Button to close and dispose of the window. */
 	private JButton 				backButton;
 
-	/** Button to search for Party in the Research Master. */
-	private JButton					searchButton;
+	/** Button to save and go to next screen. */
+	private JButton					saveButton;
 
-	/** The field holding the name of the party to search for. */
-	private JTextField				searchField;
+	/** The field to enter the user defined license. */
+	private JTextArea				licenseArea;
+	
+	/** The user defined license */
+	private String					license;
 
-	/** Reference to the model. */
-	private AndsPublishModel 		model;
-
-	/** Search if successful sets <code>PartyBean</code>. */
-	private PartyBean 				partyBean;
+	/** Scrollpane to hold {@link #licenseArea}. */
+	private JScrollPane 			scrollPane;
 
 	/**
-	 * Instantiates the dialog to Search Party in the Research Master
-	 * @see #OPTIONS
+	 * Instantiates the dialog to create the User Defined License. 
+	 * User Defined License is limited to 4000 characters.
+	 * 
 	 * @param parent	the parent window
 	 * @param title		title of the dialog
-	 * @param model		Reference to the model
 	 */
-	public SearchPartyDialog(JFrame parent, String title, AndsPublishModel model) {
+	public UDLicenseDialog(JFrame parent, String title) {
 		super(parent, title, "", null);
-		this.model = model;
 	}
 	
 	/**
@@ -116,45 +111,22 @@ public class SearchPartyDialog extends MonashDialog {
 		int index = Integer.parseInt(e.getActionCommand());
 		switch (index) {
 		case BACK:
+			license = null;
 			close();
 			break;
-		case SEARCH:
-			searchParty();
+		case SAVE:
+			saveLicense();
 			break;
 		}
 	}
 
-	private void searchParty() {
-		setMessage("");
-		String party = searchField.getText();
-		System.out.println("Search for party: " + party + "."); // cnOrEmail
-		if (null == party || Constants.SPACE.equals(party)) {
+	private void saveLicense() {
+		String udl = licenseArea.getText();
+		if (null == udl || Constants.SPACE.equals(udl)) {
 			setMessage(Constants.ERROR_NULL_FIELD);
 		} else {
-			String cookie = model.getCookie();
-			System.out.println("cookie: " + cookie);
-
-			String partyWS = PublishAgent.getPartyToken();
-			System.out.println("partyWS: " + partyWS);
-			MonashServices mSvc = ServiceFactory.getMonashServices(partyWS, -1);
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("party", party);
-			MonashSvcReply reply = null;
-			try {
-				reply = mSvc.searchRM(cookie, params);
-				String errMsg = reply.getErrMsg();
-				if (errMsg != null) {
-					setMessage(errMsg);
-				} else {
-					String result = reply.getSuccessMsg();
-					partyBean  = Unmarshaller.getPartyBean(result);
-					// TODO Show message dialog with the search result to confirm
-					if (null != partyBean ) System.out.println("partyBean: " + partyBean.toString());
-					close();
-				}
-			} catch (TransportException e) {
-				showErrDialog(this, Constants.ERROR_PARTY_NF, e);
-			}
+			license = udl;
+			close();
 		}
 	}
 	
@@ -174,7 +146,7 @@ public class SearchPartyDialog extends MonashDialog {
 		box.add(label, c);
 
 		c.gridy++;
-		box.add(searchField, c);
+		box.add(scrollPane, c);
 
 		c.gridy++;
 		c.weighty = 1.0;
@@ -196,7 +168,7 @@ public class SearchPartyDialog extends MonashDialog {
 		bar.setLayout(new BoxLayout(bar, BoxLayout.X_AXIS));
 		bar.add(backButton);
 		bar.add(Box.createHorizontalStrut(5));
-		bar.add(searchButton);
+		bar.add(saveButton);
 		bar.add(Box.createHorizontalStrut(10));
 		return bar;
 	}
@@ -207,36 +179,33 @@ public class SearchPartyDialog extends MonashDialog {
 	 */
 	protected void initComponents() {
 
-		partyBean = null;
+		license = null;
 		
-		searchField = new JTextField(30);
-		searchField.setBackground(UIUtilities.BACKGROUND_COLOR);
-		searchField.setEnabled(true);
-		searchField.setEditable(true);
-
-		//Ensure the text field always gets the first focus.
-		/*addComponentListener(new ComponentAdapter() {
-            public void componentShown(ComponentEvent ce) {
-            	searchField.requestFocusInWindow();
-            }
-        });*/
+		licenseArea = new JTextArea(15, 50);
+		licenseArea.setWrapStyleWord(true);
+		licenseArea.setLineWrap(true);
+		licenseArea.setDocument(new DocumentCharacterLimit(UDL_CHARAC_LIMIT));
+		scrollPane  = new JScrollPane(licenseArea);
 
 		backButton = new JButton("Back");
 		formatButton(backButton, 'B', BACK_TOOLTIP, BACK, this);
 
-		searchButton = new JButton("Next");
-		formatButton(searchButton, 'S', SEARCH_TOOLTIP, SEARCH, this);
-
+		saveButton = new JButton("Next");
+		formatButton(saveButton, 'S', SAVE_TOOLTIP, SAVE, this);
 	}
 
 	/**
-	 * Return the <code>PartyBean</code> if search was successful. 
+	 * Return the user defined license 
 	 * Null if user cancels the action, closes the dialog
-	 * or no party information found in <code>Research Master</code>.
 	 * 
-	 * @return the partyBean
+	 * @return see above
 	 */
-	public PartyBean getPartyBean() {
-		return partyBean;
+	public String getLicense() {
+		return license;
+	}
+	
+	public static void main(String[] args) {
+		UDLicenseDialog ld = new UDLicenseDialog(null, "Define Your Own License");
+		UIUtilities.centerAndShow(ld);
 	}
 }

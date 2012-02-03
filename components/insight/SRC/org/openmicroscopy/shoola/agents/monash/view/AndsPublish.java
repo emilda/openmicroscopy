@@ -146,5 +146,14 @@ public interface AndsPublish extends ObservableComponent {
 	 */
 	public void setDataLoaded(Collection result);
 
+	/**
+	 * Sets the cookie in model, {@link AndsPublishModel AndsPublishModel} 
+	 * @param monashAuth	the cookie from Monash DS
+	 */
 	public void setCookie(String monashAuth);
+
+	/**
+	 * Shows the license main screen
+	 */
+	public void showLicenseMain();
 }

@@ -27,6 +27,10 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view.dialog;
 
+import ij.gui.MultiLineLabel;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
@@ -38,12 +42,13 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import org.openmicroscopy.shoola.util.ui.UIUtilities;
+
 /** 
- * Dialog showing the options for adding a Party - Searching or Creating manually.
+ * Dialog showing the options for license associated with the data collection.
  * @see #OPTIONS
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
@@ -51,7 +56,7 @@ import javax.swing.JRadioButton;
  * @version 1.0
  * @since OME3.3
  */
-public class PartyDialog extends MonashDialog {
+public class LicenseDialog extends MonashDialog {
 
 	private static Hashtable<String, String> OPTIONS;
 
@@ -61,7 +66,7 @@ public class PartyDialog extends MonashDialog {
 	/** Button to go to next screen. */
 	private JButton				nextButton;
 	
-	/** List of choices of party creation. */
+	/** List of choices of license creation. */
 	private JRadioButton[] 		radioButtons;
 	
 	/** To group {@link #radioButtons}. */
@@ -71,7 +76,9 @@ public class PartyDialog extends MonashDialog {
 	private String 				selectedOption;
     
     /** Description of the panel. */
-    private static final String DESCRIPTION = "Select one of the following adding researcher options:";
+    private static final String DESCRIPTION = "Select the license you " +
+    		"want to apply to this experiment so that interested people\n" + 
+    		"understand what they are entitled to do with your published data";
 	
     /** The tooltip of the {@link #cancelButton}. */
 	private static final String		CANCEL_TOOLTIP = "Cancel this action";
@@ -86,19 +93,18 @@ public class PartyDialog extends MonashDialog {
 	private static final int		NEXT = 1;
 
 	/** Action names and description of choices of party creation. */
-	public static final String PARTY_OPTION_SEARCH = "SEARCH";
-	public static final String PARTY_OPTION_MANUAL = "MANUAL";
-	private static final String SEARCH = "Search a researcher from the Research Master Web Service";
-	private static final String MANUAL = "Manually input a researcher information";
+	public static final String LICENSE_OPTION_CCL = "CCL";
+	public static final String LICENSE_OPTION_UDL = "UDL";
+	private static final String CCL = "Creative Commons Copyrigt License (Recommended)";
+	private static final String UDL = "Define Your Own License";
 	
 	/**
-	 * Instantiates the dialog showing the options for adding a Party
-	 * @see #OPTIONS
+	 * Instantiates the dialog showing the license options
+	 * 
 	 * @param parent	the parent window
 	 * @param title		title of the dialog
-	 * @param model		Reference to the model
 	 */
-	public PartyDialog(JFrame parent, String title) {
+	public LicenseDialog(JFrame parent, String title) {
 		super(parent, title, "", null);
 	}
 
@@ -127,17 +133,25 @@ public class PartyDialog extends MonashDialog {
 	 * @see MonashDialog#buildContentPane()
 	 */
 	protected JComponent buildContentPane() {
-        JPanel box = new JPanel();
-        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
-        
-        JLabel label = new JLabel(DESCRIPTION);
-        box.add(Box.createVerticalStrut(15));
-        box.add(label);
-        box.add(Box.createVerticalStrut(5));
+		JPanel box = new JPanel(new GridBagLayout());
 
-        for (int i = 0; i < radioButtons.length; i++) {
-            box.add(radioButtons[i]);
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.FIRST_LINE_START;
+		c.weightx = 0.1;
+		c.gridy = 0;
+
+		MultiLineLabel label = new MultiLineLabel(DESCRIPTION);
+		box.add(label, c);
+
+		for (int i = 0; i < radioButtons.length; i++) {
+			c.gridy++;
+            box.add(radioButtons[i], c);
         }
+
+		c.gridy++;
+		c.weighty = 1.0;
+		c.anchor = GridBagConstraints.PAGE_END; //bottom of pane
+		box.add(Box.createVerticalStrut(5), c);
 
         return box;
 	}
@@ -171,8 +185,8 @@ public class PartyDialog extends MonashDialog {
 		formatButton(nextButton, 'N', NEXT_TOOLTIP, NEXT, this);
 		
 		OPTIONS = new Hashtable<String, String>();
-		OPTIONS.put(PARTY_OPTION_MANUAL, MANUAL);
-		OPTIONS.put(PARTY_OPTION_SEARCH, SEARCH);
+		OPTIONS.put(LICENSE_OPTION_UDL, UDL);
+		OPTIONS.put(LICENSE_OPTION_CCL, CCL);
 		
         radioButtons = new JRadioButton[OPTIONS.size()];
         group = new ButtonGroup();
@@ -191,7 +205,7 @@ public class PartyDialog extends MonashDialog {
 	}
 
 	/**
-	 * Return the selected party option. 
+	 * Return the selected licenses option. 
 	 * Null if user cancels the action or closes the dialog.
 	 * @see #OPTIONS
 	 * @return selected option

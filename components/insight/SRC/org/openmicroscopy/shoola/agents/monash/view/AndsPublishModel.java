@@ -27,11 +27,11 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Hashtable;
 
 import org.openmicroscopy.shoola.agents.monash.DataCollectionLoader;
+import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.openmicroscopy.shoola.agents.treeviewer.view.TreeViewer;
 
@@ -64,13 +64,16 @@ public class AndsPublishModel {
 	private DataCollectionLoader dataLoader;
 
 	/** Collection of Project/ Dataset tagged as <i>Register with RDA</i> */
-	private Collection dataCollection;
+	private Collection 			dataCollection = null;
 
 	/** Cookie to connect to Monash DS */
 	private String 				cookie;
 	
-	/** List containing party information */
-	private List<PartyBean> 	partyList;
+	/** Hashtable containing party information */
+	private Hashtable<String, PartyBean>	partyHtable;
+
+	/** The license associated with the data collection. */
+	private String 				license;
 
 	/**
 	 * Creates a new instance and sets the state to {@link AndsPublish#NEW}.
@@ -97,7 +100,7 @@ public class AndsPublishModel {
 	private void initialize()
 	{
 		state = AndsPublish.NEW;
-		partyList = new ArrayList<PartyBean>();
+		partyHtable = new Hashtable<String, PartyBean>();
 		recycled = false;
 	}
 
@@ -256,10 +259,30 @@ public class AndsPublishModel {
 	}
 
 	/**
-	 * Adds the given pb to the list {@link #partyList}.
+	 * Adds the given <code>PartyBean</code> to the {@link #partyHtable}.
+	 * 
+	 * @param key   the party key
 	 * @param pb	the PartyBean to add
 	 */
-	public void addParty(PartyBean pb) {
-		partyList.add(pb);
+	public void addParty(String key, PartyBean pb) {
+		partyHtable.put(key, pb);
+	}
+
+	/**
+	 * Removes the <code>PartyBean</code> for the given key from 
+	 * the {@link #partyHtable}.
+	 * 
+	 * @param key   the party key
+	 */
+	public void removeParty(String key) {
+		partyHtable.remove(key);
+	}
+
+	/**
+	 * Sets the license associated with the data collection.
+	 * @param license
+	 */
+	public void setLicense(String license) {
+		this.license = license;
 	}
 }

@@ -25,46 +25,50 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.action;
+package org.openmicroscopy.shoola.agents.monash.util;
 
-import java.awt.event.ActionEvent;
+import java.awt.Toolkit;
 
-import javax.swing.Action;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
-import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
-import org.openmicroscopy.shoola.util.ui.UIUtilities;
-
-public class PublishAction  extends MonashAction {
+import org.openmicroscopy.shoola.agents.monash.view.dialog.UDLicenseDialog;
+/** 
+ * This document is linked to the {@link UDLicenseDialog#licenseArea}.
+ * to limit the characters entered to 4000.
+ *
+ * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
+ * @version 1.0
+ * @since Beta4.4
+ */
+public class DocumentCharacterLimit extends PlainDocument {
 	
-	/** The name of the action. */
-    public static final String NAME = "I Accept";
-    
-    /** The description of the action. */
-    public static final String DESCRIPTION = "Register with RDA";
-    
-    /**
-     * Creates a new instance.
-     * 
-     * @param model Reference to the Model. Mustn't be <code>null</code>.
-     */
-    public PublishAction(AndsPublish model)
-    {
-        super(model);
-        setEnabled(true);
-        putValue(Action.NAME, NAME);
-        putValue(Action.SHORT_DESCRIPTION, 
-                UIUtilities.formatToolTipText(DESCRIPTION));
-        //IconManager im = IconManager.getInstance();
-        //putValue(Action.SMALL_ICON, im.getIcon(IconManager.EXIT_APPLICATION));
-    }
-    
-    /**
-     * Exits the application.
-     * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
-     */
-    public void actionPerformed(ActionEvent e) { 
-    	System.out.println("Action recieved by PublishAction");
-    	model.publishData(null);
-    }
+	/** The character limit */
+	private int 	limit;
 
+	/**
+	 * Creates a new instance. Beeps sound when the character
+	 * limit is reached.
+	 * @param limit	the character limit
+	 */
+	public DocumentCharacterLimit(int limit) {
+		super();
+		this.limit = limit;
+	}
+
+	/**
+	 * @see PlainDocument#insertString
+	 */
+	public void insertString(int offset, String  str, AttributeSet attr)
+			throws BadLocationException {
+		if (str == null) return;
+
+		if ((getLength() + str.length()) <= limit) {
+			super.insertString(offset, str, attr);
+		} else {
+	        Toolkit.getDefaultToolkit().beep();
+	    }
+	}
 }

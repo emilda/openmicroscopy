@@ -40,7 +40,7 @@ public class LicenseAction  extends MonashAction {
 	public static final String NAME = "Select License";
 
 	/** The description of the action. */
-	public static final String DESCRIPTION = "Add a License";
+	public static final String DESCRIPTION = "Add the license associated with the collection";
 
 	/**
 	 * Creates a new instance.
@@ -64,7 +64,7 @@ public class LicenseAction  extends MonashAction {
 	 */
 	public void actionPerformed(ActionEvent e) { 
 		System.out.println("Action recieved by LicenseAction");
-		//model.close(); 
+		model.showLicenseMain(); 
 	}
 }
 

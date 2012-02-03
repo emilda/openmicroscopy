@@ -28,6 +28,7 @@
 package org.openmicroscopy.shoola.agents.monash.view.dialog;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Container;
@@ -75,7 +76,7 @@ public abstract class MonashDialog extends JDialog
 	private TitlePanel tp;
 	
 	/**
-	 * 
+	 * Creates a new instance.
 	 * @param parent	the component
 	 * @param title	the title to display on the dialog
 	 * @param message	the error message to display
@@ -179,8 +180,7 @@ public abstract class MonashDialog extends JDialog
         IconManager icons = IconManager.getInstance();
         JOptionPane.showMessageDialog(parent, msg.toString(), 
         		Constants.BACKEND_ERROR, 	//	the title string for the dialog
-        		JOptionPane.ERROR_MESSAGE, 
-        		icons.getIcon(ERROR));		// an icon to display in the dialog
+        		JOptionPane.ERROR_MESSAGE);	// WARNING_MESSAGE, PLAIN_MESSAGE
 	}
 	
 	public Icon getIcon() {

@@ -36,9 +36,11 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -52,8 +54,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -62,13 +64,16 @@ import javax.swing.text.Document;
 
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
+import org.openmicroscopy.shoola.agents.editor.uiComponents.CustomFont;
 import org.openmicroscopy.shoola.agents.monash.IconManager;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
+import org.openmicroscopy.shoola.agents.monash.view.dialog.LicenseDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.SearchPartyDialog;
+import org.openmicroscopy.shoola.agents.monash.view.dialog.UDLicenseDialog;
 import org.openmicroscopy.shoola.agents.util.EditorUtil;
 import org.openmicroscopy.shoola.env.data.DSAccessException;
 import org.openmicroscopy.shoola.env.data.DSOutOfServiceException;
@@ -83,16 +88,34 @@ import pojos.ExperimenterData;
 import pojos.TagAnnotationData;
 
 public class AndsPublishUI extends TopWindow 
-	implements ListSelectionListener, DocumentListener {
+implements ListSelectionListener, DocumentListener, ItemListener {
 
 	/** The default title of the window. */
 	private static final String TITLE = "Register with RDA";
+	
+	/** Default height of the window */
+	private static final int HEIGHT = 700;
 
 	/** Message to display when there is no data collections available to register with RDA */
 	private static final String NO_DATA = "No data collections available to register with RDA";
 
 	/** Tag value identifying the collection to register with RDA */
 	private static final String RDA_TAG = "Register with RDA";
+	
+	/** Terms and Conditions */
+	private static final String TANDC = "Terms and Conditions:";
+
+	/** Message to display when there is no license selected */
+	private static final String NO_LICENSE = "A License has not been selected.";
+
+	/** Terms and Conditions detailed text */
+	private static final String TC_TEXT = "You are about to publish or register the above research work outside " + 
+			"Monash University to be available to the general public\nvia Internet sites that can harvest this " + 
+			"information. Sites include but are not limited to: Research Data Australia and search engines.\n\n" +
+			"Before you proceed, please ensure you have selected a licence to associate with your research data and work.\n\n" +
+			"By using this system to publish or register your research work you are continuing to agree to adhere to the " +
+			"Terms and Conditions\nof use detailed at http://www.monash.edu/eresearch/about/ands-merc.html. Please read " +
+			"these Terms and Conditions\ncarefully before registering.";
 
 	/** Reference to the model. */
 	private AndsPublishModel	model;
@@ -108,9 +131,12 @@ public class AndsPublishUI extends TopWindow
 
 	/** The component indicating to refresh the containers view.*/
 	private JXLabel 			messageLabel;
+	
+	/** Label displaying license not selected.*/
+	private JXLabel 			noLicense;
 
 	/** The field hosting the collection title name. */
-	private JTextField			titleArea;
+	private JXLabel				titleLabel;
 
 	/** The field hosting the login name. */
 	private JTextArea			descriptionTxt;	// JTextField
@@ -124,9 +150,6 @@ public class AndsPublishUI extends TopWindow
 	/** Add Researcher. */
 	private JButton				researcherButton;
 
-	/** researcher associated with the collection. */
-	private JCheckBox			ownerBox;
-
 	/**
 	 * Main panel, with list of collections to register with RDA
 	 * on the left and selected collection details on the right 
@@ -136,15 +159,18 @@ public class AndsPublishUI extends TopWindow
 	/** contains details about collection to register with ANDS  */
 	private JPanel 				projectPanel;
 
-	/** contains the party information */
-	private String 				party;	
+	/** Placed within {@link #projectPanel} and contains details about party */
+	private JPanel 				researcherPanel;
 
 	/** The model for the JList {@link #projectList}. */
 	private DefaultListModel 	listmodel;
 
 	/** list containing the items to be published */
 	private JList 				projectList;
-	
+
+	/** Hashtable containing party information */
+	private Hashtable<String, PartyBean>	partyHtable;
+
 	protected AndsPublishUI(String title) {
 		super(title);
 	}
@@ -171,6 +197,7 @@ public class AndsPublishUI extends TopWindow
 		System.out.println("initializing AndsPublish UI");
 		this.model = model;
 		this.controller = controller;
+		partyHtable = new Hashtable<String, PartyBean>();
 		total = 1;
 		initComponents();
 		//setJMenuBar(createMenuBar());
@@ -182,19 +209,19 @@ public class AndsPublishUI extends TopWindow
 	{
 		messageLabel = new JXLabel();
 		messageLabel.setText(NO_DATA);
-		messageLabel.setVisible(true);
 		messageLabel.setFont(messageLabel.getFont().deriveFont(Font.BOLD));
 
-		controlsBar = buildControls();
-		controlsBar.setVisible(true);
+		noLicense = new JXLabel();
+		noLicense.setText(NO_LICENSE);
+		noLicense.setFont(new Font("Serif", Font.PLAIN, 12));
 
-		titleArea = new JTextField();
-		titleArea.setEnabled(false);
-		titleArea.setEditable(false);
+		controlsBar = buildControls();
+
+		titleLabel = new JXLabel();
 
 		descriptionTxt = new JTextArea(5, 20);
 		descriptionTxt.setEnabled(true);
-		descriptionTxt.setEditable(true);
+		descriptionTxt.setBorder(new LineBorder(Color.LIGHT_GRAY, 1));
 		descriptionTxt.setWrapStyleWord(true);
 		descriptionTxt.setBackground(UIUtilities.BACKGROUND_COLOR);
 
@@ -204,9 +231,9 @@ public class AndsPublishUI extends TopWindow
 		licenseButton = new JButton(controller.getAction(AndsPublishControl.LICENSE));
 		licenseButton.setBackground(UIUtilities.BACKGROUND_COLOR);
 
-		ownerBox = new JCheckBox();
-		ownerBox.setBackground(UIUtilities.BACKGROUND_COLOR);
-		ownerBox.setEnabled(false);
+		researcherPanel = new JPanel();
+		researcherPanel.setLayout(new BoxLayout(researcherPanel, BoxLayout.Y_AXIS));
+		researcherPanel.setBackground(UIUtilities.BACKGROUND_COLOR);
 
 		setupSplitPane();
 	}
@@ -215,7 +242,6 @@ public class AndsPublishUI extends TopWindow
 		projectList = new JList();
 		projectList.addListSelectionListener(this);
 		projectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		//setListData();	// TODO set data when data loader returns the result
 
 		JScrollPane projListScrollPane = new JScrollPane(projectList);
 
@@ -227,13 +253,11 @@ public class AndsPublishUI extends TopWindow
 				projListScrollPane, projectPanel);
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setDividerLocation(150);
-
+		
 		//Provide minimum sizes for the two components in the split pane.
-		projListScrollPane.setMinimumSize(new Dimension(200, 200));
-		andsScrollPane.setMinimumSize(new Dimension(400, 200));
-
-		//Provide a preferred size for the split pane.
-		splitPane.setPreferredSize(new Dimension(800, 400));
+		projListScrollPane.setMinimumSize(new Dimension(150, HEIGHT));
+		andsScrollPane.setMinimumSize(new Dimension(750, HEIGHT));
+		splitPane.setPreferredSize(new Dimension(900, HEIGHT));
 	}
 
 	/**
@@ -292,7 +316,7 @@ public class AndsPublishUI extends TopWindow
 	private void updateLabel(MonashData object) {
 		if (null != object) {
 			messageLabel.setText(object.getTitle());
-			titleArea.setText(object.getTitle());
+			titleLabel.setText(object.getTitle());
 			descriptionTxt.setText(object.getDescription());
 		}
 	}
@@ -322,39 +346,29 @@ public class AndsPublishUI extends TopWindow
 		content.setBackground(UIUtilities.BACKGROUND_COLOR);
 
 		GridBagConstraints c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.NORTHWEST;
-		c.insets = new Insets(10, 10, 5, 0);
+		c.anchor = GridBagConstraints.FIRST_LINE_START;
+		c.insets = new Insets(15, 5, 0, 5);
 		c.gridx = 0;
 		c.gridy = 0;
 
 		// Add Collection name but cannot edit.
 		JComponent label = EditorUtil.getLabel(Constants.COLLECTION_NAME, false);
-		label.setBackground(UIUtilities.BACKGROUND_COLOR);
-		c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
 		c.weightx = 0.0;  
 		content.add(label, c);
-
 		c.gridx++;
 		content.add(Box.createHorizontalStrut(5), c); 
 		c.gridx++;
-		c.gridwidth = GridBagConstraints.REMAINDER;     //end row
-		c.weightx = 1.0;
-		titleArea.setText("");
-		content.add(titleArea, c);  
+		titleLabel.setText("");
+		content.add(titleLabel, c);  
 
 		// Add Collection description.
 		c.gridx = 0;
 		c.gridy++;
 		label = EditorUtil.getLabel(Constants.COLLECTION_DESCRIPTION, false);
-		label.setBackground(UIUtilities.BACKGROUND_COLOR);
-		c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
-		c.weightx = 0.0;  
 		content.add(label, c);
 		c.gridx++;
 		content.add(Box.createHorizontalStrut(5), c); 
 		c.gridx++;
-		c.gridwidth = GridBagConstraints.REMAINDER;     //end row
-		c.weightx = 1.0;
 		descriptionTxt.setText("");
 		descriptionTxt.getDocument().addDocumentListener(this);
 		descriptionTxt.getDocument().putProperty("name", "description");
@@ -364,33 +378,63 @@ public class AndsPublishUI extends TopWindow
 		LogMessage msg = new LogMessage();
 		msg.println("Created Collection description field");
 
-		// Add License.
+		// Add researcher.
 		c.gridx = 0;
 		c.gridy++;
 		label = EditorUtil.getLabel(Constants.RESEARCHER, false);
-		label.setBackground(UIUtilities.BACKGROUND_COLOR);
-		c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
-		c.weightx = 0.0;  
 		content.add(label, c);
 		c.gridx++;
 		content.add(Box.createHorizontalStrut(5), c); 
 		c.gridx++;
-		c.gridwidth = GridBagConstraints.REMAINDER;     //end row
-		c.weightx = 1.0;
 		content.add(researcherButton, c);  
 
+		// add panel containing party added
 		c.gridx = 0;
 		c.gridy++;
-		label = EditorUtil.getLabel(Constants.LICENSE, false);  
-		c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
+		c.gridwidth = 3;
 		c.weightx = 0.0;  
+		content.add(researcherPanel, c);
+
+		// Add License.
+		c.gridx = 0;
+		c.gridy++;
+		c.gridwidth = 1;
+		label = EditorUtil.getLabel(Constants.LICENSE, false);  
 		content.add(label, c);
 		c.gridx++;
 		content.add(Box.createHorizontalStrut(5), c); 
 		c.gridx++;
-		c.gridwidth = GridBagConstraints.REMAINDER;     //end row
-		c.weightx = 1.0;
 		content.add(licenseButton, c);
+
+		// Add no license label
+		c.gridx = 0;
+		c.gridy++;
+		c.gridwidth = 3;
+		c.insets = new Insets(0, 5, 15, 5);
+		content.add(noLicense, c);
+
+		// Add t and c
+		c.gridx = 0;
+		c.gridy++;
+		label = EditorUtil.getLabel(TANDC, false);
+		label.setFont(new Font("Serif", Font.BOLD, 16));
+		content.add(label, c);
+
+		JTextArea tc = new JTextArea(TC_TEXT);
+		tc.setRows(10);
+		tc.setFont(new CustomFont());
+		
+		c.insets = new Insets(0, 20, 15, 5);
+		c.gridx = 0;
+		c.gridy++;
+		content.add(tc, c);
+		
+		c.gridx = 0;
+		c.gridy++;
+		c.weighty = 1.0;
+		c.anchor = GridBagConstraints.PAGE_END; //bottom of pane
+		content.add(Box.createVerticalStrut(5));
+
 		return content;
 	}
 
@@ -492,7 +536,7 @@ public class AndsPublishUI extends TopWindow
 	}
 
 	/**
-	 * Show the Add Researcher Dialog
+	 * Shows the Add Researcher Dialog
 	 * @return Selected choice of how to add Party @see PartyDialog#OPTIONS
 	 */
 	public String showResearcher() {
@@ -515,10 +559,58 @@ public class AndsPublishUI extends TopWindow
 		SearchPartyDialog spd = new SearchPartyDialog(this, "Adding Researcher Options", model);
 		UIUtilities.centerAndShow(spd);
 		PartyBean pb = spd.getPartyBean();
-		if (null != pb)
-			model.addParty(pb);
-		
-		// TODO add party info to view and check it
+		if (null != pb) {
+			String key = pb.getPartyKey();
+			model.addParty(key, pb);
+			addPartyCheckBox(key, pb);
+		}
+
+		// TODO add party info dialog to view and check it
+	}
+
+	/**
+	 * Adds the checkbox and place the name of researcher 
+	 * associated with the collection next to it 
+	 * @param key	the party key
+	 * @param pb	the <code>PartyBean</code> object
+	 */
+	private void addPartyCheckBox(String key, PartyBean pb) {
+		System.out.println("add party CheckBox for " + pb.toString());
+
+		JCheckBox rcb = new JCheckBox(pb.toString(), true);
+		rcb.setBackground(UIUtilities.BACKGROUND_COLOR);
+		rcb.setEnabled(true);
+		rcb.setName(key);
+		rcb.addItemListener(this);
+
+		partyHtable.put(rcb.getName(), pb);	// get PartyBean
+
+		researcherPanel.add(rcb);
+		researcherPanel.add(Box.createVerticalStrut(5));
+		//researcherPanel.revalidate();
+		int ht = this.getHeight() + 20;
+		this.setSize(new Dimension(this.getWidth(), ht));
+	}
+
+	/**
+	 * @see  ItemListener.itemStateChanged()
+	 */
+	public void itemStateChanged(ItemEvent ie) {
+		JCheckBox cb = (JCheckBox) ie.getItem();
+		int state = ie.getStateChange();
+
+		if (state == ItemEvent.SELECTED) {
+			String key = cb.getName();
+			System.out.println(cb.getText() + " selected");
+			PartyBean pb = (PartyBean)partyHtable.get(cb.getName());
+			pb.setSelected(true);
+			model.addParty(cb.getName(), pb);
+		} else {
+			System.out.println(cb.getText() + " cleared");
+			model.removeParty(cb.getName());
+			PartyBean pb = (PartyBean)partyHtable.get(cb.getName());
+			pb.setSelected(false);
+		}
 	}
 
 	/** Refreshes the view */
@@ -530,8 +622,36 @@ public class AndsPublishUI extends TopWindow
 
 	private void clearFields() {
 		messageLabel.setText(NO_DATA);
-		titleArea.setText("");
+		titleLabel.setText("");
 		descriptionTxt.setText("");
 		publishButton.setEnabled(false);
+	}
+
+	/**
+	 * Shows the license main screen
+	 * @return Selected license choice @see LicenseDialog#OPTIONS
+	 */
+	public String showLicenseMain() {
+		System.out.println("Show License Main screen");
+
+		LicenseDialog ld = new LicenseDialog(this, "Select License");
+		UIUtilities.centerAndShow(ld);
+		String option = ld.getSelectedOption();
+		System.out.println("Show next screen based on option, " + option);
+		return option;
+	}
+
+	/**
+	 * Shows the user defined license screen. Upon
+	 * successful return set the license in model.
+	 */
+	public void showUDL() {
+		System.out.println("Show user defined license screen");
+
+		UDLicenseDialog ld = new UDLicenseDialog(this, "Define Your Own License");
+		UIUtilities.centerAndShow(ld);
+		String udl = ld.getLicense();
+		System.out.println("User DL: " + udl);
+		if (udl != null) model.setLicense(udl);
 	}
 }

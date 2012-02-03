@@ -32,6 +32,7 @@ import java.util.Collection;
 import javax.swing.JFrame;
 
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.view.dialog.LicenseDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.env.data.model.ImportableObject;
 import org.openmicroscopy.shoola.util.ui.component.AbstractComponent;
@@ -229,9 +230,8 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		String option = view.showResearcher();
 		//firePropertyChange(FINDER_VISIBLE_PROPERTY, oldValue, newValue);
 		if (null != option) {
-			/**
-			 * Shows the Search/ Manual add researcher screen based on the user choice.
-			 */
+			/** Shows the Search/ Manual add researcher screen 
+			 * based on the user choice. */
 			if (PartyDialog.PARTY_OPTION_SEARCH.equals(option)) {
 				view.searchResearcher();
 			} else if (PartyDialog.PARTY_OPTION_MANUAL.equals(option)) {
@@ -285,6 +285,23 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	public void setCookie(String cookie) {
 		System.out.println("setCookie...");
 		model.setCookie(cookie);
+	}
+
+	/** 
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#showLicenseMain()
+	 */
+	public void showLicenseMain() {
+		String option = view.showLicenseMain();
+		if (null != option) {
+			if (LicenseDialog.LICENSE_OPTION_CCL.equals(option)) {
+				System.out.println("CCL...");
+				//view.showCCL();
+			} else if (LicenseDialog.LICENSE_OPTION_UDL.equals(option)) {
+				System.out.println("UDL...");
+				view.showUDL();
+			}
+		}
 	}
 
 }
