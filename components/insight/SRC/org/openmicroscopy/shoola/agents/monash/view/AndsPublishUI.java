@@ -68,8 +68,10 @@ import org.openmicroscopy.shoola.agents.editor.uiComponents.CustomFont;
 import org.openmicroscopy.shoola.agents.monash.IconManager;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
+import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
+import org.openmicroscopy.shoola.agents.monash.view.dialog.CCLicenseDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.LicenseDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.SearchPartyDialog;
@@ -554,8 +556,10 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 	 * Show the search researcher dialog. On successful search
 	 * the <code>PartyBean</code> is added into the
 	 * {@link AndsPublishModel#partyList}.
+	 * @return 	<code>false</code> goes back to add researcher options page<br>
+	 * 			<code>true</code> goes back to RDA main screen
 	 */
-	public void searchResearcher() {
+	public boolean searchResearcher() {
 		SearchPartyDialog spd = new SearchPartyDialog(this, "Adding Researcher Options", model);
 		UIUtilities.centerAndShow(spd);
 		PartyBean pb = spd.getPartyBean();
@@ -563,6 +567,9 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 			String key = pb.getPartyKey();
 			model.addParty(key, pb);
 			addPartyCheckBox(key, pb);
+			return true;
+		} else {
+			return false;
 		}
 
 		// TODO add party info dialog to view and check it
@@ -644,14 +651,46 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 	/**
 	 * Shows the user defined license screen. Upon
 	 * successful return set the license in model.
+	 * 
+	 * @return 	<code>false</code> goes back to add researcher options page<br>
+	 * 			<code>true</code> goes back to RDA main screen
 	 */
-	public void showUDL() {
+	public boolean showUDL() {
 		System.out.println("Show user defined license screen");
 
 		UDLicenseDialog ld = new UDLicenseDialog(this, "Define Your Own License");
 		UIUtilities.centerAndShow(ld);
-		String udl = ld.getLicense();
-		System.out.println("User DL: " + udl);
-		if (udl != null) model.setLicense(udl);
+		LicenceBean udl = ld.getLicense();
+		if (udl != null) {
+			System.out.println("User DL: " + udl);
+			model.setLicense(udl);
+			noLicense.setText("");
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Shows the creative commons license screen. Upon
+	 * successful return set the license in model.
+	 * 
+	 * @return 	<code>false</code> goes back to add researcher options page<br>
+	 * 			<code>true</code> goes back to RDA main screen
+	 */
+	public boolean showCCL() {
+		System.out.println("Show creative commons license screen");
+
+		CCLicenseDialog ld = new CCLicenseDialog(this, "Creative Commons License");
+		UIUtilities.centerAndShow(ld);
+		LicenceBean ccl = ld.getLicense();
+		if (ccl != null) {
+			System.out.println("CCL: " + ccl);
+			model.setLicense(ccl);
+			noLicense.setText("");
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

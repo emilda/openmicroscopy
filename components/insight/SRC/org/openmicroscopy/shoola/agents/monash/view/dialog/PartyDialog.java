@@ -106,7 +106,6 @@ public class PartyDialog extends MonashDialog {
 	 * Reacts to click on buttons.
 	 * @see ActionListener#actionPerformed(ActionEvent)
 	 */
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		selectedOption = group.getSelection().getActionCommand();
 		

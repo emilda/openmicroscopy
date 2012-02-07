@@ -1,3 +1,4 @@
+package org.openmicroscopy.shoola.agents.monash.view.data;
 /*
  * Copyright (c) 2010-2011, Monash e-Research Centre
  * (Monash University, Australia)
@@ -25,53 +26,80 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.action;
 
-import java.awt.event.ActionEvent;
+import java.io.Serializable;
 
-import javax.swing.Action;
-
-import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
-import org.openmicroscopy.shoola.util.ui.UIUtilities;
-/** 
- * Action class to add Party information.
+/**
+ * @author: Simon Yu
+ * @email: Xiaoming.Yu@monash.edu
  *
- * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
- * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
- * @version 1.0
- * @since OME3.3
+ * Date: 30/01/12
+ * Time: 12:05 PM
+ * @version: 1.0
  */
-public class PartyAction  extends MonashAction {
+public class LicenceBean implements Serializable {
 
-	/** The name of the action. */
-	public static final String NAME = "Add Researcher";
+    private long id;
 
-	/** The description of the action. */
-	public static final String DESCRIPTION = "Add Party Information";
+    private String licenceType;
 
-	/**
-	 * Creates a new instance.
-	 * 
-	 * @param model Reference to the Model. Mustn't be <code>null</code>.
-	 */
-	public PartyAction(AndsPublish model)
-	{
-		super(model);
-		setEnabled(true);
-		putValue(Action.NAME, NAME);
-		putValue(Action.SHORT_DESCRIPTION, 
-				UIUtilities.formatToolTipText(DESCRIPTION));
-		//IconManager im = IconManager.getInstance();
-		//putValue(Action.SMALL_ICON, im.getIcon(IconManager.EXIT_APPLICATION));
-	}
+    private String commercial;
 
-	/**
-	 * Shows the researcher component.
-	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent e) { 
-		System.out.println("Action recieved by PartyAction, " + e.getActionCommand());
-		model.showAddResearcher(); 
+    private String derivatives;
+
+    private String jurisdiction;
+
+    private String licenceContents;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getLicenceType() {
+        return licenceType;
+    }
+
+    public void setLicenceType(String licenceType) {
+        this.licenceType = licenceType;
+    }
+
+    public String getCommercial() {
+        return commercial;
+    }
+
+    public void setCommercial(String commercial) {
+        this.commercial = commercial;
+    }
+
+    public String getDerivatives() {
+        return derivatives;
+    }
+
+    public void setDerivatives(String derivatives) {
+        this.derivatives = derivatives;
+    }
+
+    public String getJurisdiction() {
+        return jurisdiction;
+    }
+
+    public void setJurisdiction(String jurisdiction) {
+        this.jurisdiction = jurisdiction;
+    }
+
+    public String getLicenceContents() {
+        return licenceContents;
+    }
+
+    public void setLicenceContents(String licenceContents) {
+        this.licenceContents = licenceContents;
+    }
+    
+    public String toString() {
+    	return licenceContents;
 	}
 }
-

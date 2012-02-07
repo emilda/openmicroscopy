@@ -50,9 +50,13 @@ import org.xml.sax.SAXException;
  */
 public class XMLReader {
 
-	/** Stream contining the XML document to parse */
+	/** Stream containing the XML document to parse */
 	private InputStream xmlStream;
 
+	/** URL containing the XML document to parse */
+	private String		xmlUrlStr;
+	
+	/** the XML document */
 	private Document 	xmlDocument;
 
 	/** to navigate in XML documents */
@@ -74,14 +78,34 @@ public class XMLReader {
 	}
 
 	/**
+	 * Creates a new instance.
+	 * 
+	 * @param xmlUrlStr	the String URL containing the XML document to parse.
+	 * @throws ParserConfigurationException 
+	 * @throws IOException 
+	 * @throws SAXException 
+	 */
+	public XMLReader(String xmlUrlStr) 
+			throws SAXException, IOException, ParserConfigurationException {
+		
+		this.xmlUrlStr = xmlUrlStr;
+		init();
+	}
+	
+	/**
 	 * Initializes xPath and creates @see Document
 	 * from the {@link #xmlStream}.
 	 */
 	private void init() 
 			throws SAXException, IOException, ParserConfigurationException {  
 		
-		xmlDocument = DocumentBuilderFactory.
-				newInstance().newDocumentBuilder().parse(xmlStream);
+		if (null != xmlStream) {
+			xmlDocument = DocumentBuilderFactory.
+					newInstance().newDocumentBuilder().parse(xmlStream);
+		} else if (null != xmlUrlStr) {
+			xmlDocument = DocumentBuilderFactory.
+					newInstance().newDocumentBuilder().parse(xmlUrlStr.toString());
+		}
 		xPath =  XPathFactory.newInstance().newXPath();     
 	}
 

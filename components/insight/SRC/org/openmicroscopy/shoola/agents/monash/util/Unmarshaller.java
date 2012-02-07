@@ -27,12 +27,17 @@
  */
 package org.openmicroscopy.shoola.agents.monash.util;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
+import org.xml.sax.SAXException;
 /** 
  * Helper class to unmarshall XML into Objects
  *
@@ -43,8 +48,6 @@ import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
  */
 public class Unmarshaller {
 
-	private static final String PREFIX = "/response/message/registryObject/";
-
 	/**
 	 * Unmarshal the XML into PartyBean object
 	 * @param result	the XML file to unmarshall	
@@ -53,57 +56,60 @@ public class Unmarshaller {
 	public static PartyBean getPartyBean(String result) 
 	{
 		if (result == null) return null;
-		
+
 		try {
+
+			String prefix = "/response/message/registryObject/";
+
 			InputStream is = IOUtils.toInputStream(result, "UTF-8");
 			XMLReader reader = new XMLReader(is);
 			PartyBean pb = new PartyBean();
 			pb.setSelected(true);
 
 			// To get a xml attribute, group
-			String expression = PREFIX + "@group";
+			String expression = prefix + "@group";
 			pb.setGroupName(compileExpression(reader, expression));
 
 			// To get a child element's value.
-			expression = PREFIX + "key";
+			expression = prefix + "key";
 			pb.setPartyKey(compileExpression(reader, expression));
 
 			// To get originatingSource type.
-			expression = PREFIX + "originatingSource/@type";
+			expression = prefix + "originatingSource/@type";
 			pb.setOriginateSourceType(compileExpression(reader, expression));
 
 			// To get originatingSource value.
-			expression = PREFIX + "originatingSource";
+			expression = prefix + "originatingSource";
 			pb.setOriginateSourceValue(compileExpression(reader, expression));
 
 			// To get identifier type.
-			expression = PREFIX + "party/identifier/@type";
+			expression = prefix + "party/identifier/@type";
 			pb.setIdentifierType(compileExpression(reader, expression));
 
 			// To get identifier value.
-			expression = PREFIX + "party/identifier";
+			expression = prefix + "party/identifier";
 			pb.setIdentifierValue(compileExpression(reader, expression));
 
 			// To get person title.
-			expression = PREFIX + "party/name/namePart[1]";
+			expression = prefix + "party/name/namePart[1]";
 			pb.setPersonTitle(compileExpression(reader, expression));
 
 			// To get person Given Name.
-			expression = PREFIX + "party/name/namePart[2]";
+			expression = prefix + "party/name/namePart[2]";
 			pb.setPersonGivenName(compileExpression(reader, expression));
 
 			// To get person Family Name.
-			expression = PREFIX + "party/name/namePart[3]";
+			expression = prefix + "party/name/namePart[3]";
 			pb.setPersonFamilyName(compileExpression(reader, expression));
 
 			// To get address electronic address type.
-			expression = PREFIX + "party/location/address/electronic/@type";
+			expression = prefix + "party/location/address/electronic/@type";
 			String addrType = compileExpression(reader, expression);
-			
+
 			// To get address electronic address value.
-			expression = PREFIX + "party/location/address/electronic/value";
+			expression = prefix + "party/location/address/electronic/value";
 			String value = compileExpression(reader, expression);
-			
+
 			if (addrType.equals("url")) {
 				pb.setUrl(value);
 			} else if (addrType.equals("email")) {
@@ -123,9 +129,37 @@ public class Unmarshaller {
 	 * @param expression the element or attribute in the XML
 	 * @return	the value of the <code>expression</code> from the XML as <code>String</code
 	 */
-	private static String compileExpression(XMLReader reader, String expression) {
+	private static String compileExpression(XMLReader reader, String expression) 
+	{
 		String value = (String) reader.read(expression, XPathConstants.STRING);
 		System.out.println(expression + " ---> " + value);
 		return value;
+	}
+
+	/**
+	 * Creative Commons License based on the user parameters
+	 * 
+	 * @param uri		URI to the XML document
+	 * @return			the Creative Commons License
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws ParserConfigurationException
+	 */
+	public static String getCCLicense(String uri) 
+			throws SAXException, IOException, ParserConfigurationException {
+
+		XMLReader reader = new XMLReader(uri);
+		String prefix = "/result/";
+
+		// Get URI
+		String expression = prefix + "license-uri";
+		String luri = compileExpression(reader, expression);
+
+		// Get Html
+		expression = prefix + "html";
+		String html = compileExpression(reader, expression);
+		html = StringUtils.removeEnd(html, ".").trim();
+		
+		return html + " (" + luri + ").";
 	}
 }

@@ -123,11 +123,8 @@ public interface AndsPublish extends ObservableComponent {
 	/**
 	 * Shows the add researcher screen if the passed parameter is <code>true</code>, hides
 	 * otherwise.
-	 * 
-	 * @param b <code>true</code> to show the component, <code>false</code>
-	 * 			to hide.
 	 */
-	public void showAddResearcher(boolean b);
+	public void showAddResearcher();
 
 	/** Load the data collections to register with RDA */
 	public void loadDataCollection();

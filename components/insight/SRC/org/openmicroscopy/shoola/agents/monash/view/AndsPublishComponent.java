@@ -224,16 +224,16 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 
 	/** 
 	 * Implemented as specified by the {@link AndsPublish} interface.
-	 * @see AndsPublish#showAddResearcher(boolean)
+	 * @see AndsPublish#showAddResearcher()
 	 */
-	public void showAddResearcher(boolean b) {
+	public void showAddResearcher() {
 		String option = view.showResearcher();
 		//firePropertyChange(FINDER_VISIBLE_PROPERTY, oldValue, newValue);
 		if (null != option) {
 			/** Shows the Search/ Manual add researcher screen 
 			 * based on the user choice. */
 			if (PartyDialog.PARTY_OPTION_SEARCH.equals(option)) {
-				view.searchResearcher();
+				if (!view.searchResearcher()) showAddResearcher();
 			} else if (PartyDialog.PARTY_OPTION_MANUAL.equals(option)) {
 				//view.manualResearcher();
 			}
@@ -296,10 +296,10 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		if (null != option) {
 			if (LicenseDialog.LICENSE_OPTION_CCL.equals(option)) {
 				System.out.println("CCL...");
-				//view.showCCL();
+				if (!view.showCCL()) showLicenseMain();
 			} else if (LicenseDialog.LICENSE_OPTION_UDL.equals(option)) {
 				System.out.println("UDL...");
-				view.showUDL();
+				if (!view.showUDL()) showLicenseMain();
 			}
 		}
 	}

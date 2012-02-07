@@ -31,22 +31,25 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.text.AbstractDocument.Content;
+import javax.swing.JRadioButton;
+import javax.xml.parsers.ParserConfigurationException;
 
+import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
-import org.openmicroscopy.shoola.agents.monash.util.DocumentCharacterLimit;
+import org.openmicroscopy.shoola.agents.monash.util.Unmarshaller;
 import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
+import org.xml.sax.SAXException;
 
 /** 
  * Dialog to create the User Defined License. 
@@ -57,82 +60,110 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
  * @version 1.0
  * @since Beta4.4
  */
-public class UDLicenseDialog extends MonashDialog {
-
-	/** Description of the panel. */
-	private static final String 	DESCRIPTION = "4000 character limit";
-	
-	/** User Defined License characters limit. */
-	private static final int 		UDL_CHARAC_LIMIT = 4000;
+public class CCLicenseDialog extends MonashDialog {
 
 	/** The tooltip of the {@link #backButton}. */
-	private static final String		BACK_TOOLTIP = "Cancel and go back to previous page.";
+	private static final String		BACK_TOOLTIP = 
+			"Cancel and go back to previous page.";
 
-	/** The tooltip of the {@link #saveButton}. */
-	private static final String		SAVE_TOOLTIP = "Saves the user defined license.";
+	/** The tooltip of the {@link #nextButton}. */
+	private static final String		NEXT_TOOLTIP = 
+			"Saves the creative commons license and goes to register with RDA screen.";
 
 	/** Action ID to close the dialog. */
 	private static final int		BACK = 0;
 
 	/** Action ID to go to the next page and close the dialog. */
-	private static final int		SAVE = 1;
+	private static final int		NEXT = 1;
 
 	/** Button to close and dispose of the window. */
 	private JButton 				backButton;
 
 	/** Button to save and go to next screen. */
-	private JButton					saveButton;
+	private JButton					nextButton;
 
-	/** The field to enter the user defined license. */
-	private JTextArea				licenseArea;
-	
-	/** The user defined license */
-	private LicenceBean					license;
+	/** To group commercial use. */
+	private ButtonGroup 			commBtnGroup;
 
-	/** Scrollpane to hold {@link #licenseArea}. */
-	private JScrollPane 			scrollPane;
+	/** Commercial use allowed - Yes or No **/
+	private String 					commercial;
+
+	/** List of choices for commercial use. */
+	private JRadioButton[] 			commOptionsRBtn;
+
+	/** To group modification options. */
+	private ButtonGroup 			modfcnBtnGroup;
+
+	/** Modifications allowed - Yes, ShareAlike or No **/
+	private String 					derivatives;
+
+	/** List of choices for modification. */
+	private JRadioButton[] 			modfcnOptionsRBtn;
+
+	/** To group Jurisdiction. */
+	private ButtonGroup 			jurdnBtnGroup;
+
+	/** Jurisdiction -  **/
+	private String jurisdiction;
+
+	/** The creative commons license */
+	private LicenceBean				license;
 
 	/**
-	 * Instantiates the dialog to create the User Defined License. 
-	 * User Defined License is limited to 4000 characters.
+	 * Instantiates the dialog to create the Creative Commons License. 
 	 * 
 	 * @param parent	the parent window
 	 * @param title		title of the dialog
 	 */
-	public UDLicenseDialog(JFrame parent, String title) {
+	public CCLicenseDialog(JFrame parent, String title) {
 		super(parent, title, "", null);
 	}
-	
+
 	/**
 	 * Reacts to click on buttons.
 	 * @see ActionListener#actionPerformed(ActionEvent)
 	 */
-	public void actionPerformed(ActionEvent e) {
-
+	public void actionPerformed(ActionEvent e) 
+	{
 		int index = Integer.parseInt(e.getActionCommand());
 		switch (index) {
 		case BACK:
 			license = null;
 			close();
 			break;
-		case SAVE:
-			saveLicense();
+		case NEXT:
+			getCCLicense();
 			break;
 		}
 	}
 
-	private void saveLicense() {
-		String udl = licenseArea.getText();
-		if (null == udl || Constants.SPACE.equals(udl)) {
-			setMessage(Constants.ERROR_NULL_FIELD);
-		} else {
+	private void getCCLicense() {
+		commercial = commBtnGroup.getSelection().getActionCommand();
+		derivatives = modfcnBtnGroup.getSelection().getActionCommand();
+		System.out.println("commercial: " + commercial);
+		System.out.println("modification: " + derivatives);
+		
+		String cclWs = PublishAgent.getCCLUrl();
+		System.out.println("cclUrl: " + cclWs);
+		
+		try {
+			// TODO setup param from user input
+			String licenseParams = "commercial=n&derivatives=y&jurisdiction=au";
+			String uri = cclWs  + "/get?" + licenseParams;
+			String str  = Unmarshaller.getCCLicense(uri);
+			
 			license = new LicenceBean();
-			license.setLicenceContents(udl);
-			license.setLicenceType(Constants.LICENSE_USER_DEFINE_TYPE);
+			license.setCommercial(commercial);
+			license.setDerivatives(derivatives);
+			//license.setJurisdiction(jurisdiction);
+			license.setLicenceContents(str);
+			license.setLicenceType(Constants.LICENSE_CCCL_TYPE);
 			close();
+		} catch (Exception e) {
+			showErrDialog(this, Constants.ERROR_CCL, e);
 		}
 	}
-	
+
 	/** 
 	 * Implemented as specified by the {@link MonashDialog}.
 	 * @see MonashDialog#buildContentPane()
@@ -145,11 +176,26 @@ public class UDLicenseDialog extends MonashDialog {
 		c.weightx = 0.1;
 		c.gridy = 0;
 
-		JLabel label = new JLabel(DESCRIPTION);
+		JLabel label = new JLabel("Allow commercial uses of your work?");
 		box.add(label, c);
-
 		c.gridy++;
-		box.add(scrollPane, c);
+
+		for (JRadioButton button : commOptionsRBtn) {
+			box.add(button, c);
+			c.gridy++;
+		}
+
+		label = new JLabel("Allow modifications of your work?");
+		box.add(label, c);
+		c.gridy++;
+
+		for (JRadioButton button : modfcnOptionsRBtn) {
+			box.add(button, c);
+			c.gridy++;
+		}
+
+		label = new JLabel("Jurisdiction of your license?");
+		box.add(label, c);
 
 		c.gridy++;
 		c.weighty = 1.0;
@@ -171,7 +217,7 @@ public class UDLicenseDialog extends MonashDialog {
 		bar.setLayout(new BoxLayout(bar, BoxLayout.X_AXIS));
 		bar.add(backButton);
 		bar.add(Box.createHorizontalStrut(5));
-		bar.add(saveButton);
+		bar.add(nextButton);
 		bar.add(Box.createHorizontalStrut(10));
 		return bar;
 	}
@@ -183,27 +229,70 @@ public class UDLicenseDialog extends MonashDialog {
 	protected void initComponents() {
 
 		license = null;
-		
-		licenseArea = new JTextArea(15, 50);
-		licenseArea.setWrapStyleWord(true);
-		licenseArea.setLineWrap(true);
-		licenseArea.setDocument(new DocumentCharacterLimit(UDL_CHARAC_LIMIT));
-		scrollPane  = new JScrollPane(licenseArea);
 
 		backButton = new JButton("Back");
 		formatButton(backButton, 'B', BACK_TOOLTIP, BACK, this);
 
-		saveButton = new JButton("Next");
-		formatButton(saveButton, 'N', SAVE_TOOLTIP, SAVE, this);
+		nextButton = new JButton("Next");
+		formatButton(nextButton, 'N', NEXT_TOOLTIP, NEXT, this);
+
+		String[] options = new String[] {"Yes", "No"};
+		commOptionsRBtn = setupOptions(options.length, options);
+		commBtnGroup = groupOptions(commOptionsRBtn);
+
+		options = new String[] {"Yes", "ShareAlike", "No"};
+		modfcnOptionsRBtn = setupOptions(options.length, options);
+		modfcnBtnGroup = groupOptions(modfcnOptionsRBtn);
 	}
 
 	/**
-	 * Return the user defined license 
+	 * Groups the buttons passed and returns the group
+	 * 
+	 * @param buttons the buttons to group
+	 * @return	the group for the <code>buttons</code>
+	 */
+	private ButtonGroup groupOptions(JRadioButton[] buttons) 
+	{
+		ButtonGroup btnGroup = new ButtonGroup();
+		for (JRadioButton button : buttons) {
+			btnGroup.add(button);
+		}
+		return btnGroup;
+	}
+
+	/**
+	 * Creates and initializes the button group and various options
+	 * as <code>JRadioButton</code> for {@link #commBtnGroup}, 
+	 * {@link #nextButton} and {@link #nextButton}.
+	 * 
+	 * @param len		Total number of options
+	 * @param options	the possible options
+	 * @return			
+	 * 		the <code>ButtonGroup</code> grouping the <code>JRadioButton</code>
+	 */
+	private JRadioButton[] setupOptions(int len, String[] options) 
+	{
+		JRadioButton[] optionsRBtn = new JRadioButton[len];
+		for (int i = 0; i < options.length; i++) {
+			optionsRBtn[i] = new JRadioButton(options[i]);
+			optionsRBtn[i].setActionCommand(options[i]);
+		}
+		optionsRBtn[0].setSelected(true);
+		return optionsRBtn;
+	}
+
+	/**
+	 * Return the Creative Commons License 
 	 * Null if user cancels the action, closes the dialog
 	 * 
 	 * @return see above
 	 */
 	public LicenceBean getLicense() {
 		return license;
+	}
+
+	public static void main(String[] args) {
+		CCLicenseDialog ld = new CCLicenseDialog(null, "Creative Commons License");
+		UIUtilities.centerAndShow(ld);
 	}
 }

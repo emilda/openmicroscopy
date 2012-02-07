@@ -32,6 +32,7 @@ import java.util.Hashtable;
 
 import org.openmicroscopy.shoola.agents.monash.DataCollectionLoader;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.openmicroscopy.shoola.agents.treeviewer.view.TreeViewer;
 
@@ -73,7 +74,7 @@ public class AndsPublishModel {
 	private Hashtable<String, PartyBean>	partyHtable;
 
 	/** The license associated with the data collection. */
-	private String 				license;
+	private LicenceBean 		license;
 
 	/**
 	 * Creates a new instance and sets the state to {@link AndsPublish#NEW}.
@@ -101,6 +102,7 @@ public class AndsPublishModel {
 	{
 		state = AndsPublish.NEW;
 		partyHtable = new Hashtable<String, PartyBean>();
+		license = null;
 		recycled = false;
 	}
 
@@ -280,9 +282,9 @@ public class AndsPublishModel {
 
 	/**
 	 * Sets the license associated with the data collection.
-	 * @param license
+	 * @param ccl	the <code>LicenceBean</code> to set
 	 */
-	public void setLicense(String license) {
-		this.license = license;
+	public void setLicense(LicenceBean ccl) {
+		this.license = ccl;
 	}
 }

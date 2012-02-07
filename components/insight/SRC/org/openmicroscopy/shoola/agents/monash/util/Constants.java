@@ -56,6 +56,9 @@ public class Constants {
 	
 	/** Field to access the service token for Party WS in Monash DS.  */
 	public static final String PARTY_TOKEN = "/services/monash/partyToken";
+	
+	/** The REST interface URL to Creative Commons Web Services.  */
+	public static final String CCL_URL = "/services/ws/ccl";
 
 	/** Error message when party field is null */
     public static final String ERROR_NULL_FIELD = "Please enter the compulsory field";
@@ -68,4 +71,13 @@ public class Constants {
 
 	/** Blank field */
 	public static final String SPACE = "";
+
+	/** Creative Commons License type */
+	public static final String LICENSE_CCCL_TYPE = "cccl_license";
+
+	/** User Defined License type */
+	public static final String LICENSE_USER_DEFINE_TYPE = "user_license";
+	
+	/** Error retrieving Creative Commons License */
+    public static final String ERROR_CCL = "Failed to retrieve Creative Commons License.";
 }

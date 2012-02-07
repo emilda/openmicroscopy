@@ -215,6 +215,16 @@ public class PublishAgent implements Agent, AgentEventListener {
 	{
 		return (String) registry.lookup(Constants.PARTY_TOKEN);
 	}
+	
+	/**
+	 * Helper method returning the REST interface URL to Creative Commons Web Services
+	 * 
+	 * @return See above.
+	 */
+	public static String getCCLUrl()
+	{
+		return (String) registry.lookup(Constants.CCL_URL);
+	}
 
 	/**
 	 * Helper method returning the data registration token to Monash DS.
