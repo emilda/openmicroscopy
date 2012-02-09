@@ -72,10 +72,10 @@ import pojos.GroupData;
 public class PublishAgent implements Agent, AgentEventListener {
 
 	/** Reference to the registry. */
-	private static Registry         registry;
+	private static Registry	registry;
 
 	/** Name of agent **/
-	public static String 			MONASH_AGENT = "Register with RDA";
+	public static String	MONASH_AGENT = "Register with RDA";
 
 	//no-arguments constructor required for initialization
 	public PublishAgent() {
@@ -161,15 +161,9 @@ public class PublishAgent implements Agent, AgentEventListener {
 		Environment env = (Environment) registry.lookup(LookupNames.ENV);
 		if (env == null) return;
 		if (!env.isServerAvailable()) return;
-		ExperimenterData exp = (ExperimenterData) registry.lookup(
-				LookupNames.CURRENT_USER_DETAILS);
+		ExperimenterData exp = getUserDetails();
 		if (exp == null) return;
-		GroupData gp = null;
-		try {
-			gp = exp.getDefaultGroup();
-		} catch (Exception e) {
-			//No default group
-		}
+		GroupData gp = exp.getDefaultGroup();
 		long id = -1;
 		if (gp != null) id = gp.getId();
 		AndsPublish viewer = AndsPublishFactory.getViewer(exp, id);
@@ -238,8 +232,6 @@ public class PublishAgent implements Agent, AgentEventListener {
 
 	/**
 	 * Helper method returning the current user's Monash DS authentication details.
-	 * @return 
-	 * 
 	 * @return See above.
 	 */
 	public static void setMonashOmeroDS()
@@ -297,5 +289,4 @@ public class PublishAgent implements Agent, AgentEventListener {
 			handleExperimenterLoadedDataEvent((ExperimenterLoadedDataEvent) e);
 		}
 	}
-
 }

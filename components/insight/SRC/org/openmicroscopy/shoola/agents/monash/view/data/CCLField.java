@@ -1,3 +1,4 @@
+package org.openmicroscopy.shoola.agents.monash.view.data;
 /*
  * Copyright (c) 2010-2011, Monash e-Research Centre
  * (Monash University, Australia)
@@ -25,97 +26,107 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.view.data;
-
-import pojos.DataObject;
-import pojos.DatasetData;
-import pojos.ProjectData;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /** 
- * Java Bean containing the metadata about the data collection to
- * register with RDA.<br>
- * {@link #description} is the only field the user is allowed to modify.
+ * Java Bean containing Creative Commons License Fields
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
  * @since Beta4.4
  */
-public class MonashData {
-	
-	/** Identifies the title field. */
-	private String		title = null;
-	
-	/** Identifies the description field. */
-	private String		description = null;
-	
-	/** Identifies the type i.e Project/Dataset. */
-	private String		type = null;
-	
-	/** DataObject. */
-	private DataObject	dataObject = null;
 
-	public MonashData(DataObject dataObject) 
-	{
-		this.dataObject = dataObject;
-		
-		if (dataObject instanceof ProjectData) {
-			title = ((ProjectData) dataObject).getName();
-			description = ((ProjectData) dataObject).getDescription();
-			type = "Project";
-		} else if (dataObject instanceof DatasetData) {
-			title = ((DatasetData) dataObject).getName();
-			description = ((DatasetData) dataObject).getDescription();
-			type = "Dataset";
-		}
+public class CCLField implements Serializable {
+
+	private String id;
+	private String label;
+	private String description;
+	private String type;
+
+	/** Contains a list of enum field values for the field */
+	private List<CCLFieldEnumValues> enumValues;
+
+	public CCLField() {
+		super();
+		enumValues = new ArrayList<CCLFieldEnumValues>();
 	}
 
-	/**
-	 * @return the id
-	 */
-	public long getId() {
-		return dataObject.getId();
+	public CCLField(String id, String label) {
+		super();
+		this.enumValues = new ArrayList<CCLFieldEnumValues>();
+		this.id = id;
+		this.label = label;
 	}
 
-	/**
-	 * @return the title
-	 */
-	public String getTitle() {
-		return title;
+	public String getId() {
+		return id;
 	}
 
-	/**
-	 * @return the description
-	 */
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
 	public String getDescription() {
 		return description;
 	}
 
-	/**
-	 * @return the type
-	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public String getType() {
 		return type;
 	}
 
-	/**
-	 * @return the dataObject
-	 */
-	public DataObject getDataObject() {
-		return dataObject;
+	public void setType(String type) {
+		this.type = type;
 	}
 
-	/* 
+	public void addEnumValue(CCLFieldEnumValues enumField) {
+		enumValues.add(enumField);
+	}
+
+	/**
+	 * @return the enumValues
+	 */
+	public List<CCLFieldEnumValues> getEnumValues() {
+		return enumValues;
+	}
+
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return title;
-	}
+		StringBuilder sb = new StringBuilder();
+		if (null != id)
+			sb.append(id);
 
-	/**
-	 * @param description the description to set
-	 */
-	public void setDescription(String description) {
-		this.description = description;
+		if (null != label)
+			sb.append("\n\t" + label);
+
+		if (null != description)
+			sb.append("\n\t" + description);
+
+		for (CCLFieldEnumValues evalue : enumValues) {
+			sb.append("\n" + evalue.getId() + ": ");
+			if (null != evalue.getLabel())
+				sb.append(evalue.getLabel() + " ");
+			if (null != evalue.getDescription())
+				sb.append("\n\t" + evalue.getDescription());
+		}
+
+		return sb.toString();
 	}
 }
+

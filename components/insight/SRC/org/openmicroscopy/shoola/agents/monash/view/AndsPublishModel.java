@@ -27,12 +27,18 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.commons.httpclient.NameValuePair;
 import org.openmicroscopy.shoola.agents.monash.DataCollectionLoader;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
+import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.openmicroscopy.shoola.agents.treeviewer.view.TreeViewer;
 
@@ -70,11 +76,18 @@ public class AndsPublishModel {
 	/** Cookie to connect to Monash DS */
 	private String 				cookie;
 	
+	/** The license associated with the data collection. */
+	private LicenceBean 		license;
+
+	/** The metadata of the data collection */
+	private MonashData 			metadata;
+	
+	/** Login Id of the user */
+	private static String 		loginId;
+	
 	/** Hashtable containing party information */
 	private Hashtable<String, PartyBean>	partyHtable;
 
-	/** The license associated with the data collection. */
-	private LicenceBean 		license;
 
 	/**
 	 * Creates a new instance and sets the state to {@link AndsPublish#NEW}.
@@ -103,6 +116,7 @@ public class AndsPublishModel {
 		state = AndsPublish.NEW;
 		partyHtable = new Hashtable<String, PartyBean>();
 		license = null;
+		metadata = null;
 		recycled = false;
 	}
 
@@ -286,5 +300,136 @@ public class AndsPublishModel {
 	 */
 	public void setLicense(LicenceBean ccl) {
 		this.license = ccl;
+	}
+
+	/**
+	 * returns true if all the data necessary for registering
+	 * collection with RDA is available as well as authentication
+	 * token available to connect to Monash DS, false otherwise.
+	 * 
+	 * @return see above
+	 */
+	public boolean hasAllData() {
+		if (cookie != null && license != null && partyHtable.size() > 0)
+			return true;
+		return false;
+	}
+
+	/**
+	 * Returns all required parameters to register collection
+	 * TODO add dataset_id, collection title, desc and authcate_id
+	 * 
+	 * @return see above
+	 */
+	public NameValuePair[] getMdRegParams() 
+	{
+		if (!hasAllData()) return null; // TODO show error msg
+		
+		List<NameValuePair> nvp = getLicenseParams();
+		System.out.println("nvp size: " + nvp.size());
+		getPartyParams(nvp);
+		System.out.println("nvp size 1: " + nvp.size());	// TODO test this
+		getMetadataParams(nvp);
+		System.out.println("nvp size 2: " + nvp.size());	// TODO test this
+		
+		Iterator<NameValuePair> j = nvp.iterator();
+    	NameValuePair[] values = new NameValuePair[nvp.size()];
+    	int index = 0;
+    	while (j.hasNext()) {
+    		values[index] = j.next();
+			index++;
+		}
+    	return values;
+	}
+
+	/**
+	 * Return the <code>NameValuePair</code> for the collection metadata
+	 * 
+	 * @return see above
+	 */
+	private void getMetadataParams(List<NameValuePair> nvp) {
+		long datasetId = metadata.getId();
+		nvp.add(new NameValuePair("regMetadata.datasetId", String.valueOf(datasetId)));
+		nvp.add(new NameValuePair("regMetadata.description", metadata.getDescription()));
+		nvp.add(new NameValuePair("regMetadata.title", metadata.getTitle()));
+		nvp.add(new NameValuePair("regMetadata.uid", loginId));
+	}
+
+	/**
+	 * Return the <code>NameValuePair</code> for <code>PartyBean</code>
+	 * @param nvp 
+	 * 
+	 * @return see above
+	 */
+	private void getPartyParams(List<NameValuePair> nvp) 
+	{
+		int i=0;
+		for (PartyBean pb : partyHtable.values()) 
+		{
+			nvp.add(new NameValuePair("partyBeans[" + i + "].groupName", pb.getGroupName()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].partyKey", pb.getGroupName()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].originateSourceType", pb.getOriginateSourceType()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].originateSourceValue", pb.getOriginateSourceValue()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].identifierType", pb.getIdentifierType()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].identifierValue", pb.getIdentifierValue()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].personTitle", pb.getPersonTitle()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].personGivenName", pb.getPersonGivenName()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].personFamilyName", pb.getPersonFamilyName()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].url", pb.getUrl()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].email", pb.getEmail()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].address", pb.getAddress()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].rifcsContent", pb.getRifcsContent()));
+			nvp.add(new NameValuePair("partyBeans[" + i + "].fromRm", pb.getFromRm()));
+			i++;
+			
+		}
+	}
+
+	/**
+	 * Return the <code>NameValuePair</code> for <code>LicenceBean</code>
+	 * 
+	 * @return see above
+	 */
+	private List<NameValuePair> getLicenseParams() 
+	{
+		List<NameValuePair> nvp = new ArrayList<NameValuePair>();
+		String type = license.getLicenceType();
+		nvp.add(new NameValuePair("licenceBean.licenceType", type));
+		nvp.add(new NameValuePair("licenceBean.licenceType", license.getLicenceContents()));
+		if(type.equals(Constants.LICENSE_CCCL_TYPE)) {
+			nvp.add(new NameValuePair("licenceBean.licenceType", license.getCommercial()));
+			nvp.add(new NameValuePair("licenceBean.licenceType", license.getDerivatives()));
+			nvp.add(new NameValuePair("licenceBean.licenceType", license.getJurisdiction()));
+		}
+		return nvp;
+	}
+
+	public void changeTag() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * Sets the collection metadata
+	 * @param metadata the metadata to set
+	 */
+	public void setMetadata(MonashData metadata) {
+		this.metadata = metadata;
+		System.out.println("setMetadata() called");
+	}
+
+	/**
+	 * @return the collection metadata
+	 */
+	public MonashData getMetadata() {
+		return metadata;
+	}
+
+	/**
+	 * Sets the uthcate Id of the user
+	 * @param the id to set
+	 */
+	public void setLoginId(String loginId) {
+		this.loginId = loginId;
 	}
 }

@@ -80,4 +80,10 @@ public class Constants {
 	
 	/** Error retrieving Creative Commons License */
     public static final String ERROR_CCL = "Failed to retrieve Creative Commons License.";
+
+    /** Tag value identifying the collection to register with RDA */
+    public static final String REGISTER_RDA_TAG = "Register with RDA";
+    
+    /** Tag value identifying the collection successfully registered with RDA */
+    public static final String SUCCESS_RDA_TAG = "Successfully Registered with RDA";
 }

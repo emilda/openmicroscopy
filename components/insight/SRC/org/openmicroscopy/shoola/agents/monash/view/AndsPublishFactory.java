@@ -46,6 +46,8 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
 import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
+import org.openmicroscopy.shoola.agents.monash.util.Constants;
+import org.openmicroscopy.shoola.agents.monash.view.dialog.MonashDialog;
 import org.openmicroscopy.shoola.env.data.login.UserCredentials;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 
@@ -136,6 +138,7 @@ public class AndsPublishFactory implements ChangeListener {
     	System.out.println("AndsPublishFactory setCookie");
 		if (singleton.viewer != null) {
 			singleton.viewer.setCookie(monashAuth(uc));
+			singleton.viewer.setLoginId(uc.getUserName());
 		}
 	}
 	
@@ -156,8 +159,7 @@ public class AndsPublishFactory implements ChangeListener {
 		try {
 			return mSvc.login(params);
 		} catch (TransportException e) {
-			//MonashDialog.showErrDialog(null, Constants.BACKEND_ERROR, e);
-			// TODO fire property change to disable publish button in view.
+			MonashDialog.showErrDialog(null, Constants.BACKEND_ERROR, e);
 		}
 		return null;
 	}

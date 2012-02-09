@@ -29,15 +29,22 @@ package org.openmicroscopy.shoola.agents.monash.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.openmicroscopy.shoola.agents.monash.view.data.CCLField;
+import org.openmicroscopy.shoola.agents.monash.view.data.CCLFieldEnumValues;
 import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
 /** 
  * Helper class to unmarshall XML into Objects
  *
@@ -64,7 +71,7 @@ public class Unmarshaller {
 			InputStream is = IOUtils.toInputStream(result, "UTF-8");
 			XMLReader reader = new XMLReader(is);
 			PartyBean pb = new PartyBean();
-			pb.setSelected(true);
+			pb.setFromRm("true");
 
 			// To get a xml attribute, group
 			String expression = prefix + "@group";
@@ -102,18 +109,19 @@ public class Unmarshaller {
 			expression = prefix + "party/name/namePart[3]";
 			pb.setPersonFamilyName(compileExpression(reader, expression));
 
-			// To get address electronic address type.
-			expression = prefix + "party/location/address/electronic/@type";
-			String addrType = compileExpression(reader, expression);
-
-			// To get address electronic address value.
-			expression = prefix + "party/location/address/electronic/value";
-			String value = compileExpression(reader, expression);
-
-			if (addrType.equals("url")) {
-				pb.setUrl(value);
-			} else if (addrType.equals("email")) {
-				pb.setEmail(value);
+			// To get address electronic address.
+			expression = prefix + "party/location/address/electronic";
+			NodeList electronic = (NodeList)reader.read(expression, XPathConstants.NODESET);
+			for (int i = 0; i < electronic.getLength(); i++) 
+			{
+				Node field = electronic.item(i);
+				String addrType = field.getAttributes().getNamedItem("type").getTextContent();
+				String value = field.getTextContent();
+				if (addrType.equals("url")) {
+					pb.setUrl(value);
+				} else if (addrType.equals("email")) {
+					pb.setEmail(value);
+				}
 			}
 			return pb;
 		} catch (Exception e) {
@@ -159,7 +167,59 @@ public class Unmarshaller {
 		expression = prefix + "html";
 		String html = compileExpression(reader, expression);
 		html = StringUtils.removeEnd(html, ".").trim();
-		
+
 		return html + " (" + luri + ").";
+	}
+
+	public static List<CCLField> getLicenseFields(String uri) 
+			throws SAXException, IOException, ParserConfigurationException 
+	{
+		XMLReader reader = new XMLReader(uri);
+		NodeList fieldList = (NodeList)reader.read("/licenseclass/field", XPathConstants.NODESET);
+
+		List<CCLField> fields = new ArrayList<CCLField>();
+
+		for (int i = 0; i < fieldList.getLength(); i++) {
+			Node field = fieldList.item(i);
+			CCLField ccfield = new CCLField();
+			String id = field.getAttributes().getNamedItem("id").getTextContent();
+			ccfield.setId(id);
+			if (field.hasChildNodes()) {
+				NodeList fieldElemsList = field.getChildNodes();
+				for (int j = 0; j < fieldElemsList.getLength(); j++) 
+				{
+					Node fieldElem = fieldElemsList.item(j);
+					String nodename = fieldElem.getNodeName();
+					String nodevalue  = fieldElem.getTextContent();
+					if(nodename.equals("label"))
+						ccfield.setLabel(nodevalue);
+					else if(nodename.equals("description"))
+						ccfield.setDescription(nodevalue);
+					else if(nodename.equals("type"))
+						ccfield.setType(nodevalue);
+					else if(nodename.equals("enum")) {
+						String enumId = fieldElem.getAttributes().getNamedItem("id").getTextContent();
+						CCLFieldEnumValues enumField = new CCLFieldEnumValues();
+						if (enumId.equals("")) enumId = "International";	// TODO test
+						enumField.setId(enumId);
+						if (fieldElem.hasChildNodes()) {
+							NodeList enumList = fieldElem.getChildNodes();
+							for (int k = 0; k < enumList.getLength(); k++) {
+								Node enumElem = enumList.item(k);
+								String ename = enumElem.getNodeName();
+								String evalue  = enumElem.getTextContent();
+								if(ename.equals("label"))
+									enumField.setLabel(evalue);
+								else if(ename.equals("description"))
+									enumField.setDescription(evalue);
+							}
+						}
+						ccfield.addEnumValue(enumField);
+					}	// nodename is enum
+				} // field elements
+			}
+			fields.add(ccfield);
+		} // fields
+		return fields;
 	}
 }

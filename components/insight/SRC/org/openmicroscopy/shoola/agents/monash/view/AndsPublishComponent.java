@@ -31,25 +31,28 @@ import java.util.Collection;
 
 import javax.swing.JFrame;
 
+import org.apache.commons.httpclient.NameValuePair;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
+import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
+import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
+import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.LicenseDialog;
+import org.openmicroscopy.shoola.agents.monash.view.dialog.MonashDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
-import org.openmicroscopy.shoola.env.data.model.ImportableObject;
+import org.openmicroscopy.shoola.svc.transport.TransportException;
 import org.openmicroscopy.shoola.util.ui.component.AbstractComponent;
 
 public class AndsPublishComponent extends AbstractComponent implements AndsPublish {
 
 	/** The Model sub-component. */
-	private AndsPublishModel     model;
+	private AndsPublishModel	model;
 
 	/** The Controller sub-component. */
-	private AndsPublishControl   controller;
+	private AndsPublishControl	controller;
 
 	/** The View sub-component. */
 	private AndsPublishUI       view;
-
-	/** Flag indicating that the window has been marked to be closed.*/
-	private boolean 		markToclose;
 
 	/**
 	 * Creates a new instance.
@@ -65,7 +68,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		this.model = model;
 		controller = new AndsPublishControl(this);
 		view = new AndsPublishUI();
-		markToclose = false;
 	}
 
 	/** 
@@ -131,7 +133,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	public void close()
 	{
 		System.out.println("Close AndsPublish component");
-		markToclose = true;
 		view.setVisible(false);
 		view.dispose();
 	}
@@ -194,28 +195,32 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 
 	/** 
 	 * Implemented as specified by the {@link AndsPublish} interface.
-	 * @see AndsPublish#retryPublish()
+	 * @see AndsPublish#publishData()
 	 */
-	public void retryPublish() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/** 
-	 * Implemented as specified by the {@link AndsPublish} interface.
-	 * @see AndsPublish#publishData(ImportableObject)
-	 */
-	public void publishData(ImportableObject data) {
+	public void publishData() {
 		System.out.println("AndsPublishComponent.publishData()");
-
-		// TODO Sets the action to publish enabled depending on the authentication to Monash DS
-		// Example 
-		/*
-		 *  protected void onPublishStateChange(boolean state) {
-        	setEnabled(state);
-        	return;
-        }*/
-		close();	// TODO implement registration functionality here
+		
+		String cookie = model.getCookie();
+		System.out.println("cookie: " + cookie);
+		
+		String wsURL = PublishAgent.getMdRegToken();
+		System.out.println("partyWS: " + wsURL);
+		
+		MonashServices mSvc = ServiceFactory.getMonashServices(wsURL, -1);
+		NameValuePair[] nvp = model.getMdRegParams();
+		try {
+			MonashSvcReply reply = mSvc.mdReg(cookie, nvp);
+			String errMsg = reply.getErrMsg();
+			if (errMsg != null) {
+				view.setMessage(errMsg);
+			} else {
+				model.changeTag();
+				view.setMessage(reply.getSuccessMsg());
+			}
+		} catch (TransportException e) {
+			MonashDialog.showErrDialog(null, Constants.ERROR_PARTY_NF, e);
+		}
+		//close();
 	}
 
 	void refreshTree() {
@@ -304,4 +309,11 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		}
 	}
 
+	/** 
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#setLoginId()
+	 */
+	public void setLoginId(String loginId) {
+		model.setLoginId(loginId);
+	}
 }

@@ -82,6 +82,8 @@ public class CCLicenseDialog extends MonashDialog {
 	/** Button to save and go to next screen. */
 	private JButton					nextButton;
 
+	/** URI to Creative Commons Web Services accessible via REST interface. */
+	private String 					cclWs;
 	/** To group commercial use. */
 	private ButtonGroup 			commBtnGroup;
 
@@ -117,6 +119,8 @@ public class CCLicenseDialog extends MonashDialog {
 	 */
 	public CCLicenseDialog(JFrame parent, String title) {
 		super(parent, title, "", null);
+		cclWs = PublishAgent.getCCLUrl();
+		System.out.println("cclUrl: " + cclWs);
 	}
 
 	/**
@@ -142,9 +146,6 @@ public class CCLicenseDialog extends MonashDialog {
 		derivatives = modfcnBtnGroup.getSelection().getActionCommand();
 		System.out.println("commercial: " + commercial);
 		System.out.println("modification: " + derivatives);
-		
-		String cclWs = PublishAgent.getCCLUrl();
-		System.out.println("cclUrl: " + cclWs);
 		
 		try {
 			// TODO setup param from user input
@@ -236,6 +237,8 @@ public class CCLicenseDialog extends MonashDialog {
 		nextButton = new JButton("Next");
 		formatButton(nextButton, 'N', NEXT_TOOLTIP, NEXT, this);
 
+		//String[] str  = Unmarshaller.getLicenseFields(cclWs);
+		
 		String[] options = new String[] {"Yes", "No"};
 		commOptionsRBtn = setupOptions(options.length, options);
 		commBtnGroup = groupOptions(commOptionsRBtn);

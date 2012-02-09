@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.openmicroscopy.shoola.svc.proxy.Request;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
@@ -12,20 +13,36 @@ import org.openmicroscopy.shoola.svc.transport.TransportException;
 public class MonashSvcRequest extends Request {
 
 	/** The parameters to set */
-	private Map<String, String> 	info;
+	private Map<String, String> 	params;
 	
 	/** The cookie to set */
 	private String 					cookie;
+
+	/** The <code>NameValuePair</code> array containing parameters */
+	private NameValuePair[] 		nvp;
 
 	/**
 	 * Creates a new instance.
 	 * 
 	 * @param cookie	The cookie to set.
-	 * @param info		The parameters to set.
+	 * @param params		The parameters to set.
 	 */
-	public MonashSvcRequest(String cookie, Map<String, String> info) {
-		this.info = info;
+	public MonashSvcRequest(String cookie, Map<String, String> params) {
+		this.params = params;
 		this.cookie = cookie;
+		nvp = null;
+	}
+
+	/**
+	 * Creates a new instance.
+	 * 
+	 * @param cookie	The cookie to set.
+	 * @param params		The parameters to set.
+	 */
+	public MonashSvcRequest(String cookie, NameValuePair[] nvp) {
+		this.nvp = nvp;
+		this.cookie = cookie;
+		params = null;
 	}
 
 	/**
@@ -39,15 +56,15 @@ public class MonashSvcRequest extends Request {
         //		new DefaultHttpMethodRetryHandler(3, false));
         if (null != cookie) 
         	request.setRequestHeader("cookie", cookie);
-        //Marshal.
-        Entry entry;
-        Iterator k = info.entrySet().iterator();
-        while (k.hasNext()) {
-        	entry = (Entry) k.next();
-        	request.addParameter((String) entry.getKey(),
-        			 (String) entry.getValue());
-		}
+        
+        if (params != null) {
+        	for (Entry<String, String> entry : params.entrySet())
+        	{
+        	    request.addParameter(entry.getKey(), entry.getValue());
+        	}
+        } else if (nvp != null) {
+        	request.addParameters(nvp);
+        }
 		return request;
 	}
-
 }

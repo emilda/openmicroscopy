@@ -187,10 +187,12 @@ public abstract class MonashDialog extends JDialog
 		return icon;
 	}
 
+	/** sets the icon for the dialog */
 	public void setIcon(Icon icon) {
 		this.icon = icon;
 	}
 
+	/** Sets the sub-title in the title panel */
 	public void setMessage(String message) {
 		tp.setTextHeader(message);
 	}

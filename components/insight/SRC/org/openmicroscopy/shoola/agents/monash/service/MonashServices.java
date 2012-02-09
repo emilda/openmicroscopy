@@ -29,6 +29,7 @@ package org.openmicroscopy.shoola.agents.monash.service;
 
 import java.util.Map;
 
+import org.apache.commons.httpclient.NameValuePair;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 
 /** 
@@ -63,5 +64,16 @@ public interface MonashServices
 	 */
 	public String login(Map<String, String> params)
 					throws TransportException;
+
+	/**
+	 * Registers the specified collection with RDA.
+	 * @param cookie The cookie to communicate with Monash DS
+	 * @param nvp An array of <code>NameValuePair</code> containing request parameters
+	 * @return
+	 * @throws TransportException 	Thrown if an error occurred while trying 
+	 * 								to communicate with the server.
+	 */
+	public MonashSvcReply mdReg(String cookie, NameValuePair[] nvp)
+			throws TransportException;
 
 }

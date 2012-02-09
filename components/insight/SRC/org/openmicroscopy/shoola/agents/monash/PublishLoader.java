@@ -25,8 +25,10 @@ package org.openmicroscopy.shoola.agents.monash;
 
 import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
 import org.openmicroscopy.shoola.env.config.Registry;
+import org.openmicroscopy.shoola.env.data.OmeroMetadataService;
 import org.openmicroscopy.shoola.env.data.events.DSCallAdapter;
 import org.openmicroscopy.shoola.env.data.views.DataManagerView;
+import org.openmicroscopy.shoola.env.data.views.MetadataHandlerView;
 import org.openmicroscopy.shoola.env.log.LogMessage;
 
 /** 
@@ -53,8 +55,8 @@ public abstract class PublishLoader extends DSCallAdapter {
 	protected final AndsPublish		viewer;
 
     /** Convenience reference for subclasses. */
-    protected final DataManagerView        dmView;
-    
+    protected final DataManagerView	dmView;
+
 	/**
 	 * Creates a new instance.
 	 */
@@ -64,7 +66,7 @@ public abstract class PublishLoader extends DSCallAdapter {
         this.viewer = viewer;
 		registry = PublishAgent.getRegistry();
 		dmView = (DataManagerView) 
-        registry.getDataServicesView(DataManagerView.class);
+					registry.getDataServicesView(DataManagerView.class);
 	}
 
 	/**

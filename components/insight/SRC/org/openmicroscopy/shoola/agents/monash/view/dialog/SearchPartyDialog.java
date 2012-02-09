@@ -43,6 +43,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.commons.lang.StringUtils;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
 import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
@@ -128,20 +129,20 @@ public class SearchPartyDialog extends MonashDialog {
 		setMessage("");
 		String party = searchField.getText();
 		System.out.println("Search for party: " + party + "."); // cnOrEmail
+		//StringUtils.isBlank(party); TODO use this.
 		if (null == party || Constants.SPACE.equals(party)) {
 			setMessage(Constants.ERROR_NULL_FIELD);
 		} else {
 			String cookie = model.getCookie();
 			System.out.println("cookie: " + cookie);
 
-			String partyWS = PublishAgent.getPartyToken();
-			System.out.println("partyWS: " + partyWS);
-			MonashServices mSvc = ServiceFactory.getMonashServices(partyWS, -1);
+			String wsURL = PublishAgent.getPartyToken();
+			System.out.println("partyWS: " + wsURL);
+			MonashServices mSvc = ServiceFactory.getMonashServices(wsURL, -1);
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("party", party);
-			MonashSvcReply reply = null;
 			try {
-				reply = mSvc.searchRM(cookie, params);
+				MonashSvcReply reply = mSvc.searchRM(cookie, params);
 				String errMsg = reply.getErrMsg();
 				if (errMsg != null) {
 					setMessage(errMsg);

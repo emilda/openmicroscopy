@@ -36,6 +36,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Collection;
@@ -90,20 +92,17 @@ import pojos.ExperimenterData;
 import pojos.TagAnnotationData;
 
 public class AndsPublishUI extends TopWindow 
-implements ListSelectionListener, DocumentListener, ItemListener {
+	implements ListSelectionListener, ItemListener, FocusListener {
 
 	/** The default title of the window. */
 	private static final String TITLE = "Register with RDA";
 	
 	/** Default height of the window */
-	private static final int HEIGHT = 700;
+	private static final int 	HEIGHT = 700;
 
 	/** Message to display when there is no data collections available to register with RDA */
 	private static final String NO_DATA = "No data collections available to register with RDA";
 
-	/** Tag value identifying the collection to register with RDA */
-	private static final String RDA_TAG = "Register with RDA";
-	
 	/** Terms and Conditions */
 	private static final String TANDC = "Terms and Conditions:";
 
@@ -124,9 +123,6 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 
 	/** Reference to the control. */
 	private AndsPublishControl	controller;
-
-	/** The total of projects to register with ANDS. */
-	private int 				total;
 
 	/** The controls bar. */
 	private JComponent 			controlsBar;
@@ -163,6 +159,9 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 
 	/** Placed within {@link #projectPanel} and contains details about party */
 	private JPanel 				researcherPanel;
+	
+	/** Title panel for displaying title as well as other messages in sub-title */
+	private TitlePanel 			tp;
 
 	/** The model for the JList {@link #projectList}. */
 	private DefaultListModel 	listmodel;
@@ -185,7 +184,6 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 	 */
 	public AndsPublishUI() {
 		super(TITLE);
-		System.out.println("Created AndsPublish UI");
 	}
 
 	/**
@@ -196,11 +194,9 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 	 */
 	void initialize(AndsPublishModel model, AndsPublishControl controller)
 	{
-		System.out.println("initializing AndsPublish UI");
 		this.model = model;
 		this.controller = controller;
 		partyHtable = new Hashtable<String, PartyBean>();
-		total = 1;
 		initComponents();
 		//setJMenuBar(createMenuBar());
 		buildGUI();
@@ -222,10 +218,12 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		titleLabel = new JXLabel();
 
 		descriptionTxt = new JTextArea(5, 20);
+		descriptionTxt.setText("");
 		descriptionTxt.setEnabled(true);
 		descriptionTxt.setBorder(new LineBorder(Color.LIGHT_GRAY, 1));
 		descriptionTxt.setWrapStyleWord(true);
 		descriptionTxt.setBackground(UIUtilities.BACKGROUND_COLOR);
+		descriptionTxt.addFocusListener(this);
 
 		researcherButton = new JButton(controller.getAction(AndsPublishControl.PARTY));
 		researcherButton.setBackground(UIUtilities.BACKGROUND_COLOR);
@@ -272,23 +270,46 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		Iterator i = dataCollection.iterator();
 		while (i.hasNext()) {
 			DataObject object = (DataObject) i.next();
-			MonashData listdata = new MonashData(object);
-			if (getTagDetails(object)) listmodel.addElement(listdata);
+			if (getTagDetails(object)) {
+				MonashData listdata = new MonashData(object);
+				listmodel.addElement(listdata);
+			}
 		}
 		System.out.println("Setting new list model object");
 		projectList.setModel(listmodel);
 		if (listmodel.size() > 0) {
 			System.out.println("Setting first element");
-			publishButton.setEnabled(true);
 			projectList.setSelectedIndex(0);
+		}
+		setComponentControls();
+	}
+
+	private void setComponentControls() {
+		System.out.println("setComponentControls()");
+		if (listmodel.size() > 0) {
+			descriptionTxt.setEditable(true);
+			researcherButton.setEnabled(true);
+			licenseButton.setEnabled(true);
+			if (model.hasAllData())
+				publishButton.setEnabled(true);
+			else
+				publishButton.setEnabled(false);
+		} else {
+			clearFields();
 		}
 	}
 
-	// TODO remove this method later
-	private boolean getTagDetails(DataObject object) {
-		System.out.println("DataObject, id: " + object.getId());
+	/**
+	 * Get the tag values for the given <code>DataObject</code>
+	 * and check for value {@link Constants.REGISTER_RDA_TAG}
+	 * returns true if found, false otherwise
+	 * @param dataObject
+	 * @return true if the above tag exists false otherwise
+	 */
+	private boolean getTagDetails(DataObject dataObject) {
+		System.out.println("DataObject, id: " + dataObject.getId());
 		try {
-			Collection tags = PublishAgent.getAnnotations(object);
+			Collection tags = PublishAgent.getAnnotations(dataObject);
 			if (tags == null || tags.size() == 0)
 				return false;
 			Iterator iterator = tags.iterator();
@@ -299,22 +320,23 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 				if (data instanceof TagAnnotationData) {
 					tag = (TagAnnotationData) data;
 					System.out.println("Tags: " + tag.getTagValue() + " ");
-					if(RDA_TAG.equals(tag.getTagValue())) {
+					if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
 						return true;
 					}
 				}
-
 			}
-		} catch (DSOutOfServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DSAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			return false;
 		}
 		return false;
 	}
 
+	/**
+	 * Updates messge, title and description with the 
+	 * new selection details
+	 * 
+	 * @param object	contains collection metadata
+	 */
 	private void updateLabel(MonashData object) {
 		if (null != object) {
 			messageLabel.setText(object.getTitle());
@@ -323,15 +345,19 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		}
 	}
 
-	@Override
+	/** 
+	 * Implemented as specified by the {@link ListSelectionListener} interface.
+	 * @see ListSelectionListener#valueChanged()
+	 */
 	public void valueChanged(ListSelectionEvent e) {
-		System.out.println("List selection event recived");
+		System.out.println("List selection event received");
 		JList list = (JList)e.getSource();
 		int index = list.getSelectedIndex();
 		if (-1 != index) {
 			MonashData object = (MonashData) list.getModel().getElementAt(index);
 			System.out.println("Update messageLabel");
 			updateLabel(object);
+			model.setMetadata(object);
 		}
 		//updateLabel((String) list.getSelectedValue());
 	}
@@ -340,9 +366,8 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 	 * Build the collection details panel
 	 * @return the panel containing collection details.
 	 */
-	private JPanel buildProjectDetails() {
-		ExperimenterData user = PublishAgent.getUserDetails();
-
+	private JPanel buildProjectDetails() 
+	{
 		JPanel content = new JPanel(new GridBagLayout());
 		content.setBorder(BorderFactory.createTitledBorder("Metadata Public Registration"));
 		content.setBackground(UIUtilities.BACKGROUND_COLOR);
@@ -371,12 +396,8 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		c.gridx++;
 		content.add(Box.createHorizontalStrut(5), c); 
 		c.gridx++;
-		descriptionTxt.setText("");
-		descriptionTxt.getDocument().addDocumentListener(this);
-		descriptionTxt.getDocument().putProperty("name", "description");
-		content.add(descriptionTxt, c);  
-		//content.add(new JScrollPane(descriptionTxt), "1, 2");
-		//System.out.println("Created Collection description field");  
+		//content.add(descriptionTxt, c);  
+		content.add(new JScrollPane(descriptionTxt), c);
 		LogMessage msg = new LogMessage();
 		msg.println("Created Collection description field");
 
@@ -463,7 +484,8 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		container.setLayout(new BorderLayout(0, 0));
 
 		IconManager icons = IconManager.getInstance();
-		TitlePanel tp = new TitlePanel(TITLE, "", "Register the following collection with RDA", 
+		tp = new TitlePanel(TITLE, "", 
+				"Register the following collection with RDA", 
 				icons.getIcon(IconManager.MONASH ));
 		JXPanel p = new JXPanel();
 		JXPanel lp = new JXPanel();
@@ -480,64 +502,6 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 	}
 
 	/**
-	 * Creates a row.
-	 */
-	private JPanel createRow()
-	{
-		return createRow(UIUtilities.BACKGROUND);
-	}
-
-	/**
-	 * Creates a row.
-	 * 
-	 * @param background The background of color.
-	 */
-	private JPanel createRow(Color background)
-	{
-		JPanel row = new JPanel();
-		row.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
-		if (background != null)
-			row.setBackground(background);
-		row.setBorder(null);
-		return row;
-	}
-
-	/**
-	 * Fires property indicating that some text has been changed.
-	 * @see DocumentListener#changedUpdate(DocumentEvent)
-	 */
-	@Override
-	public void changedUpdate(DocumentEvent e) {
-		Document doc = (Document)e.getDocument();
-		String name = (String) doc.getProperty("name");
-		System.out.println("DocumentListener.changedUpdate activated from " + name);
-	}
-
-	/**
-	 * Fires property indicating that some text has been entered.
-	 * @see DocumentListener#insertUpdate(DocumentEvent)
-	 */
-	@Override
-	public void insertUpdate(DocumentEvent e) {
-		//firePropertyChange(EditorControl.SAVE_PROPERTY, Boolean.valueOf(false), Boolean.valueOf(true));
-		Document doc = (Document)e.getDocument();
-		String name = (String) doc.getProperty("name");
-		//String description = descriptionTxt.getText();
-		//description = description.trim();
-		//System.out.println("DocumentListener.insertUpdate activated from " + name);
-	}
-
-	/**
-	 * Fires property indicating that some text has been removed.
-	 * @see DocumentListener#removeUpdate(DocumentEvent)
-	 */
-	@Override
-	public void removeUpdate(DocumentEvent e) {
-		//firePropertyChange(EditorControl.SAVE_PROPERTY, Boolean.valueOf(false), Boolean.valueOf(true));
-		//System.out.println("DocumentListener.removeUpdate activated");
-	}
-
-	/**
 	 * Shows the Add Researcher Dialog
 	 * @return Selected choice of how to add Party @see PartyDialog#OPTIONS
 	 */
@@ -545,7 +509,6 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		System.out.println("Show add-researcher screen");
 
 		PartyDialog pd = new PartyDialog(this, "Adding Researcher Options");
-		//pd.addPropertyChangeListener(manager);
 		UIUtilities.centerAndShow(pd);
 		String option = pd.getSelectedOption();
 		System.out.println("Show next screen based on option, " + option);
@@ -571,8 +534,6 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		} else {
 			return false;
 		}
-
-		// TODO add party info dialog to view and check it
 	}
 
 	/**
@@ -597,6 +558,7 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		//researcherPanel.revalidate();
 		int ht = this.getHeight() + 20;
 		this.setSize(new Dimension(this.getWidth(), ht));
+		setComponentControls();
 	}
 
 	/**
@@ -609,21 +571,18 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		if (state == ItemEvent.SELECTED) {
 			String key = cb.getName();
 			System.out.println(cb.getText() + " selected");
-			PartyBean pb = (PartyBean)partyHtable.get(cb.getName());
-			pb.setSelected(true);
-			model.addParty(cb.getName(), pb);
+			PartyBean pb = (PartyBean)partyHtable.get(key);
+			model.addParty(key, pb);
 		} else {
 			System.out.println(cb.getText() + " cleared");
 			model.removeParty(cb.getName());
-			PartyBean pb = (PartyBean)partyHtable.get(cb.getName());
-			pb.setSelected(false);
 		}
+		setComponentControls();
 	}
 
 	/** Refreshes the view */
 	public void refresh() {
 		System.out.println("Refreshing view");
-		clearFields();
 		setListData(model.getDataCollection());
 	}
 
@@ -631,6 +590,9 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 		messageLabel.setText(NO_DATA);
 		titleLabel.setText("");
 		descriptionTxt.setText("");
+		descriptionTxt.setEditable(false);
+		researcherButton.setEnabled(false);
+		licenseButton.setEnabled(false);
 		publishButton.setEnabled(false);
 	}
 
@@ -639,12 +601,9 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 	 * @return Selected license choice @see LicenseDialog#OPTIONS
 	 */
 	public String showLicenseMain() {
-		System.out.println("Show License Main screen");
-
 		LicenseDialog ld = new LicenseDialog(this, "Select License");
 		UIUtilities.centerAndShow(ld);
 		String option = ld.getSelectedOption();
-		System.out.println("Show next screen based on option, " + option);
 		return option;
 	}
 
@@ -656,8 +615,6 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 	 * 			<code>true</code> goes back to RDA main screen
 	 */
 	public boolean showUDL() {
-		System.out.println("Show user defined license screen");
-
 		UDLicenseDialog ld = new UDLicenseDialog(this, "Define Your Own License");
 		UIUtilities.centerAndShow(ld);
 		LicenceBean udl = ld.getLicense();
@@ -665,6 +622,7 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 			System.out.println("User DL: " + udl);
 			model.setLicense(udl);
 			noLicense.setText("");
+			setComponentControls();
 			return true;
 		} else {
 			return false;
@@ -679,8 +637,6 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 	 * 			<code>true</code> goes back to RDA main screen
 	 */
 	public boolean showCCL() {
-		System.out.println("Show creative commons license screen");
-
 		CCLicenseDialog ld = new CCLicenseDialog(this, "Creative Commons License");
 		UIUtilities.centerAndShow(ld);
 		LicenceBean ccl = ld.getLicense();
@@ -688,9 +644,36 @@ implements ListSelectionListener, DocumentListener, ItemListener {
 			System.out.println("CCL: " + ccl);
 			model.setLicense(ccl);
 			noLicense.setText("");
+			setComponentControls();
 			return true;
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * Sets the sub-title in the title panel
+	 * @param message	the message to set
+	 */
+	public void setMessage(String message) {
+		tp.setTextHeader(message);
+	}
+
+	/** 
+	 * Nothing done when focus gained.
+	 * Implemented as specified by the {@link FocusListener} interface.
+	 * @see FocusListener#focusGained()
+	 */
+	public void focusGained(FocusEvent arg0) {}
+
+	/** 
+	 * On focus lost, the metadata in the model is updated with new value.
+	 * Implemented as specified by the {@link FocusListener} interface.
+	 * @see FocusListener#focusLost()
+	 */
+	public void focusLost(FocusEvent fe) {
+		String description = descriptionTxt.getText();
+		System.out.println("focusLost: " + description);
+		model.getMetadata().setDescription(description);
 	}
 }

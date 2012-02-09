@@ -28,29 +28,27 @@
 package org.openmicroscopy.shoola.agents.monash.view;
 
 import java.util.Collection;
-import java.util.List;
 
 import javax.swing.JFrame;
 
-import org.openmicroscopy.shoola.env.data.model.ImportableObject;
 import org.openmicroscopy.shoola.util.ui.component.ObservableComponent;
 
 public interface AndsPublish extends ObservableComponent {
 	
 	/** Flag to denote the <i>New</i> state. */
-	public static final int     NEW = 1;
+	public static final int NEW = 1;
 
 	/** Flag to denote the <i>Ready</i> state. */
-	public static final int     READY = 2;
+	public static final int READY = 2;
 	
 	/** Flag to denote the <i>Ready</i> state. */
-	public static final int     LOADING_DATA = 3;
+	public static final int LOADING_DATA = 3;
 
 	/** Flag to denote the <i>Discarded</i> state. */
-	public static final int     DISCARDED = 4;
+	public static final int DISCARDED = 4;
 	
 	/** Flag to denote the <i>Publishing</i> state. */
-	public static final int     PUBLISHING = 5;
+	public static final int PUBLISHING = 5;
 
 	/**
 	 * Starts the ANDS publishing process when the current state is {@link #NEW} 
@@ -77,12 +75,9 @@ public interface AndsPublish extends ObservableComponent {
 	public int getState();
 	
 	/**
-	 * Registers the specified files with ANDS. Sets the action to publish enabled depending on the 
-	 * authentication to Monash DS
-	 * 
-	 * @param data The data to register with ANDS.
+	 * Registers the specified collection with RDA.
 	 */
-	public void publishData(ImportableObject data);
+	public void publishData();
 
 	/**
 	 * Sets the Registered tag.
@@ -113,9 +108,6 @@ public interface AndsPublish extends ObservableComponent {
 	 *                               {@link #DISCARDED}.
 	 */
 	public void moveToFront();
-	
-	/** Tries to re-register failed registration. */
-	public void retryPublish();
 	
 	/** Refreshes the view on UserGroupSwitched */
 	public void refresh();
@@ -153,4 +145,9 @@ public interface AndsPublish extends ObservableComponent {
 	 * Shows the license main screen
 	 */
 	public void showLicenseMain();
+
+	/**
+	 * Authcate Id of the user
+	 */
+	public void setLoginId(String userName);
 }

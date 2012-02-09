@@ -30,9 +30,7 @@ package org.openmicroscopy.shoola.agents.monash.service;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpState;
+import org.apache.commons.httpclient.NameValuePair;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 
 /** 
@@ -72,11 +70,11 @@ public class MonashServicesImpl implements MonashServices {
 		try {
 			channel.exchange(out, in);
 			System.out.println("response from serachRM:" + in.toString()); 
+			return in ;
 		} catch (IOException ioe) {
 			throw new TransportException(
 					"Couldn't communicate with server (I/O error).", ioe);
 		}
-		return in ;
 	}
 
 	/**
@@ -96,6 +94,27 @@ public class MonashServicesImpl implements MonashServices {
 			
 			return in.getCookie();
 			
+		} catch (IOException ioe) {
+			throw new TransportException(
+					"Couldn't communicate with server (I/O error).", ioe);
+		}
+	}
+
+	/**
+	 * Implemented as specified by the {@link MonashServices} interface.
+	 * @see MonashServices#mdReg()
+	 */
+	public MonashSvcReply mdReg(String cookie, NameValuePair[] nvp)
+			throws TransportException {
+
+		MonashSvcRequest out = new MonashSvcRequest(cookie, nvp);
+		StringBuilder reply = new StringBuilder();
+		MonashSvcReply in = new MonashSvcReply(reply);
+		
+		try {
+			channel.exchange(out, in);
+			System.out.println("response from mdReg:" + in.toString()); 
+			return in ;
 		} catch (IOException ioe) {
 			throw new TransportException(
 					"Couldn't communicate with server (I/O error).", ioe);

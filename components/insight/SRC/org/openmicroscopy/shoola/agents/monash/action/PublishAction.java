@@ -64,7 +64,7 @@ public class PublishAction  extends MonashAction {
      */
     public void actionPerformed(ActionEvent e) { 
     	System.out.println("Action recieved by PublishAction");
-    	model.publishData(null);
+    	model.publishData();
     }
 
 }

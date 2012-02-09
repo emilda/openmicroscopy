@@ -62,9 +62,7 @@ public class PartyBean implements Serializable {
 
     private String rifcsContent;
 
-    private boolean selected;
-
-    private boolean fromRm;
+    private String fromRm;
 
     public String getGroupName() {
         return groupName;
@@ -170,21 +168,19 @@ public class PartyBean implements Serializable {
         this.rifcsContent = rifcsContent;
     }
 
-    public boolean isSelected() {
-        return selected;
-    }
+    /**
+	 * @return the fromRm
+	 */
+	public String getFromRm() {
+		return fromRm;
+	}
 
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
-    public boolean isFromRm() {
-        return fromRm;
-    }
-
-    public void setFromRm(boolean fromRm) {
-        this.fromRm = fromRm;
-    }
+	/**
+	 * @param fromRm the fromRm to set
+	 */
+	public void setFromRm(String fromRm) {
+		this.fromRm = fromRm;
+	}
 
 	/** 
 	 * Return in the format, Title gName fName - gName <br>
