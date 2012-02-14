@@ -171,7 +171,6 @@ public class CCLicenseDialog extends MonashDialog {
 			if (jId.equals(Constants.INTERNATIONAL)) jId = "";
 			String licenseParams = 
 					"commercial=" + C + "&derivatives=" + D + "&jurisdiction=" + jId;
-			System.out.println("licenseParams: " + licenseParams);
 			String uri = cclWs  + "/get?" + licenseParams;
 			String str  = Unmarshaller.getCCLicense(uri);
 			
@@ -246,7 +245,6 @@ public class CCLicenseDialog extends MonashDialog {
         if (imgURL != null) {
             return new ImageIcon(imgURL);
         } else {
-            System.err.println("Couldn't find file: " + path);
             return null;
         }
     }
@@ -288,7 +286,6 @@ public class CCLicenseDialog extends MonashDialog {
 		
 		cclWs = PublishAgent.getCCLUrl();
 		//cclWs = "http://api.creativecommons.org/rest/1.5/license/standard";
-		System.out.println("cclUrl: " + cclWs);
 
 		backButton = new JButton("Back");
 		formatButton(backButton, 'B', BACK_TOOLTIP, BACK, this);
@@ -302,21 +299,18 @@ public class CCLicenseDialog extends MonashDialog {
 				String id = field.getId();
 				List<CCLFieldEnumValues> options = field.getEnumValues();
 				if (id.equals("commercial")) {
-					System.out.println("Setting up commercial");
 					commLabel = new JLabel(field.getLabel());
 					commDescr = field.getDescription();
 					commOpDesc = new String[options.size()];
 					commOptRBtn = setupOptions(options, commOpDesc);
 					commBtnGroup = groupOptions(commOptRBtn);
 				} else if (id.equals("derivatives")) {
-					System.out.println("Setting up derivatives");
 					modLabel = new JLabel(field.getLabel());
 					modDescr = field.getDescription();
 					modOptDesc = new String[options.size()];
 					modOptRBtn = setupOptions(options, modOptDesc);
 					modfBtnGroup = groupOptions(modOptRBtn);
 				} else if (id.equals("jurisdiction")) {
-					System.out.println("Setting up jurisdiction");
 					jLabel = new JLabel(field.getLabel());
 					jDescr = field.getDescription();
 					String[] opStrings = new String[options.size()];

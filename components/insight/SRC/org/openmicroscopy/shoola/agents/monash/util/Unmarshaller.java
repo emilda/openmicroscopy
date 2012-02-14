@@ -142,7 +142,6 @@ public class Unmarshaller {
 	private static String compileExpression(XMLReader reader, String expression) 
 	{
 		String value = (String) reader.read(expression, XPathConstants.STRING);
-		System.out.println(expression + " ---> " + value);
 		return value;
 	}
 

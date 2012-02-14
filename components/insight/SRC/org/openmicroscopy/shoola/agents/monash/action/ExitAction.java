@@ -71,8 +71,7 @@ public class ExitAction extends MonashAction {
      * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
      */
     public void actionPerformed(ActionEvent e) { 
-    	System.out.println("Action recieved by ExitAction");
-    	model.close();  // TODO decide discard() or close() ??
+    	model.close();  // TODO discard() or close() ??
     }
     
 }

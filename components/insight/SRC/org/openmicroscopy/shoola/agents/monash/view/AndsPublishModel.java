@@ -124,7 +124,6 @@ public class AndsPublishModel {
 	 * @param userGroupID 	The id to the group selected for the current user.
 	 */
 	public AndsPublishModel(ExperimenterData exp, long userGroupID) {
-		System.out.println("AndsPublishModel instantiated");
 		initialize();
 		this.experimenter = exp;
 		setHierarchyRoot(exp.getId(), userGroupID);
@@ -258,7 +257,6 @@ public class AndsPublishModel {
 	 * @return	the data collections to register with RDA
 	 */
 	protected Collection getDataCollection() {
-		System.out.println("model.getDataCollection()");
 		return dataCollection;
 	}
 
@@ -266,7 +264,6 @@ public class AndsPublishModel {
 	 * Loads the data collections to register with RDA
 	 */
 	protected void loadDataCollection() {
-		System.out.println("model.loadDataCollection()");
 		dataLoader = new DataCollectionLoader(component);
 		dataLoader.load();
 	}
@@ -283,7 +280,6 @@ public class AndsPublishModel {
 	 * @param cookie
 	 */
 	protected void setCookie(String cookie) {
-		System.out.println("Model received cookie");
 		this.cookie = cookie;
 	}
 
@@ -346,11 +342,8 @@ public class AndsPublishModel {
 		if (!hasAllData()) return null; // TODO show error msg
 		
 		List<NameValuePair> nvp = getLicenseParams();
-		System.out.println("nvp size: " + nvp.size());
 		getPartyParams(nvp);
-		System.out.println("nvp size 1: " + nvp.size());	// TODO test this
 		getMetadataParams(nvp);
-		System.out.println("nvp size 2: " + nvp.size());	// TODO test this
 		
 		Iterator<NameValuePair> j = nvp.iterator();
     	NameValuePair[] values = new NameValuePair[nvp.size()];
@@ -458,7 +451,6 @@ public class AndsPublishModel {
 				if (data instanceof TagAnnotationData) {
 					tag = (TagAnnotationData) data;
 					if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
-						System.out.println("Setting tag value to " + Constants.SUCCESS_RDA_TAG);
 						tag.setTagValue(Constants.SUCCESS_RDA_TAG);
 						break;
 					}
@@ -491,7 +483,6 @@ public class AndsPublishModel {
 	 */
 	protected void setMetadata(MonashData metadata) {
 		this.metadata = metadata;
-		System.out.println("setMetadata() called");
 	}
 
 	/**
@@ -502,7 +493,6 @@ public class AndsPublishModel {
 	}
 
 	public void setTags(Collection tags) {
-		System.out.println("setTags() in model........");
 		if (tags == null || tags.size() == 0)
 			return;// false;
 		Iterator iterator = tags.iterator();
@@ -512,9 +502,7 @@ public class AndsPublishModel {
 			data = (AnnotationData) iterator.next();
 			if (data instanceof TagAnnotationData) {
 				tag = (TagAnnotationData) data;
-				System.out.println("Tags: " + tag.getTagValue() + " ");
 				if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
-					System.out.println("REGISTER_RDA_TAG");
 					return;// true;
 				}
 			}
@@ -539,8 +527,7 @@ public class AndsPublishModel {
 	protected PartyBean searchParty() 
 	{
 		try {
-			//MonashSvcReply reply = searchRM(experimenter.getEmail());
-			MonashSvcReply reply = searchRM("mary.vail@monash.edu");
+			MonashSvcReply reply = searchRM(experimenter.getEmail());
 			String result = reply.getReply();
 			return Unmarshaller.getPartyBean(result);
 		} catch (TransportException e) {
@@ -551,7 +538,6 @@ public class AndsPublishModel {
 	public MonashSvcReply searchRM(String party) throws TransportException 
 	{
 		String wsURL = PublishAgent.getPartyToken();
-		System.out.println("partyWS: " + wsURL);
 		MonashServices mSvc = ServiceFactory.getMonashServices(wsURL, -1);
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("party", party);

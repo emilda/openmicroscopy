@@ -70,7 +70,6 @@ public class PartyAction  extends MonashAction {
 	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent e) { 
-		System.out.println("Action recieved by PartyAction, " + e.getActionCommand());
 		model.showAddResearcher(); 
 	}
 }

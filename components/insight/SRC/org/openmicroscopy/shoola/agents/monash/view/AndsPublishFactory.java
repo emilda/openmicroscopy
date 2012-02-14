@@ -83,7 +83,6 @@ public class AndsPublishFactory implements ChangeListener {
         AndsPublishModel model = new AndsPublishModel(exp, userGroupID);
         singleton.viewer = singleton.getViewer(model);
         PublishAgent.setMonashOmeroDS();
-		System.out.println("Cookie.........done");
 		return singleton.viewer;
     }
 
@@ -96,8 +95,6 @@ public class AndsPublishFactory implements ChangeListener {
      */
     private AndsPublish getViewer(AndsPublishModel model)
     {
-    	System.out.println("Creates or recycles a AndsPublish component");
-    	
     	if (singleton.viewer != null) return viewer;
     	AndsPublishComponent comp = new AndsPublishComponent(model);
     	comp.initialize();
@@ -125,7 +122,6 @@ public class AndsPublishFactory implements ChangeListener {
 	}
 
 	public static void setCookie(UserCredentials uc) {
-    	System.out.println("AndsPublishFactory setCookie");
 		if (singleton.viewer != null) {
 			singleton.viewer.setCookie(monashAuth(uc));
 		}
@@ -139,7 +135,6 @@ public class AndsPublishFactory implements ChangeListener {
 	private static String monashAuth(UserCredentials uc) 
 	{
 		String loginToken = PublishAgent.getLoginToken();
-		System.out.println("loginToken: " + loginToken);
 		
 		MonashServices mSvc = ServiceFactory.getMonashServices(loginToken, -1);
 		Map<String, String> params = new HashMap<String, String>();

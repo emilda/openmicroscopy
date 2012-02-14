@@ -69,7 +69,6 @@ public class MonashServicesImpl implements MonashServices {
 		
 		try {
 			channel.exchange(out, in);
-			System.out.println("response from serachRM:" + in.toString()); 
 			return in ;
 		} catch (IOException ioe) {
 			throw new TransportException(
@@ -90,7 +89,6 @@ public class MonashServicesImpl implements MonashServices {
 		
 		try {
 			channel.exchange(out, in);
-			System.out.println("response from login:" + in.toString());
 			
 			return in.getCookie();
 			
@@ -113,7 +111,6 @@ public class MonashServicesImpl implements MonashServices {
 		
 		try {
 			channel.exchange(out, in);
-			System.out.println("response from mdReg:" + in.toString()); 
 			return in ;
 		} catch (IOException ioe) {
 			throw new TransportException(

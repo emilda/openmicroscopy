@@ -175,7 +175,6 @@ public class MonashSvcReply extends Reply {
 		for(Cookie c:cookies){ 
 			tmp = tmp + c.toString();	//+";"; 
 		} 
-		System.out.println("Received cookie, " + tmp);
 		return tmp;
 	}
 }

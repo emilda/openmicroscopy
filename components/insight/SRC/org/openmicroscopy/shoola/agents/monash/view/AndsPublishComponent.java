@@ -78,9 +78,8 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * 
 	 * @param model The Model sub-component.
 	 */
-	public AndsPublishComponent(AndsPublishModel model) {
-		System.out.println("Created a new AndsPublish component");
-
+	public AndsPublishComponent(AndsPublishModel model) 
+	{
 		if (model == null) throw new NullPointerException("No model."); 
 		this.model = model;
 		controller = new AndsPublishControl(this);
@@ -100,25 +99,19 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#activate()
 	 */
-	@Override
-	public void activate() {
-		System.out.println("Activating AndsPublish component");
+	public void activate() 
+	{
 		switch (model.getState()) {
 		case NEW:
-			System.out.println("model is NEW");
-			view.setOnScreen();
-			view.toFront();
-			System.out.println("auto load party");
 			loadParty();
 			loadDataCollection();
-			System.out.println("Done");
+			view.setOnScreen();
+			view.toFront();
 			break;
 		case READY:
-			System.out.println("model is READY");
 			view.setOnScreen();
 			break;
 		case DISCARDED:
-			System.out.println("model is DISCARDED");
 			return;
 		}
 	}
@@ -152,7 +145,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 */
 	public void close()
 	{
-		System.out.println("Close AndsPublish component");
 		view.setVisible(false);
 		view.dispose();
 	}
@@ -173,15 +165,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * @see AndsPublish#getState()
 	 */
 	public int getState() { return model.getState(); }
-
-	/** 
-	 * Implemented as specified by the {@link AndsPublish} interface.
-	 * @see AndsPublish#setExistingTags()
-	 */
-	public void setExistingTags() {
-		// TODO Auto-generated method stub
-
-	}
 
 	/** 
 	 * Implemented as specified by the {@link AndsPublish} interface.
@@ -217,19 +200,15 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#publishData()
 	 */
-	public void publishData() {
-		System.out.println("AndsPublishComponent.publishData()");
-		
+	public void publishData() 
+	{
 		String cookie = model.getCookie();
-		System.out.println("cookie: " + cookie);
 		
 		String wsURL = PublishAgent.getMdRegToken();
-		System.out.println("partyWS: " + wsURL);
 		
 		MonashServices mSvc = ServiceFactory.getMonashServices(wsURL, -1);
 		NameValuePair[] nvp = model.getMdRegParams();
-		model.changeTag();
-		/*try {
+		try {
 			MonashSvcReply reply = mSvc.mdReg(cookie, nvp);
 			String errMsg = reply.getErrMsg();
 			if (errMsg != null) {
@@ -240,8 +219,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 			}
 		} catch (TransportException e) {
 			MonashDialog.showErrDialog(null, Constants.ERROR_PARTY_NF, e);
-		}*/
-		//close();
+		}
 	}
 
 	void refreshTree() {
@@ -252,16 +230,16 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#showAddResearcher()
 	 */
-	public void showAddResearcher() {
+	public void showAddResearcher() 
+	{
 		String option = view.showResearcher();
-		//firePropertyChange(FINDER_VISIBLE_PROPERTY, oldValue, newValue);
 		if (null != option) {
 			/** Shows the Search/ Manual add researcher screen 
 			 * based on the user choice. */
 			if (PartyDialog.PARTY_OPTION_SEARCH.equals(option)) {
 				if (!view.searchResearcher()) showAddResearcher();
 			} else if (PartyDialog.PARTY_OPTION_MANUAL.equals(option)) {
-				//view.manualResearcher();
+				view.manualResearcher();
 			}
 		}
 	}
@@ -294,7 +272,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * @see AndsPublish#setDataCollection()
 	 */
 	public void setDataCollection(Collection result) {
-		System.out.println("Data collection loaded...");
 		int state = model.getState();
 		if (state != LOADING_DATA)
 			throw new IllegalStateException(
@@ -312,7 +289,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * @see AndsPublish#setDataLoaded()
 	 */
 	public void setDataLoaded(Collection dataloaded) {
-		System.out.println("Load data");
 		if(model.getState() == DISCARDED) return;
 		model.setState(LOADING_DATA);
 		setDataCollection(dataloaded);
@@ -323,7 +299,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * @see AndsPublish#setCookie()
 	 */
 	public void setCookie(String cookie) {
-		System.out.println("setCookie...");
 		model.setCookie(cookie);
 	}
 
@@ -335,10 +310,8 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		String option = view.showLicenseMain();
 		if (null != option) {
 			if (LicenseDialog.LICENSE_OPTION_CCL.equals(option)) {
-				System.out.println("CCL...");
 				if (!view.showCCL()) showLicenseMain();
 			} else if (LicenseDialog.LICENSE_OPTION_UDL.equals(option)) {
-				System.out.println("UDL...");
 				if (!view.showUDL()) showLicenseMain();
 			}
 		}
@@ -351,7 +324,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 
 	@Override
 	public void onDataSave(List<DataObject> data) {
-		System.out.println("return from tag saver");
 		if (data == null) {
 			model.setState(READY);
 			return;
@@ -360,10 +332,8 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		DataObject dataObject = null;
 		if (data.size() == 1) dataObject = data.get(0);
 		if (dataObject != null && model.isSameObject(dataObject)) {
-			System.out.println("Tag updated");
 			view.removeListItem();
 		} else
-			System.out.println("Tag not updated");
 		model.setState(READY);
 	}
 }

@@ -185,8 +185,8 @@ public class LicenseDialog extends MonashDialog {
 		formatButton(nextButton, 'N', NEXT_TOOLTIP, NEXT, this);
 		
 		OPTIONS = new Hashtable<String, String>();
-		OPTIONS.put(LICENSE_OPTION_UDL, UDL);
 		OPTIONS.put(LICENSE_OPTION_CCL, CCL);
+		OPTIONS.put(LICENSE_OPTION_UDL, UDL);
 		
         radioButtons = new JRadioButton[OPTIONS.size()];
         group = new ButtonGroup();

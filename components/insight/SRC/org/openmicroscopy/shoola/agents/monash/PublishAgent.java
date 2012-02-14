@@ -99,7 +99,6 @@ public class PublishAgent implements Agent, AgentEventListener {
 
 	public void setContext(Registry ctx)
 	{
-		System.out.println("PublishAgent setContext");
 		//Reference to the Agent Registry to access services.
 		registry = ctx; 
 
@@ -130,7 +129,6 @@ public class PublishAgent implements Agent, AgentEventListener {
 	 * @param e The event to handle.
 	 */
 	private void handleExperimenterLoadedDataEvent(ExperimenterLoadedDataEvent evt) {
-		System.out.println("ExperimenterLoadedDataEvent fired");
 		if (evt == null) return;
 		AndsPublish viewer = AndsPublishFactory.getViewer();
 		Map<Long, List<TreeImageDisplay>> map = evt.getData();
@@ -152,9 +150,8 @@ public class PublishAgent implements Agent, AgentEventListener {
 	 * 
 	 * @param evt The event to handle.
 	 */
-	private void handlePublishEvent(PublishEvent evt) {
-		System.out.println("Publish Event notification received by PublishAgent");
-
+	private void handlePublishEvent(PublishEvent evt) 
+	{
 		if (evt == null) return;
 
 		Environment env = (Environment) registry.lookup(LookupNames.ENV);
@@ -174,7 +171,6 @@ public class PublishAgent implements Agent, AgentEventListener {
 	 * @see Agent#activate(boolean)
 	 */
 	public void activate(boolean master) {
-		System.out.println("PublishAgent activated");
 		if (!master) return;
 	}
 

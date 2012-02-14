@@ -27,7 +27,7 @@
  */
 package org.openmicroscopy.shoola.agents.monash.util;
 /** 
- * Collection of helper methods to format data objects.
+ * Constant values used in the application.
  *
  * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>

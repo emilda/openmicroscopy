@@ -27,6 +27,8 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view.dialog;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -58,32 +60,41 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
  * @version 1.0
  * @since Beta4.4
  */
-public class SearchPartyDialog extends MonashDialog {
+public class InputPartyDialog extends MonashDialog {
 
 	/** Description of the panel. */
-	private static final String 	DESCRIPTION = "Enter the researcher name or email below:";
+	private static final String 	DESCRIPTION = "This page is under construction";
 
 	/** The tooltip of the {@link #backButton}. */
 	private static final String		BACK_TOOLTIP = "Go back to previous page.";
 
-	/** The tooltip of the {@link #searchButton}. */
-	private static final String		SEARCH_TOOLTIP = "Search for Party in the Research Master.";
+	/** The tooltip of the {@link #addButton}. */
+	private static final String		ADD_TOOLTIP = "Search for Party in the Research Master.";
 
 	/** Action ID to close the dialog. */
 	private static final int		BACK = 0;
 
 	/** Action ID to go to the next page and close the dialog. */
-	private static final int		SEARCH = 1;
+	private static final int		ADD = 1;
+
+	/** Max character length */
+	private static final String MAX_TWENTY = "(Maximum 20 characters in length)";
 
 	/** Button to close and dispose of the window. */
 	private JButton 				backButton;
 
 	/** Button to search for Party in the Research Master. */
-	private JButton					searchButton;
+	private JButton					addButton;
 
-	/** The field holding the name of the party to search for. */
-	private JTextField				searchField;
-
+	/** The field holding the title of the party to add. */
+	private JTextField				titleField;
+	
+	/** The field holding the first name of the party add. */
+	private JTextField				fName;
+	
+	/** The field holding the last name of the party to add. */
+	private JTextField				lName;
+	
 	/** Reference to the model. */
 	private AndsPublishModel 		model;
 
@@ -97,7 +108,7 @@ public class SearchPartyDialog extends MonashDialog {
 	 * @param title		title of the dialog
 	 * @param model		Reference to the model
 	 */
-	public SearchPartyDialog(JFrame parent, String title, AndsPublishModel model) {
+	public InputPartyDialog(JFrame parent, String title, AndsPublishModel model) {
 		super(parent, title, "", null);
 		this.model = model;
 	}
@@ -113,33 +124,20 @@ public class SearchPartyDialog extends MonashDialog {
 		case BACK:
 			close();
 			break;
-		case SEARCH:
-			searchParty();
+		case ADD:
+			addParty();
 			break;
 		}
 	}
 
-	private void searchParty() {
+	private void addParty() {
 		setMessage("");
-		String party = searchField.getText();
+		String title = titleField.getText();
 		//StringUtils.isBlank(party); TODO use this.
-		if (null == party || Constants.SPACE.equals(party)) {
+		if (null == title || Constants.SPACE.equals(title)) {
 			setMessage(Constants.ERROR_NULL_FIELD);
 		} else {
-			try {
-				MonashSvcReply reply = model.searchRM(party);
-				String errMsg = reply.getErrMsg();
-				if (errMsg != null) {
-					setMessage(errMsg);
-				} else {
-					String result = reply.getReply();
-					partyBean  = Unmarshaller.getPartyBean(result);
-					// TODO Show message dialog with the search result to confirm
-					close();
-				}
-			} catch (TransportException e) {
-				showErrDialog(this, Constants.ERROR_PARTY_NF, e);
-			}
+			// create party bean
 		}
 	}
 	
@@ -158,8 +156,9 @@ public class SearchPartyDialog extends MonashDialog {
 		JLabel label = new JLabel(DESCRIPTION);
 		box.add(label, c);
 
-		c.gridy++;
-		box.add(searchField, c);
+		addField(box, c, "Title", MAX_TWENTY, titleField);
+		addField(box, c, "First Name", MAX_TWENTY, fName);
+		addField(box, c, "Last Name", MAX_TWENTY, lName);
 
 		c.gridy++;
 		c.weighty = 1.0;
@@ -167,6 +166,24 @@ public class SearchPartyDialog extends MonashDialog {
 		box.add(Box.createVerticalStrut(5), c);
 
 		return box;
+	}
+
+	private void addField(JPanel box, GridBagConstraints c, String fieldTxt,
+			String info, JTextField comp) {
+		c.gridy++;
+		JLabel label = new JLabel(fieldTxt + ":");
+		box.add(label, c);
+		c.gridy++;
+		
+		JLabel infoLabel = new JLabel(info);
+		//Font f = new Font("Serif", Font.PLAIN, 10);
+		//infoLabel.setFont(f);
+		infoLabel.setFont(infoLabel.getFont().deriveFont(10));
+		infoLabel.setForeground(Color.GRAY);
+		
+		box.add(infoLabel, c);
+		c.gridy++;
+		box.add(comp, c);
 	}
 
 	/**
@@ -181,7 +198,7 @@ public class SearchPartyDialog extends MonashDialog {
 		bar.setLayout(new BoxLayout(bar, BoxLayout.X_AXIS));
 		bar.add(backButton);
 		bar.add(Box.createHorizontalStrut(5));
-		bar.add(searchButton);
+		bar.add(addButton);
 		bar.add(Box.createHorizontalStrut(10));
 		return bar;
 	}
@@ -194,16 +211,21 @@ public class SearchPartyDialog extends MonashDialog {
 
 		partyBean = null;
 		
-		searchField = new JTextField(30);
-		searchField.setBackground(UIUtilities.BACKGROUND_COLOR);
-		searchField.setEnabled(true);
-		searchField.setEditable(true);
+		titleField = new JTextField(20);
+		titleField.setBackground(UIUtilities.BACKGROUND_COLOR);
+		
+		fName = new JTextField(20);
+		fName.setBackground(UIUtilities.BACKGROUND_COLOR);
+		
+		lName = new JTextField(20);
+		lName.setBackground(UIUtilities.BACKGROUND_COLOR);
 
 		backButton = new JButton("Back");
 		formatButton(backButton, 'B', BACK_TOOLTIP, BACK, this);
 
-		searchButton = new JButton("Next");
-		formatButton(searchButton, 'N', SEARCH_TOOLTIP, SEARCH, this);
+		addButton = new JButton("Next");
+		formatButton(addButton, 'A', ADD_TOOLTIP, ADD, this);
+		addButton.setEnabled(false);
 
 	}
 

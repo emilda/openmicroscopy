@@ -71,12 +71,12 @@ import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.CCLicenseDialog;
+import org.openmicroscopy.shoola.agents.monash.view.dialog.InputPartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.LicenseDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.SearchPartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.UDLicenseDialog;
 import org.openmicroscopy.shoola.agents.util.EditorUtil;
-import org.openmicroscopy.shoola.env.log.LogMessage;
 import org.openmicroscopy.shoola.env.ui.TopWindow;
 import org.openmicroscopy.shoola.util.ui.TitlePanel;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
@@ -105,7 +105,7 @@ public class AndsPublishUI extends TopWindow
 	private static final String TITLE = "Register with RDA";
 	
 	/** Default height of the window */
-	private static final int 	HEIGHT = 700;
+	private static final int 	HEIGHT = 350;
 
 	/** Message to display when there is no data collections available to register with RDA */
 	private static final String NO_DATA = "No data collections available to register with RDA";
@@ -161,6 +161,9 @@ public class AndsPublishUI extends TopWindow
 	 */
 	private JSplitPane 			splitPane;
 
+	/** Scrollpane to hold {@link #splitPane}. */
+	private JScrollPane 			scrollPane;
+	
 	/** contains details about collection to register with ANDS  */
 	private JPanel 				projectPanel;
 
@@ -263,8 +266,9 @@ public class AndsPublishUI extends TopWindow
 		
 		//Provide minimum sizes for the two components in the split pane.
 		projListScrollPane.setMinimumSize(new Dimension(150, HEIGHT));
-		andsScrollPane.setMinimumSize(new Dimension(750, HEIGHT));
-		splitPane.setPreferredSize(new Dimension(900, HEIGHT));
+		andsScrollPane.setMinimumSize(new Dimension(500, HEIGHT));
+		splitPane.setMinimumSize(new Dimension(650, HEIGHT));
+		scrollPane  = new JScrollPane(splitPane);
 	}
 
 	/**
@@ -283,10 +287,8 @@ public class AndsPublishUI extends TopWindow
 				listmodel.addElement(listdata);
 			}
 		}
-		System.out.println("Setting new list model object");
 		projectList.setModel(listmodel);
 		if (listmodel.size() > 0) {
-			System.out.println("Setting first element");
 			projectList.setSelectedIndex(0);
 		}
 		setComponentControls();
@@ -294,9 +296,7 @@ public class AndsPublishUI extends TopWindow
 
 	/** Enable or disables the components in the panel */
 	private void setComponentControls() {
-		System.out.println("setComponentControls()");
 		if (listmodel != null & listmodel.size() > 0) {
-			System.out.println("listmodel available");
 			descriptionTxt.setEditable(true);
 			researcherButton.setEnabled(true);
 			licenseButton.setEnabled(true);
@@ -307,7 +307,6 @@ public class AndsPublishUI extends TopWindow
 		} else {
 			clearFields();
 		}
-		System.out.println("setComponentControls...........done");
 	}
 
 	/**
@@ -318,7 +317,7 @@ public class AndsPublishUI extends TopWindow
 	 * @return true if the above tag exists false otherwise
 	 */
 	private boolean getTagDetails(DataObject dataObject) {
-		System.out.println("DataObject, id: " + dataObject.getId());
+		System.out.println("data object: " + dataObject.getId());
 		try {
 			Collection tags = PublishAgent.getAnnotations(dataObject);
 			if (tags == null || tags.size() == 0)
@@ -330,7 +329,7 @@ public class AndsPublishUI extends TopWindow
 				data = (AnnotationData) iterator.next();
 				if (data instanceof TagAnnotationData) {
 					tag = (TagAnnotationData) data;
-					System.out.println("Tags: " + tag.getTagValue() + " ");
+					System.out.println("tag value: " + tag.getTagValue());
 					if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
 						return true;
 					}
@@ -361,12 +360,10 @@ public class AndsPublishUI extends TopWindow
 	 * @see ListSelectionListener#valueChanged()
 	 */
 	public void valueChanged(ListSelectionEvent e) {
-		System.out.println("List selection event received");
 		JList list = (JList)e.getSource();
 		int index = list.getSelectedIndex();
 		if (-1 != index) {
 			MonashData object = (MonashData) list.getModel().getElementAt(index);
-			System.out.println("Update messageLabel");
 			updateLabel(object);
 			model.setMetadata(object);
 		}
@@ -506,7 +503,7 @@ public class AndsPublishUI extends TopWindow
 		p.setBackgroundPainter(tp.getBackgroundPainter());
 		lp.setBackgroundPainter(tp.getBackgroundPainter());
 		container.add(p, BorderLayout.NORTH);
-		container.add(splitPane, BorderLayout.CENTER);
+		container.add(scrollPane, BorderLayout.CENTER);	// splitPane
 		container.add(controlsBar, BorderLayout.SOUTH);
 	}
 
@@ -514,13 +511,11 @@ public class AndsPublishUI extends TopWindow
 	 * Shows the Add Researcher Dialog
 	 * @return Selected choice of how to add Party @see PartyDialog#OPTIONS
 	 */
-	protected String showResearcher() {
-		System.out.println("Show add-researcher screen");
-
+	protected String showResearcher() 
+	{
 		PartyDialog pd = new PartyDialog(this, "Adding Researcher Options");
 		UIUtilities.centerAndShow(pd);
 		String option = pd.getSelectedOption();
-		System.out.println("Show next screen based on option, " + option);
 		return option;
 	}
 
@@ -531,8 +526,10 @@ public class AndsPublishUI extends TopWindow
 	 * @return 	<code>false</code> goes back to add researcher options page<br>
 	 * 			<code>true</code> goes back to RDA main screen
 	 */
-	protected boolean searchResearcher() {
-		SearchPartyDialog spd = new SearchPartyDialog(this, "Adding Researcher Options", model);
+	protected boolean searchResearcher() 
+	{
+		SearchPartyDialog spd = 
+				new SearchPartyDialog(this, "Adding Researcher Options", model);
 		UIUtilities.centerAndShow(spd);
 		PartyBean pb = spd.getPartyBean();
 		if (null != pb) {
@@ -545,6 +542,18 @@ public class AndsPublishUI extends TopWindow
 			return false;
 		}
 	}
+	
+	/** Shows the manual input researcher screen */
+	public void manualResearcher() {
+		InputPartyDialog ipd = 
+				new InputPartyDialog(this, "Manually Input a Researcher Infoon", model);
+		UIUtilities.centerAndShow(ipd);
+		/*PartyBean pb = ipd.getPartyBean();
+		String key = pb.getPartyKey();
+		model.addParty(key, pb);
+		addPartyCheckBox(key, pb);
+		setComponentControls();*/
+	}
 
 	/**
 	 * Adds the checkbox and place the name of researcher 
@@ -553,7 +562,6 @@ public class AndsPublishUI extends TopWindow
 	 * @param pb	the <code>PartyBean</code> object
 	 */
 	protected void addPartyCheckBox(String key, PartyBean pb) {
-		System.out.println("add party CheckBox for " + pb.toString());
 
 		JCheckBox rcb = new JCheckBox(pb.toString(), true);
 		rcb.setBackground(UIUtilities.BACKGROUND_COLOR);
@@ -565,7 +573,7 @@ public class AndsPublishUI extends TopWindow
 
 		researcherPanel.add(rcb);
 		researcherPanel.add(Box.createVerticalStrut(5));
-		//researcherPanel.revalidate();
+		researcherPanel.revalidate();
 		int ht = this.getHeight() + 20;
 		this.setSize(new Dimension(this.getWidth(), ht));
 	}
@@ -579,11 +587,9 @@ public class AndsPublishUI extends TopWindow
 
 		if (state == ItemEvent.SELECTED) {
 			String key = cb.getName();
-			System.out.println(cb.getText() + " selected");
 			PartyBean pb = (PartyBean)partyHtable.get(key);
 			model.addParty(key, pb);
 		} else {
-			System.out.println(cb.getText() + " cleared");
 			model.removeParty(cb.getName());
 		}
 		setComponentControls();
@@ -591,7 +597,6 @@ public class AndsPublishUI extends TopWindow
 
 	/** Refreshes the view */
 	public void refresh() {
-		System.out.println("Refreshing view");
 		setListData(model.getDataCollection());
 	}
 
@@ -624,11 +629,11 @@ public class AndsPublishUI extends TopWindow
 	 * 			<code>true</code> goes back to RDA main screen
 	 */
 	protected boolean showUDL() {
-		UDLicenseDialog ld = new UDLicenseDialog(this, "Define Your Own License");
+		UDLicenseDialog ld = 
+				new UDLicenseDialog(this, "Define Your Own License");
 		UIUtilities.centerAndShow(ld);
 		LicenceBean udl = ld.getLicense();
 		if (udl != null) {
-			System.out.println("User DL: " + udl);
 			model.setLicense(udl);
 			noLicense.setText("");
 			setComponentControls();
@@ -645,8 +650,10 @@ public class AndsPublishUI extends TopWindow
 	 * @return 	<code>false</code> goes back to add researcher options page<br>
 	 * 			<code>true</code> goes back to RDA main screen
 	 */
-	protected boolean showCCL() {
-		CCLicenseDialog ld = new CCLicenseDialog(this, "Creative Commons License");
+	protected boolean showCCL() 
+	{
+		CCLicenseDialog ld = 
+				new CCLicenseDialog(this, "Creative Commons License");
 		UIUtilities.centerAndShow(ld);
 		LicenceBean ccl = ld.getLicense();
 		if (ccl != null) {
@@ -684,6 +691,9 @@ public class AndsPublishUI extends TopWindow
 		model.getMetadata().setDescription(description);
 	}
 
+	/**
+	 * Removes the registered collection from the explorer
+	 */
 	public void removeListItem() {
 		listmodel.remove(projectList.getSelectedIndex());
 		if (listmodel.size() > 0) {

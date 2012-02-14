@@ -88,7 +88,6 @@ public class AndsPublishControl implements PropertyChangeListener {
 	 *               Mustn't be <code>null</code>.
 	 */
 	public AndsPublishControl(AndsPublish model) {
-		System.out.println("Created AndsPublishControl");
 		if (model == null) throw new NullPointerException("No model.");
 		this.model = model;
 	}
@@ -99,7 +98,6 @@ public class AndsPublishControl implements PropertyChangeListener {
 	 */
 	public void initialize(AndsPublishUI view) {
 		if (view == null) throw new NullPointerException("No view.");
-		System.out.println("initializing AndsPublishControl");
 		this.view = view;
 		createActions();
 		attachListeners();
@@ -130,60 +128,12 @@ public class AndsPublishControl implements PropertyChangeListener {
 		view.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) { model.close(); }
 		});
-		/*JMenu menu = ImporterFactory.getWindowMenu();
-		menu.addMenuListener(new MenuListener() {
-
-			public void menuSelected(MenuEvent e)
-			{ 
-				Object source = e.getSource();
-				if (source instanceof JMenu)
-					createWindowsMenuItems((JMenu) source);
-			}
-
-			*//** 
-			 * Required by I/F but not actually needed in our case, 
-			 * no-operation implementation.
-			 * @see MenuListener#menuCanceled(MenuEvent)
-			 *//* 
-			public void menuCanceled(MenuEvent e) {}
-
-			*//** 
-			 * Required by I/F but not actually needed in our case, 
-			 * no-operation implementation.
-			 * @see MenuListener#menuDeselected(MenuEvent)
-			 *//* 
-			public void menuDeselected(MenuEvent e) {}
-
-		});
-
-		//Listen to keyboard selection
-		menu.addMenuKeyListener(new MenuKeyListener() {
-
-			public void menuKeyReleased(MenuKeyEvent e)
-			{
-				Object source = e.getSource();
-				if (source instanceof JMenu)
-					createWindowsMenuItems((JMenu) source);
-			}
-
-			*//** 
-			 * Required by I/F but not actually needed in our case, 
-			 * no-operation implementation.
-			 * @see MenuKeyListener#menuKeyPressed(MenuKeyEvent)
-			 *//*
-			public void menuKeyPressed(MenuKeyEvent e) {}
-
-			*//** 
-			 * Required by I/F but not actually needed in our case, 
-			 * no-operation implementation.
-			 * @see MenuKeyListener#menuKeyTyped(MenuKeyEvent)
-			 *//*
-			public void menuKeyTyped(MenuKeyEvent e) {}
-
-		});*/
 	}
 
-	@Override
+	/**
+	 * Implemented as specified by {@link PropertyChangeListener}.
+	 * @see PropertyChangeListener#propertyChange(PropertyChangeEvent)
+	 */
 	public void propertyChange(PropertyChangeEvent evt) {
 		
 		String name = evt.getPropertyName();

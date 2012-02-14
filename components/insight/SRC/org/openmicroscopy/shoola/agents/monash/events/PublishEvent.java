@@ -45,8 +45,5 @@ public class PublishEvent extends RequestEvent {
      * 
      * @param If there is any data to pass to the agent, then pass it here.
      */
-    public PublishEvent()
-    {
-    	System.out.println("PublishEvent fired");
-    }
+    public PublishEvent() {}
 }

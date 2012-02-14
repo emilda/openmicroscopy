@@ -109,13 +109,6 @@ public interface AndsPublish extends ObservableComponent {
 	public void publishData();
 
 	/**
-	 * Sets the Registered tag.
-	 * 
-	 * @param tags The Registered tag.
-	 */
-	public void setExistingTags();
-	
-	/**
 	 * Returns the view.
 	 * 
 	 * @return See above.

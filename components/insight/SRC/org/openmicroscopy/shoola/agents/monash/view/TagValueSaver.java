@@ -38,7 +38,6 @@ public class TagValueSaver extends PublishLoader
 	 */
 	public void load()
 	{
-		System.out.println("Tag saver");
 		handle = mhView.saveData(data, null, null, null, -1, this);
 	}
 
