@@ -43,7 +43,7 @@ import org.openmicroscopy.shoola.agents.monash.view.dialog.UDLicenseDialog;
  * @version 1.0
  * @since Beta4.4
  */
-public class DocumentCharacterLimit extends PlainDocument {
+public class DocCharacterLimit extends PlainDocument {
 	
 	/** The character limit */
 	private int 	limit;
@@ -53,7 +53,7 @@ public class DocumentCharacterLimit extends PlainDocument {
 	 * limit is reached.
 	 * @param limit	the character limit
 	 */
-	public DocumentCharacterLimit(int limit) {
+	public DocCharacterLimit(int limit) {
 		super();
 		this.limit = limit;
 	}

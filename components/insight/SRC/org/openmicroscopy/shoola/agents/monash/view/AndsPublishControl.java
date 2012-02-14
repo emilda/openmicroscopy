@@ -34,62 +34,45 @@ import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JMenu;
 import javax.swing.WindowConstants;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuKeyEvent;
-import javax.swing.event.MenuKeyListener;
-import javax.swing.event.MenuListener;
 
-import org.openmicroscopy.shoola.agents.fsimporter.actions.ImporterAction;
-import org.openmicroscopy.shoola.agents.fsimporter.chooser.ImportDialog;
 import org.openmicroscopy.shoola.agents.monash.action.ExitAction;
 import org.openmicroscopy.shoola.agents.monash.action.LicenseAction;
 import org.openmicroscopy.shoola.agents.monash.action.MonashAction;
 import org.openmicroscopy.shoola.agents.monash.action.PartyAction;
 import org.openmicroscopy.shoola.agents.monash.action.PublishAction;
 
-
+/** 
+ * The controller component in the <code>AndsPublish</code> MVC triad.
+ * All the main actions in <code>PublishAgent</code> is controlled here.
+ *
+ * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
+ * @version 1.0
+ * @since Beta4.4
+ */
 public class AndsPublishControl implements PropertyChangeListener {
-
-	/** Action ID indicating to send the files that could not imported. */
-	static final Integer SEND_BUTTON = 0;
-	
-	/** Action ID indicating to close the window. */
-	static final Integer CLOSE_BUTTON = 1;
-	
-	/** Action ID indicating to cancel. */
-	static final Integer CANCEL_BUTTON = 2;
-	
-	/** Action ID indicating to retry failed import. */
-	static final Integer RETRY_BUTTON = 3;
-	
-	/** Action ID indicating to switch between groups. */
-	static final Integer GROUP_BUTTON = 4;
 	
 	/** Action ID indicating to exit the application. */
-	static final Integer EXIT = 5;
-	
-	/** Action ID indicating to log off the current server. */
-	static final Integer LOG_OFF = 6;
+	static final Integer EXIT = 0;
 	
 	/** Action ID indicating to register metadata with RDS. */
-	static final Integer    PUBLISH = 7;
+	static final Integer PUBLISH = 1;
 	
 	/** Action ID indicating to add Researcher. */
-	static final Integer    PARTY = 8;
+	static final Integer PARTY = 2;
 	
 	/** Action ID indicating to add License. */
-	static final Integer    LICENSE = 9;
+	static final Integer LICENSE = 3;
 	
 	/** 
 	 * Reference to the {@link AndsPublish} component, which, in this context,
 	 * is regarded as the Model.
 	 */
-	private AndsPublish      				model;
+	private AndsPublish		model;
 	
 	/** Reference to the View. */
-	private AndsPublishUI		view;
+	private AndsPublishUI	view;
 	
 	/** Maps actions ids onto actual <code>Action</code> object. */
 	private Map<Integer, MonashAction>	actionsMap;
@@ -110,13 +93,16 @@ public class AndsPublishControl implements PropertyChangeListener {
 		this.model = model;
 	}
 
+	/**
+	 * Initialize the controller. Links the view with the controller.
+	 * @param view
+	 */
 	public void initialize(AndsPublishUI view) {
 		if (view == null) throw new NullPointerException("No view.");
 		System.out.println("initializing AndsPublishControl");
 		this.view = view;
 		createActions();
 		attachListeners();
-		//ImporterFactory.attachWindowMenuToTaskBar();
 	}
 	
 	/** Helper method to create all the UI actions. */
@@ -126,11 +112,7 @@ public class AndsPublishControl implements PropertyChangeListener {
 		actionsMap.put(PUBLISH, new PublishAction(model));
 		actionsMap.put(LICENSE, new LicenseAction(model));
 		actionsMap.put(PARTY, new PartyAction(model));
-		//actionsMap.put(CANCEL_BUTTON, new CancelAction(model));
-		//actionsMap.put(RETRY_BUTTON, new RetryImportAction(model));
-		//actionsMap.put(GROUP_BUTTON, new PersonalManagementAction(model));
 		actionsMap.put(EXIT, new ExitAction(model));
-		//actionsMap.put(LOG_OFF, new LogOffAction(model));
 	}
 
 	/**

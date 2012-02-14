@@ -57,6 +57,9 @@ public abstract class PublishLoader extends DSCallAdapter {
     /** Convenience reference for subclasses. */
     protected final DataManagerView	dmView;
 
+    /** Convenience reference for subclasses. */
+    protected final MetadataHandlerView mhView;
+
 	/**
 	 * Creates a new instance.
 	 */
@@ -67,6 +70,8 @@ public abstract class PublishLoader extends DSCallAdapter {
 		registry = PublishAgent.getRegistry();
 		dmView = (DataManagerView) 
 					registry.getDataServicesView(DataManagerView.class);
+		mhView = (MetadataHandlerView) 
+ 				registry.getDataServicesView(MetadataHandlerView.class);
 	}
 
 	/**

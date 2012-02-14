@@ -27,7 +27,9 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view;
 
+import java.awt.Cursor;
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -37,12 +39,27 @@ import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
 import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
 import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
+import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.LicenseDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.MonashDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 import org.openmicroscopy.shoola.util.ui.component.AbstractComponent;
 
+import pojos.DataObject;
+
+/** 
+ * Implements the {@link AndsPublish} interface to provide 
+ * the functionality required of the {@link PublishAgent}.
+ * This class is the component hub and embeds the component's
+ * MVC triad. It manages the component's state and delegates 
+ * actual functionality to the MVC sub-components.
+ * 
+ * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
+ * @version 1.0
+ * @since Beta4.4
+ */
 public class AndsPublishComponent extends AbstractComponent implements AndsPublish {
 
 	/** The Model sub-component. */
@@ -89,9 +106,12 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		switch (model.getState()) {
 		case NEW:
 			System.out.println("model is NEW");
-			loadDataCollection();
 			view.setOnScreen();
 			view.toFront();
+			System.out.println("auto load party");
+			loadParty();
+			loadDataCollection();
+			System.out.println("Done");
 			break;
 		case READY:
 			System.out.println("model is READY");
@@ -208,7 +228,8 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		
 		MonashServices mSvc = ServiceFactory.getMonashServices(wsURL, -1);
 		NameValuePair[] nvp = model.getMdRegParams();
-		try {
+		model.changeTag();
+		/*try {
 			MonashSvcReply reply = mSvc.mdReg(cookie, nvp);
 			String errMsg = reply.getErrMsg();
 			if (errMsg != null) {
@@ -219,7 +240,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 			}
 		} catch (TransportException e) {
 			MonashDialog.showErrDialog(null, Constants.ERROR_PARTY_NF, e);
-		}
+		}*/
 		//close();
 	}
 
@@ -245,6 +266,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		}
 	}
 
+	
 	/** 
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#loadDataCollection()
@@ -253,7 +275,20 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		model.setState(LOADING_DATA);
 		model.loadDataCollection();
 	}
-
+	
+	/** 
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#loadParty()
+	 */
+	public void loadParty() {
+		PartyBean pb = model.searchParty();
+		if (null != pb) {
+			String key = pb.getPartyKey();
+			model.addParty(key, pb);
+			view.addPartyCheckBox(key, pb);
+		}
+	}
+	
 	/** 
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#setDataCollection()
@@ -309,11 +344,26 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		}
 	}
 
-	/** 
-	 * Implemented as specified by the {@link AndsPublish} interface.
-	 * @see AndsPublish#setLoginId()
-	 */
-	public void setLoginId(String loginId) {
-		model.setLoginId(loginId);
+	@Override
+	public void setTags(Collection result) {
+		model.setTags(result);
+	}
+
+	@Override
+	public void onDataSave(List<DataObject> data) {
+		System.out.println("return from tag saver");
+		if (data == null) {
+			model.setState(READY);
+			return;
+		}
+		if (model.getState() == DISCARDED) return;
+		DataObject dataObject = null;
+		if (data.size() == 1) dataObject = data.get(0);
+		if (dataObject != null && model.isSameObject(dataObject)) {
+			System.out.println("Tag updated");
+			view.removeListItem();
+		} else
+			System.out.println("Tag not updated");
+		model.setState(READY);
 	}
 }

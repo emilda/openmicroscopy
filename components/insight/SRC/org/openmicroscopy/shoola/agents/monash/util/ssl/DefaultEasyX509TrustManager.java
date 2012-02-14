@@ -25,43 +25,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openmicroscopy.shoola.agents.monash.service;
+package org.openmicroscopy.shoola.agents.monash.util.ssl;
 
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.openmicroscopy.shoola.agents.monash.util.ssl.EasyIgnoreSSLProtocolSocketFactory;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
-/** 
- * Factory for creating an object implementing the {@link MonashServices} interface.
+/**
+ * DefaultEasyX509TrustManager class
  *
- * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
- * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
+ * @author Simon Yu - Xiaoming.Yu@monash.edu
  * @version 1.0
- * @since Beta4.4
  */
-public class ServiceFactory {
+public class DefaultEasyX509TrustManager implements X509TrustManager {
 
-	private static final boolean IGNORE_CERT_ERROR = true;
+    @Override
+    public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+    }
 
-	/**
-	 * Creates a {@link MonashServices}
-	 * In order to enforce a connection per request model, factory creates
-	 * new channel for communication for each request to service
-	 * 
-	 * @param url			The server's URL.
-	 * @param connTimeout	The time before being disconnected.
-	 * @return A {@link MonashServicesImpl} or null if none was created.
-	 */
-	public static MonashServices getMonashServices(String url, int connTimeout)
-	{
-		if (url == null)
-			throw new NullPointerException("Please provide server URL.");
+    @Override
+    public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+    }
 
-		if (IGNORE_CERT_ERROR && url.startsWith("https://")) {
-			Protocol easyhttps = new Protocol("https", new EasyIgnoreSSLProtocolSocketFactory(), 443);
-			Protocol.registerProtocol("https", easyhttps);
-		}
+    @Override
+    public X509Certificate[] getAcceptedIssuers() {
+        return null;
+    }
 
-		MonashHttpChannel channel = new MonashHttpChannel(url, connTimeout);
-		return new MonashServicesImpl(channel);
-	}
 }

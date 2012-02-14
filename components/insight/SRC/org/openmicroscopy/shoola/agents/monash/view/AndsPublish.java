@@ -28,11 +28,37 @@
 package org.openmicroscopy.shoola.agents.monash.view;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.JFrame;
 
+import org.openmicroscopy.shoola.agents.monash.DataCollectionLoader;
+import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.util.ui.component.ObservableComponent;
 
+import pojos.DataObject;
+
+/** 
+* Defines the interface provided by the {@link PublishAgent}.
+* The tree viewer provides a top-level window to host different types of
+* hierarchy display and let the user interact with it.
+
+* <p>The typical life-cycle of {@link PublishAgent} is as follows. The object
+* is first created using the {@link AndsPublishFactory}. After
+* creation the object is in the {@link #NEW} state and is waiting for the
+* {@link #activate() activate} method to be called.
+* The data retrieval happens in the {@link DataCollectionLoader}.
+* 
+* When the user quits the window, the {@link #discard() discard} method is
+* invoked and the object transitions to the {@link #DISCARDED} state.
+* At which point, all clients should de-reference the component to allow for
+* garbage collection.
+* 
+ * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
+ * @version 1.0
+ * @since Beta4.4
+ */
 public interface AndsPublish extends ObservableComponent {
 	
 	/** Flag to denote the <i>New</i> state. */
@@ -49,6 +75,9 @@ public interface AndsPublish extends ObservableComponent {
 	
 	/** Flag to denote the <i>Publishing</i> state. */
 	public static final int PUBLISHING = 5;
+	
+	/** Flag to denote the <i>Batch Saving Tag</i> state. */
+	public static final int SAVING = 6;
 
 	/**
 	 * Starts the ANDS publishing process when the current state is {@link #NEW} 
@@ -121,6 +150,8 @@ public interface AndsPublish extends ObservableComponent {
 	/** Load the data collections to register with RDA */
 	public void loadDataCollection();
 
+	/** Load the party info for the logged in user */
+	public void loadParty();
 	/**
 	 * Project/ Dataset tagged as <i>Register with RDA</i>
 	 * 
@@ -146,8 +177,7 @@ public interface AndsPublish extends ObservableComponent {
 	 */
 	public void showLicenseMain();
 
-	/**
-	 * Authcate Id of the user
-	 */
-	public void setLoginId(String userName);
+	public void setTags(Collection result);
+
+	public void onDataSave(List<DataObject> dataObject);
 }

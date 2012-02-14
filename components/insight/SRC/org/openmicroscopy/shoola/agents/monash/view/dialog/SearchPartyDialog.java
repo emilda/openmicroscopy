@@ -43,7 +43,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.commons.lang.StringUtils;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
 import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
@@ -133,24 +132,15 @@ public class SearchPartyDialog extends MonashDialog {
 		if (null == party || Constants.SPACE.equals(party)) {
 			setMessage(Constants.ERROR_NULL_FIELD);
 		} else {
-			String cookie = model.getCookie();
-			System.out.println("cookie: " + cookie);
-
-			String wsURL = PublishAgent.getPartyToken();
-			System.out.println("partyWS: " + wsURL);
-			MonashServices mSvc = ServiceFactory.getMonashServices(wsURL, -1);
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("party", party);
 			try {
-				MonashSvcReply reply = mSvc.searchRM(cookie, params);
+				MonashSvcReply reply = model.searchRM(party);
 				String errMsg = reply.getErrMsg();
 				if (errMsg != null) {
 					setMessage(errMsg);
 				} else {
-					String result = reply.getSuccessMsg();
+					String result = reply.getReply();
 					partyBean  = Unmarshaller.getPartyBean(result);
 					// TODO Show message dialog with the search result to confirm
-					if (null != partyBean ) System.out.println("partyBean: " + partyBean.toString());
 					close();
 				}
 			} catch (TransportException e) {
@@ -214,13 +204,6 @@ public class SearchPartyDialog extends MonashDialog {
 		searchField.setBackground(UIUtilities.BACKGROUND_COLOR);
 		searchField.setEnabled(true);
 		searchField.setEditable(true);
-
-		//Ensure the text field always gets the first focus.
-		/*addComponentListener(new ComponentAdapter() {
-            public void componentShown(ComponentEvent ce) {
-            	searchField.requestFocusInWindow();
-            }
-        });*/
 
 		backButton = new JButton("Back");
 		formatButton(backButton, 'B', BACK_TOOLTIP, BACK, this);

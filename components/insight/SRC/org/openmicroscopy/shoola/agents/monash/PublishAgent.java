@@ -79,7 +79,6 @@ public class PublishAgent implements Agent, AgentEventListener {
 
 	//no-arguments constructor required for initialization
 	public PublishAgent() {
-		System.out.println("PublishAgent constructor");
 	}
 
 	/**

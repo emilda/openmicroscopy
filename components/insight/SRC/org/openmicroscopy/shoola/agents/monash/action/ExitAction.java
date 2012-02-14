@@ -32,10 +32,16 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 
 import org.openmicroscopy.shoola.agents.fsimporter.IconManager;
-import org.openmicroscopy.shoola.agents.fsimporter.view.Importer;
 import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
-
+/** 
+ * Action class to exit the <code>PublishAgent</code>.
+ *
+ * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
+ * @version 1.0
+ * @since OME3.3
+ */
 public class ExitAction extends MonashAction {
 
 	/** The name of the action. */

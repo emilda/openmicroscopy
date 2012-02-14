@@ -27,23 +27,46 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view;
 
+import java.awt.Cursor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.httpclient.NameValuePair;
 import org.openmicroscopy.shoola.agents.monash.DataCollectionLoader;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
+import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
+import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
+import org.openmicroscopy.shoola.agents.monash.util.Unmarshaller;
 import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
-import org.openmicroscopy.shoola.agents.treeviewer.view.TreeViewer;
+import org.openmicroscopy.shoola.env.data.DSAccessException;
+import org.openmicroscopy.shoola.env.data.DSOutOfServiceException;
+import org.openmicroscopy.shoola.svc.transport.TransportException;
 
+import pojos.AnnotationData;
+import pojos.DataObject;
 import pojos.ExperimenterData;
-
+import pojos.TagAnnotationData;
+import pojos.WellSampleData;
+/** 
+ * The Model component in the <code>AndsPublish</code> MVC triad.
+ * This class keeps the <code>AndsPublish</code>'s state and data. 
+ * The {@link AndsPublishComponent} intercepts the 
+ * results of data loadings, feeds them back to this class.
+ *
+ * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
+ * @version 1.0
+ * @since Beta4.4
+ */
 public class AndsPublishModel {
 
 	/** Holds one of the state flags defined by {@link PublishAgent}. */
@@ -81,9 +104,6 @@ public class AndsPublishModel {
 
 	/** The metadata of the data collection */
 	private MonashData 			metadata;
-	
-	/** Login Id of the user */
-	private static String 		loginId;
 	
 	/** Hashtable containing party information */
 	private Hashtable<String, PartyBean>	partyHtable;
@@ -213,23 +233,23 @@ public class AndsPublishModel {
 		state = AndsPublish.READY;
 	}
 
-	public ExperimenterData getExperimenter() {
+	protected ExperimenterData getExperimenter() {
 		return experimenter;
 	}
 
-	public long getRootID() {
+	protected long getRootID() {
 		return rootID;
 	}
 
-	public void setRootID(long rootID) {
+	protected void setRootID(long rootID) {
 		this.rootID = rootID;
 	}
 
-	public long getUserGroupID() {
+	protected long getUserGroupID() {
 		return userGroupID;
 	}
 
-	public void setUserGroupID(long userGroupID) {
+	protected void setUserGroupID(long userGroupID) {
 		this.userGroupID = userGroupID;
 	}
 
@@ -237,7 +257,7 @@ public class AndsPublishModel {
 	 * 
 	 * @return	the data collections to register with RDA
 	 */
-	public Collection getDataCollection() {
+	protected Collection getDataCollection() {
 		System.out.println("model.getDataCollection()");
 		return dataCollection;
 	}
@@ -245,7 +265,7 @@ public class AndsPublishModel {
 	/**
 	 * Loads the data collections to register with RDA
 	 */
-	public void loadDataCollection() {
+	protected void loadDataCollection() {
 		System.out.println("model.loadDataCollection()");
 		dataLoader = new DataCollectionLoader(component);
 		dataLoader.load();
@@ -254,7 +274,7 @@ public class AndsPublishModel {
 	/**
 	 * @param dataCollection	the data collections to register with RDA
 	 */
-	public void setDataCollection(Collection dataCollection) {
+	protected void setDataCollection(Collection dataCollection) {
 		this.dataCollection = dataCollection;
 	}
 
@@ -262,7 +282,7 @@ public class AndsPublishModel {
 	 * Cookie to connect to Monash DS
 	 * @param cookie
 	 */
-	public void setCookie(String cookie) {
+	protected void setCookie(String cookie) {
 		System.out.println("Model received cookie");
 		this.cookie = cookie;
 	}
@@ -280,7 +300,7 @@ public class AndsPublishModel {
 	 * @param key   the party key
 	 * @param pb	the PartyBean to add
 	 */
-	public void addParty(String key, PartyBean pb) {
+	protected void addParty(String key, PartyBean pb) {
 		partyHtable.put(key, pb);
 	}
 
@@ -290,7 +310,7 @@ public class AndsPublishModel {
 	 * 
 	 * @param key   the party key
 	 */
-	public void removeParty(String key) {
+	protected void removeParty(String key) {
 		partyHtable.remove(key);
 	}
 
@@ -298,7 +318,7 @@ public class AndsPublishModel {
 	 * Sets the license associated with the data collection.
 	 * @param ccl	the <code>LicenceBean</code> to set
 	 */
-	public void setLicense(LicenceBean ccl) {
+	protected void setLicense(LicenceBean ccl) {
 		this.license = ccl;
 	}
 
@@ -309,7 +329,7 @@ public class AndsPublishModel {
 	 * 
 	 * @return see above
 	 */
-	public boolean hasAllData() {
+	protected boolean hasAllData() {
 		if (cookie != null && license != null && partyHtable.size() > 0)
 			return true;
 		return false;
@@ -321,7 +341,7 @@ public class AndsPublishModel {
 	 * 
 	 * @return see above
 	 */
-	public NameValuePair[] getMdRegParams() 
+	protected NameValuePair[] getMdRegParams() 
 	{
 		if (!hasAllData()) return null; // TODO show error msg
 		
@@ -352,7 +372,7 @@ public class AndsPublishModel {
 		nvp.add(new NameValuePair("regMetadata.datasetId", String.valueOf(datasetId)));
 		nvp.add(new NameValuePair("regMetadata.description", metadata.getDescription()));
 		nvp.add(new NameValuePair("regMetadata.title", metadata.getTitle()));
-		nvp.add(new NameValuePair("regMetadata.uid", loginId));
+		nvp.add(new NameValuePair("regMetadata.uid", experimenter.getUserName()));
 	}
 
 	/**
@@ -366,20 +386,34 @@ public class AndsPublishModel {
 		int i=0;
 		for (PartyBean pb : partyHtable.values()) 
 		{
-			nvp.add(new NameValuePair("partyBeans[" + i + "].groupName", pb.getGroupName()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].partyKey", pb.getGroupName()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].originateSourceType", pb.getOriginateSourceType()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].originateSourceValue", pb.getOriginateSourceValue()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].identifierType", pb.getIdentifierType()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].identifierValue", pb.getIdentifierValue()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].personTitle", pb.getPersonTitle()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].personGivenName", pb.getPersonGivenName()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].personFamilyName", pb.getPersonFamilyName()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].url", pb.getUrl()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].email", pb.getEmail()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].address", pb.getAddress()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].rifcsContent", pb.getRifcsContent()));
-			nvp.add(new NameValuePair("partyBeans[" + i + "].fromRm", pb.getFromRm()));
+			if (pb.getGroupName() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].groupName", pb.getGroupName()));
+			if (pb.getPartyKey() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].partyKey", pb.getPartyKey()));
+			if (pb.getOriginateSourceType() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].originateSourceType", pb.getOriginateSourceType()));
+			if (pb.getOriginateSourceValue() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].originateSourceValue", pb.getOriginateSourceValue()));
+			if (pb.getIdentifierType() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].identifierType", pb.getIdentifierType()));
+			if (pb.getIdentifierValue() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].identifierValue", pb.getIdentifierValue()));
+			if (pb.getPersonTitle() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].personTitle", pb.getPersonTitle()));
+			if (pb.getPersonGivenName() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].personGivenName", pb.getPersonGivenName()));
+			if (pb.getPersonFamilyName() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].personFamilyName", pb.getPersonFamilyName()));
+			if (pb.getUrl() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].url", pb.getUrl()));
+			if (pb.getEmail() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].email", pb.getEmail()));
+			if (pb.getAddress() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].address", pb.getAddress()));
+			if (pb.getRifcsContent() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].rifcsContent", pb.getRifcsContent()));
+			if (pb.getFromRm() != null)
+				nvp.add(new NameValuePair("partyBeans[" + i + "].fromRm", pb.getFromRm()));
 			i++;
 			
 		}
@@ -395,25 +429,67 @@ public class AndsPublishModel {
 		List<NameValuePair> nvp = new ArrayList<NameValuePair>();
 		String type = license.getLicenceType();
 		nvp.add(new NameValuePair("licenceBean.licenceType", type));
-		nvp.add(new NameValuePair("licenceBean.licenceType", license.getLicenceContents()));
+		nvp.add(new NameValuePair("licenceBean.licenceContents", license.getLicenceContents()));
 		if(type.equals(Constants.LICENSE_CCCL_TYPE)) {
-			nvp.add(new NameValuePair("licenceBean.licenceType", license.getCommercial()));
-			nvp.add(new NameValuePair("licenceBean.licenceType", license.getDerivatives()));
-			nvp.add(new NameValuePair("licenceBean.licenceType", license.getJurisdiction()));
+			nvp.add(new NameValuePair("licenceBean.commercial", license.getCommercial()));
+			nvp.add(new NameValuePair("licenceBean.derivatives", license.getDerivatives()));
+			nvp.add(new NameValuePair("licenceBean.jurisdiction", license.getJurisdiction()));
 		}
 		return nvp;
 	}
 
-	public void changeTag() {
-		// TODO Auto-generated method stub
+	/**
+	 * Starts an asynchronous call to update the tag from
+	 * {@link Constants#REGISTER_RDA_TAG} to {@link Constants#SUCCESS_RDA_TAG}.
+	 */
+	protected void changeTag() {
+		state = AndsPublish.SAVING;
+		DataObject object = metadata.getDataObject();
+		
+		try {
+			Collection tags = PublishAgent.getAnnotations(object);
+			if (tags == null || tags.size() == 0)
+				return;
+			Iterator iterator = tags.iterator();
+			AnnotationData data;
+			TagAnnotationData tag;
+			while (iterator.hasNext()){
+				data = (AnnotationData) iterator.next();
+				if (data instanceof TagAnnotationData) {
+					tag = (TagAnnotationData) data;
+					if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
+						System.out.println("Setting tag value to " + Constants.SUCCESS_RDA_TAG);
+						tag.setTagValue(Constants.SUCCESS_RDA_TAG);
+						break;
+					}
+				}
+			}
+			TagValueSaver tagValueSaver = new TagValueSaver(component, object);
+			tagValueSaver.load();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
 	/**
+	 * Get the tag values for the given <code>DataObject</code>
+	 * and check for value {@link Constants.REGISTER_RDA_TAG}
+	 * returns true if found, false otherwise
+	 * @param dataObject
+	 * @return true if the above tag exists false otherwise
+	 */
+	protected void getTagDetails(DataObject dataObject) {
+		TagsLoader tagsLoader = new TagsLoader(component, dataObject);
+		tagsLoader.load();
+	}
+	
+	/**
 	 * Sets the collection metadata
 	 * @param metadata the metadata to set
 	 */
-	public void setMetadata(MonashData metadata) {
+	protected void setMetadata(MonashData metadata) {
 		this.metadata = metadata;
 		System.out.println("setMetadata() called");
 	}
@@ -421,15 +497,65 @@ public class AndsPublishModel {
 	/**
 	 * @return the collection metadata
 	 */
-	public MonashData getMetadata() {
+	protected MonashData getMetadata() {
 		return metadata;
 	}
 
-	/**
-	 * Sets the uthcate Id of the user
-	 * @param the id to set
-	 */
-	public void setLoginId(String loginId) {
-		this.loginId = loginId;
+	public void setTags(Collection tags) {
+		System.out.println("setTags() in model........");
+		if (tags == null || tags.size() == 0)
+			return;// false;
+		Iterator iterator = tags.iterator();
+		AnnotationData data;
+		TagAnnotationData tag;
+		while (iterator.hasNext()){
+			data = (AnnotationData) iterator.next();
+			if (data instanceof TagAnnotationData) {
+				tag = (TagAnnotationData) data;
+				System.out.println("Tags: " + tag.getTagValue() + " ");
+				if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
+					System.out.println("REGISTER_RDA_TAG");
+					return;// true;
+				}
+			}
+		}
 	}
+	
+	/**
+	 * Returns <code>true</code> if the passed object is the reference object,
+	 * <code>false</code> otherwise.
+	 * 
+	 * @param uo The object to compare.
+	 * @return See above.
+	 */
+	boolean isSameObject(DataObject uo)
+	{
+		DataObject refObject = metadata.getDataObject();
+		if (uo == null || !(refObject instanceof DataObject)) return false;
+		if (uo.getId() != refObject.getId()) return false;
+		return true;
+	}
+
+	protected PartyBean searchParty() 
+	{
+		try {
+			//MonashSvcReply reply = searchRM(experimenter.getEmail());
+			MonashSvcReply reply = searchRM("mary.vail@monash.edu");
+			String result = reply.getReply();
+			return Unmarshaller.getPartyBean(result);
+		} catch (TransportException e) {
+			return null;
+		}
+	}
+
+	public MonashSvcReply searchRM(String party) throws TransportException 
+	{
+		String wsURL = PublishAgent.getPartyToken();
+		System.out.println("partyWS: " + wsURL);
+		MonashServices mSvc = ServiceFactory.getMonashServices(wsURL, -1);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("party", party);
+		return mSvc.searchRM(cookie, params);
+	}
+
 }

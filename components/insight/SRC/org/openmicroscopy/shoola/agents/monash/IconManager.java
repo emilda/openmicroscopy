@@ -56,12 +56,15 @@ public class IconManager
     /** The <code>ANDS</code> icon. */
     public  static final int	LOGO_ANDS = 1;
     
+    /** The <code>information</code> icon. */
+    public  static final int	INFO = 2;
+    
     
     /** 
      * The maximum ID used for the icon IDs.
      * Allows to correctly build arrays for direct indexing. 
      */
-    private static final int	MAX_ID = 1;
+    private static final int	MAX_ID = 2;
     
     /** Paths of the icon files. */
     private static String[]     relPaths = new String[MAX_ID+1];
@@ -69,6 +72,7 @@ public class IconManager
     static {
     	relPaths[MONASH] = "mon_reg.png";	// monash.ico
         relPaths[LOGO_ANDS] = "logo_ands.png";
+        relPaths[INFO] = "info.png";
     }
     
     /** The sole instance. */

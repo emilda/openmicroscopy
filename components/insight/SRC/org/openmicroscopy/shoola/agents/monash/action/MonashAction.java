@@ -40,7 +40,8 @@ import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
 /** 
  * Top class that each action should extend.
  *
- * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp; <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
+ * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ *  <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  * @version 1.0
  * @since OME2.3
  */

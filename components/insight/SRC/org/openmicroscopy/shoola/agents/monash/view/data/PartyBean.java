@@ -29,10 +29,13 @@ package org.openmicroscopy.shoola.agents.monash.view.data;
 import java.io.Serializable;
 
 /**
- * PartyBean class
+ * JavaBean class containing Party information
  *
  * @author Simon Yu - Xiaoming.Yu@monash.edu
  * @version 2.0
+ * 
+ * Modified by Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  */
 public class PartyBean implements Serializable {
 
@@ -184,7 +187,7 @@ public class PartyBean implements Serializable {
 
 	/** 
 	 * Return in the format, Title gName fName - gName <br>
-	 * Eg. Ms Sindhu Emilda - Monash University 
+	 * Eg. Ms first last - Monash University 
 	 */
     public String toString() {
 		StringBuilder sb = new StringBuilder();

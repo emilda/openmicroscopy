@@ -77,4 +77,9 @@ public class CCLFieldEnumValues implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    /** @see java.lang.Object#toString() */
+	public String toString() {
+		return label;
+	}
 }

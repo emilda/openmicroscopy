@@ -30,12 +30,17 @@ package org.openmicroscopy.shoola.agents.monash.view.data;
 import java.io.Serializable;
 
 /**
+ * JavaBean containing license information.
+ * 
  * @author: Simon Yu
  * @email: Xiaoming.Yu@monash.edu
  *
  * Date: 30/01/12
  * Time: 12:05 PM
  * @version: 1.0
+ * 
+ * Modified by Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
  */
 public class LicenceBean implements Serializable {
 

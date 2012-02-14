@@ -25,8 +25,8 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * General set up for the data manager
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-<entry name="/services/monash/loginToken">http://localhost:8080/omeromd/user/userLogin.jspx</entry>
-<entry name="/services/monash/mdregToken">http://localhost:8080//omeromd/data/mdReg.jspx</entry>
-<entry name="/services/monash/partyToken">http://localhost:8080/omeromd/data/searchParty.jspx</entry>
+<entry name="/services/monash/loginToken">https://vera143.its.monash.edu.au/omeromd/user/userLogin.jspx</entry>
+<entry name="/services/monash/mdregToken">https://vera143.its.monash.edu.au//omeromd/data/mdReg.jspx</entry>
+<entry name="/services/monash/partyToken">https://vera143.its.monash.edu.au/omeromd/data/searchParty.jspx</entry>
 <entry name="/services/ws/ccl">http://api.creativecommons.org/rest/1.5/license/standard</entry>
 </agent>

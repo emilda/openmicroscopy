@@ -39,7 +39,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.openmicroscopy.shoola.agents.monash.view.data.CCLField;
 import org.openmicroscopy.shoola.agents.monash.view.data.CCLFieldEnumValues;
-import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -72,6 +71,7 @@ public class Unmarshaller {
 			XMLReader reader = new XMLReader(is);
 			PartyBean pb = new PartyBean();
 			pb.setFromRm("true");
+			pb.setRifcsContent(result);
 
 			// To get a xml attribute, group
 			String expression = prefix + "@group";
@@ -109,6 +109,8 @@ public class Unmarshaller {
 			expression = prefix + "party/name/namePart[3]";
 			pb.setPersonFamilyName(compileExpression(reader, expression));
 
+			// TODO other addresses?
+			
 			// To get address electronic address.
 			expression = prefix + "party/location/address/electronic";
 			NodeList electronic = (NodeList)reader.read(expression, XPathConstants.NODESET);
@@ -200,7 +202,7 @@ public class Unmarshaller {
 					else if(nodename.equals("enum")) {
 						String enumId = fieldElem.getAttributes().getNamedItem("id").getTextContent();
 						CCLFieldEnumValues enumField = new CCLFieldEnumValues();
-						if (enumId.equals("")) enumId = "International";	// TODO test
+						if (enumId.equals("")) enumId = Constants.INTERNATIONAL;
 						enumField.setId(enumId);
 						if (fieldElem.hasChildNodes()) {
 							NodeList enumList = fieldElem.getChildNodes();
@@ -220,6 +222,8 @@ public class Unmarshaller {
 			}
 			fields.add(ccfield);
 		} // fields
+		
+		//System.out.println("----ccfields: " + fields.toString());	// TODO remove
 		return fields;
 	}
 }

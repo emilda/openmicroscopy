@@ -43,7 +43,7 @@ public class PublishEvent extends RequestEvent {
     /**
      * Creates a new instance.
      * 
-     * @param TODO If there is any data to pass to the agent, then pass it here.
+     * @param If there is any data to pass to the agent, then pass it here.
      */
     public PublishEvent()
     {

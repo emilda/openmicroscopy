@@ -41,12 +41,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.text.AbstractDocument.Content;
 
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
-import org.openmicroscopy.shoola.agents.monash.util.DocumentCharacterLimit;
+import org.openmicroscopy.shoola.agents.monash.util.DocCharacterLimit;
 import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
-import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
 /** 
  * Dialog to create the User Defined License. 
@@ -187,7 +185,7 @@ public class UDLicenseDialog extends MonashDialog {
 		licenseArea = new JTextArea(15, 50);
 		licenseArea.setWrapStyleWord(true);
 		licenseArea.setLineWrap(true);
-		licenseArea.setDocument(new DocumentCharacterLimit(UDL_CHARAC_LIMIT));
+		licenseArea.setDocument(new DocCharacterLimit(UDL_CHARAC_LIMIT));
 		scrollPane  = new JScrollPane(licenseArea);
 
 		backButton = new JButton("Back");

@@ -86,4 +86,7 @@ public class Constants {
     
     /** Tag value identifying the collection successfully registered with RDA */
     public static final String SUCCESS_RDA_TAG = "Successfully Registered with RDA";
+
+    /** International License */
+	public static final String INTERNATIONAL = "International";
 }

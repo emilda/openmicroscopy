@@ -27,22 +27,12 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
 import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
@@ -138,7 +128,6 @@ public class AndsPublishFactory implements ChangeListener {
     	System.out.println("AndsPublishFactory setCookie");
 		if (singleton.viewer != null) {
 			singleton.viewer.setCookie(monashAuth(uc));
-			singleton.viewer.setLoginId(uc.getUserName());
 		}
 	}
 	
