@@ -43,6 +43,7 @@ import java.awt.event.ItemListener;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -83,6 +84,8 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
 import pojos.AnnotationData;
 import pojos.DataObject;
+import pojos.DatasetData;
+import pojos.ProjectData;
 import pojos.TagAnnotationData;
 
 /** 
@@ -280,11 +283,24 @@ public class AndsPublishUI extends TopWindow
 		listmodel = new DefaultListModel();
 
 		Iterator i = dataCollection.iterator();
+		DataObject object;
+		Set<DatasetData> datasets;
+		Iterator<DatasetData> j;
+		DatasetData data;
 		while (i.hasNext()) {
-			DataObject object = (DataObject) i.next();
+			object = (DataObject) i.next();
 			if (getTagDetails(object)) {
-				MonashData listdata = new MonashData(object);
-				listmodel.addElement(listdata);
+				listmodel.addElement(new MonashData(object));
+				if (object instanceof ProjectData) {
+					datasets = ((ProjectData) object).getDatasets();
+					j = datasets.iterator();
+					while (j.hasNext()) {
+						data = j.next();
+						if (getTagDetails(object)) {
+							listmodel.addElement(new MonashData(data));
+						}
+					}
+				}
 			}
 		}
 		projectList.setModel(listmodel);
@@ -300,10 +316,7 @@ public class AndsPublishUI extends TopWindow
 			descriptionTxt.setEditable(true);
 			researcherButton.setEnabled(true);
 			licenseButton.setEnabled(true);
-			if (model.hasAllData())
-				publishButton.setEnabled(true);
-			else
-				publishButton.setEnabled(false);
+			publishButton.setEnabled(model.hasAllData());
 		} else {
 			clearFields();
 		}
