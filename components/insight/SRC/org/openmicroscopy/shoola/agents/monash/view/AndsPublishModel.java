@@ -449,7 +449,7 @@ public class AndsPublishModel {
 				return;
 			Iterator iterator = tags.iterator();
 			AnnotationData data;
-			TagAnnotationData tag;
+			TagAnnotationData tag = null;
 			while (iterator.hasNext()){
 				data = (AnnotationData) iterator.next();
 				if (data instanceof TagAnnotationData) {
@@ -460,8 +460,10 @@ public class AndsPublishModel {
 					}
 				}
 			}
-			TagValueSaver tagValueSaver = new TagValueSaver(component, object);
-			tagValueSaver.load();
+			if (tag != null) {
+				TagValueSaver tagValueSaver = new TagValueSaver(component, tag);
+				tagValueSaver.load();
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
