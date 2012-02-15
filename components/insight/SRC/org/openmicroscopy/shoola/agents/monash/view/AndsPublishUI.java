@@ -289,6 +289,11 @@ public class AndsPublishUI extends TopWindow
 		DatasetData data;
 		while (i.hasNext()) {
 			object = (DataObject) i.next();
+			listmodel.addElement(new MonashData(object));
+		}
+		/*
+		while (i.hasNext()) {
+			object = (DataObject) i.next();
 			if (getTagDetails(object)) {
 				listmodel.addElement(new MonashData(object));
 				if (object instanceof ProjectData) {
@@ -303,6 +308,7 @@ public class AndsPublishUI extends TopWindow
 				}
 			}
 		}
+		*/
 		projectList.setModel(listmodel);
 		if (listmodel.size() > 0) {
 			projectList.setSelectedIndex(0);

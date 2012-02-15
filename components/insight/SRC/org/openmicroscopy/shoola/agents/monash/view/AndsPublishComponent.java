@@ -27,9 +27,11 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view;
 
-import java.awt.Cursor;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JFrame;
 
@@ -47,6 +49,8 @@ import org.openmicroscopy.shoola.svc.transport.TransportException;
 import org.openmicroscopy.shoola.util.ui.component.AbstractComponent;
 
 import pojos.DataObject;
+import pojos.DatasetData;
+import pojos.ProjectData;
 
 /** 
  * Implements the {@link AndsPublish} interface to provide 
@@ -71,6 +75,12 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	/** The View sub-component. */
 	private AndsPublishUI       view;
 
+	/** The number of filters.*/
+	private int totalFilter;
+	
+	/** The number of processed filters.*/
+	private int count;
+	
 	/**
 	 * Creates a new instance.
 	 * The {@link #initialize() initialize} method should be called straight 
@@ -281,9 +291,77 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 
 		model.setState(READY);
 		model.setDataCollection(result);
-		view.setListData(result);
+		if (result == null) return;
+		Iterator i = result.iterator();
+		DataObject object;
+		Set<DatasetData> datasets;
+		Iterator<DatasetData> j;
+		List<Long> datasetIds = new ArrayList<Long>();
+		List<Long> projectIds = new ArrayList<Long>();
+		while (i.hasNext()) {
+			object = (DataObject) i.next();
+			if (object instanceof ProjectData) {
+				projectIds.add(object.getId());
+				datasets = ((ProjectData) object).getDatasets();
+				j = datasets.iterator();
+				while (j.hasNext()) {
+					datasetIds.add(j.next().getId());
+				}
+			} else if (object instanceof DatasetData) {
+				datasetIds.add(object.getId());
+			}
+		}
+		totalFilter = 0;
+		if (datasetIds.size() > 0) {
+			totalFilter++;
+			model.filterData(DatasetData.class, datasetIds);
+		}
+		if (projectIds.size() > 0) {
+			totalFilter++;
+			model.filterData(ProjectData.class, projectIds);
+		}
+		//Filter the nodes
+		//view.setListData(result);
 	}
 
+	public void setFilteredData(Class type, Collection<Long> nodeIds)
+	{
+		Collection list = model.getDataCollection();
+		Iterator i = list.iterator();
+		DataObject data;
+		List<DataObject> nodes = new ArrayList<DataObject>();
+		Set<DatasetData> datasets;
+		Iterator<DatasetData> j;
+		DatasetData d;
+		while (i.hasNext()) {
+			data = (DataObject) i.next();
+			if (data instanceof ProjectData) {
+				if (ProjectData.class.equals(type)) {
+					if (nodeIds.contains(data.getId()))
+						nodes.add(data);
+				} else {
+					datasets = ((ProjectData) data).getDatasets();
+					j = datasets.iterator();
+					while (j.hasNext()) {
+						d = j.next();
+						if (nodeIds.contains(d.getId()))
+							nodes.add(d);
+					}
+				}
+			} else if (data instanceof DatasetData && 
+					DatasetData.class.equals(type) && 
+					nodeIds.contains(data.getId())) {
+				nodes.add(data);
+			}
+		}
+		count++;
+		model.setFilteredData(nodes);
+		if (count == totalFilter) {
+			view.setListData(model.getFilteredData());
+			totalFilter = 0;
+		}
+	}
+	
 	/** 
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#setDataLoaded()

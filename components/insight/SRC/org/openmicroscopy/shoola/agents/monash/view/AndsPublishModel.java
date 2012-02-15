@@ -38,6 +38,7 @@ import java.util.Map;
 
 import org.apache.commons.httpclient.NameValuePair;
 import org.openmicroscopy.shoola.agents.monash.DataCollectionLoader;
+import org.openmicroscopy.shoola.agents.monash.FilterByTag;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
 import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
@@ -108,7 +109,9 @@ public class AndsPublishModel {
 	/** Hashtable containing party information */
 	private Hashtable<String, PartyBean>	partyHtable;
 
-
+	/** The number of filters.*/
+	private List<DataObject> filteredData;
+	
 	/**
 	 * Creates a new instance and sets the state to {@link AndsPublish#NEW}.
 	 */
@@ -134,6 +137,7 @@ public class AndsPublishModel {
 	{
 		state = AndsPublish.NEW;
 		partyHtable = new Hashtable<String, PartyBean>();
+		filteredData = new ArrayList<DataObject>();
 		license = null;
 		metadata = null;
 		recycled = false;
@@ -542,6 +546,37 @@ public class AndsPublishModel {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("party", party);
 		return mSvc.searchRM(cookie, params);
+	}
+
+	/**
+	 * Filters the passed objects tagged with {@link Constants#REGISTER_RDA_TAG}.
+	 * 
+	 * @param type The type of object to handle.
+	 * @param ids The identifiers of the objects.
+	 */
+	void filterData(Class type, List<Long> ids)
+	{
+		FilterByTag  loader = new FilterByTag(component, type, ids);
+		loader.load();
+	}
+	
+	/**
+	 * Adds the nodes to the list.
+	 * 
+	 * @param nodes The nodes to handle.
+	 */
+	void setFilteredData(List<DataObject> nodes)
+	{
+		filteredData.addAll(nodes);
+	}
+	
+	/**
+	 * Returns the filtered data.
+	 * @return
+	 */
+	List<DataObject> getFilteredData()
+	{
+		return filteredData;
 	}
 
 }

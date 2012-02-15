@@ -34,6 +34,7 @@ import javax.swing.JFrame;
 
 import org.openmicroscopy.shoola.agents.monash.DataCollectionLoader;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.util.ui.component.ObservableComponent;
 
 import pojos.DataObject;
@@ -173,4 +174,13 @@ public interface AndsPublish extends ObservableComponent {
 	public void setTags(Collection result);
 
 	public void onDataSave(List<DataObject> dataObject);
+	
+	/**
+	 * Sets the data filtered using the {@link Constants#REGISTER_RDA_TAG}.
+	 * 
+	 * @param type The type of nodes to handle.
+	 * @param nodeIds The id of the nodes.
+	 */
+	public void setFilteredData(Class type, Collection<Long> nodeIds);
+	
 }
