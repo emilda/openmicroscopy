@@ -44,7 +44,7 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
 public class PublishAction  extends MonashAction {
 	
 	/** The name of the action. */
-    public static final String NAME = "I Accept";
+    public static final String NAME = "I accept: Register to RDA";
     
     /** The description of the action. */
     public static final String DESCRIPTION = "Register with RDA";
