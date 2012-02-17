@@ -306,6 +306,22 @@ public class AndsPublishUI extends TopWindow
 						}
 					}
 				}
+=======
+			DataObject object = (DataObject) i.next();
+			if (object instanceof ProjectData) {
+				Set<DatasetData> datasets = ((ProjectData) object).getDatasets();
+				for (DatasetData dataset : datasets) {
+					if (getTagDetails(dataset)) {
+						MonashData listdata = new MonashData(dataset);
+						listmodel.addElement(listdata);
+					}
+				}
+			} else {
+				if (getTagDetails(object)) {
+					MonashData listdata = new MonashData(object);
+					listmodel.addElement(listdata);
+				}
+>>>>>>> monash-dev
 			}
 		}
 		*/
@@ -336,19 +352,15 @@ public class AndsPublishUI extends TopWindow
 	 * @return true if the above tag exists false otherwise
 	 */
 	private boolean getTagDetails(DataObject dataObject) {
-		System.out.println("data object: " + dataObject.getId());
 		try {
 			Collection tags = PublishAgent.getAnnotations(dataObject);
 			if (tags == null || tags.size() == 0)
 				return false;
 			Iterator iterator = tags.iterator();
-			AnnotationData data;
-			TagAnnotationData tag;
 			while (iterator.hasNext()){
-				data = (AnnotationData) iterator.next();
+				AnnotationData data = (AnnotationData) iterator.next();
 				if (data instanceof TagAnnotationData) {
-					tag = (TagAnnotationData) data;
-					System.out.println("tag value: " + tag.getTagValue());
+					TagAnnotationData tag = (TagAnnotationData) data;
 					if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
 						return true;
 					}
@@ -494,11 +506,11 @@ public class AndsPublishUI extends TopWindow
 	private JPanel buildControls()
 	{
 		JPanel p = new JPanel();
+		p.add(new JButton(controller.getAction(AndsPublishControl.EXIT)));
 		publishButton = new JButton(controller.getAction(AndsPublishControl.PUBLISH));
 		publishButton.setEnabled(false);
 		p.add(publishButton);
 		p.add(Box.createHorizontalStrut(5));
-		p.add(new JButton(controller.getAction(AndsPublishControl.EXIT)));
 		return UIUtilities.buildComponentPanelRight(p);
 	}
 
