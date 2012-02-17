@@ -171,8 +171,11 @@ public interface AndsPublish extends ObservableComponent {
 	 */
 	public void showLicenseMain();
 
-	public void setTags(Collection result);
-
+	/**
+	 * Updates the tag from {@link Constants#REGISTER_RDA_TAG} 
+	 * to {@link Constants#SUCCESS_RDA_TAG} for the dataObject.
+	 * @param dataObject
+	 */
 	public void onDataSave(List<DataObject> dataObject);
 	
 	/**

@@ -156,9 +156,9 @@ public class InputPartyDialog extends MonashDialog {
 		JLabel label = new JLabel(DESCRIPTION);
 		box.add(label, c);
 
-		addField(box, c, "Title", MAX_TWENTY, titleField);
+		/*addField(box, c, "Title", MAX_TWENTY, titleField);
 		addField(box, c, "First Name", MAX_TWENTY, fName);
-		addField(box, c, "Last Name", MAX_TWENTY, lName);
+		addField(box, c, "Last Name", MAX_TWENTY, lName);*/
 
 		c.gridy++;
 		c.weighty = 1.0;

@@ -268,9 +268,9 @@ public class AndsPublishUI extends TopWindow
 		splitPane.setDividerLocation(150);
 		
 		//Provide minimum sizes for the two components in the split pane.
-		projListScrollPane.setMinimumSize(new Dimension(150, HEIGHT));
-		andsScrollPane.setMinimumSize(new Dimension(500, HEIGHT));
-		splitPane.setMinimumSize(new Dimension(650, HEIGHT));
+		//projListScrollPane.setMinimumSize(new Dimension(150, HEIGHT));
+		//andsScrollPane.setMinimumSize(new Dimension(500, HEIGHT));
+		//splitPane.setMinimumSize(new Dimension(650, HEIGHT));
 		scrollPane  = new JScrollPane(splitPane);
 	}
 
@@ -278,17 +278,16 @@ public class AndsPublishUI extends TopWindow
 	 * Sets the data for the list in the explorer
 	 * @param dataCollection	the data collections to register with RDA
 	 */
-	protected void setListData(Collection dataCollection) {
+	protected void setListData(Collection<DataObject> dataCollection) {
 		clearFields();
 		listmodel = new DefaultListModel();
 
-		Iterator i = dataCollection.iterator();
-		DataObject object;
+		Iterator<DataObject> i = dataCollection.iterator();
 		Set<DatasetData> datasets;
 		Iterator<DatasetData> j;
 		DatasetData data;
 		while (i.hasNext()) {
-			object = (DataObject) i.next();
+			DataObject object = (DataObject) i.next();
 			listmodel.addElement(new MonashData(object));
 		}
 		/*
@@ -342,34 +341,6 @@ public class AndsPublishUI extends TopWindow
 		} else {
 			clearFields();
 		}
-	}
-
-	/**
-	 * Get the tag values for the given <code>DataObject</code>
-	 * and check for value {@link Constants.REGISTER_RDA_TAG}
-	 * returns true if found, false otherwise
-	 * @param dataObject
-	 * @return true if the above tag exists false otherwise
-	 */
-	private boolean getTagDetails(DataObject dataObject) {
-		try {
-			Collection tags = PublishAgent.getAnnotations(dataObject);
-			if (tags == null || tags.size() == 0)
-				return false;
-			Iterator iterator = tags.iterator();
-			while (iterator.hasNext()){
-				AnnotationData data = (AnnotationData) iterator.next();
-				if (data instanceof TagAnnotationData) {
-					TagAnnotationData tag = (TagAnnotationData) data;
-					if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
-						return true;
-					}
-				}
-			}
-		} catch (Exception e) {
-			return false;
-		}
-		return false;
 	}
 
 	/**
@@ -640,6 +611,15 @@ public class AndsPublishUI extends TopWindow
 		licenseButton.setEnabled(false);
 		publishButton.setEnabled(false);
 	}
+	
+	protected void clearData() {
+		model.setLicense(null);
+		model.clearParty();
+		noLicense.setText("");
+		partyHtable.clear();
+		researcherPanel.removeAll();
+		//researcherPanel.updateUI();
+	}
 
 	/**
 	 * Shows the license main screen
@@ -666,7 +646,7 @@ public class AndsPublishUI extends TopWindow
 		LicenceBean udl = ld.getLicense();
 		if (udl != null) {
 			model.setLicense(udl);
-			noLicense.setText("");
+			noLicense.setText(udl.toString());
 			setComponentControls();
 			return true;
 		} else {
@@ -689,7 +669,7 @@ public class AndsPublishUI extends TopWindow
 		LicenceBean ccl = ld.getLicense();
 		if (ccl != null) {
 			model.setLicense(ccl);
-			noLicense.setText("");
+			noLicense.setText(ccl.toString());
 			setComponentControls();
 			return true;
 		} else {

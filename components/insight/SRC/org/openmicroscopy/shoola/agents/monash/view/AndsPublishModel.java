@@ -447,11 +447,10 @@ public class AndsPublishModel {
 			Collection tags = PublishAgent.getAnnotations(object);
 			if (tags == null || tags.size() == 0)
 				return;
-			Iterator iterator = tags.iterator();
-			AnnotationData data;
+			Iterator<AnnotationData> iterator = tags.iterator();
 			TagAnnotationData tag = null;
 			while (iterator.hasNext()){
-				data = (AnnotationData) iterator.next();
+				AnnotationData data = (AnnotationData) iterator.next();
 				if (data instanceof TagAnnotationData) {
 					tag = (TagAnnotationData) data;
 					if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
@@ -472,18 +471,6 @@ public class AndsPublishModel {
 	}
 
 	/**
-	 * Get the tag values for the given <code>DataObject</code>
-	 * and check for value {@link Constants.REGISTER_RDA_TAG}
-	 * returns true if found, false otherwise
-	 * @param dataObject
-	 * @return true if the above tag exists false otherwise
-	 */
-	protected void getTagDetails(DataObject dataObject) {
-		TagsLoader tagsLoader = new TagsLoader(component, dataObject);
-		tagsLoader.load();
-	}
-	
-	/**
 	 * Sets the collection metadata
 	 * @param metadata the metadata to set
 	 */
@@ -498,23 +485,6 @@ public class AndsPublishModel {
 		return metadata;
 	}
 
-	public void setTags(Collection tags) {
-		if (tags == null || tags.size() == 0)
-			return;// false;
-		Iterator iterator = tags.iterator();
-		AnnotationData data;
-		TagAnnotationData tag;
-		while (iterator.hasNext()){
-			data = (AnnotationData) iterator.next();
-			if (data instanceof TagAnnotationData) {
-				tag = (TagAnnotationData) data;
-				if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
-					return;// true;
-				}
-			}
-		}
-	}
-	
 	/**
 	 * Returns <code>true</code> if the passed object is the reference object,
 	 * <code>false</code> otherwise.
@@ -579,6 +549,15 @@ public class AndsPublishModel {
 	List<DataObject> getFilteredData()
 	{
 		return filteredData;
+	}
+
+	/** clear the filtered data when data reloads */
+	public void clearFilteredData() {
+		filteredData.clear();
+	}
+
+	public void clearParty() {
+		partyHtable.clear();
 	}
 
 }

@@ -224,8 +224,9 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 			if (errMsg != null) {
 				view.setMessage(errMsg);
 			} else {
-				model.changeTag();
+				//model.changeTag();
 				view.setMessage(reply.getSuccessMsg());
+				view.clearData();
 			}
 		} catch (TransportException e) {
 			MonashDialog.showErrDialog(null, Constants.ERROR_PARTY_NF, e);
@@ -312,6 +313,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 			}
 		}
 		totalFilter = 0;
+		count = 0;
 		if (datasetIds.size() > 0) {
 			totalFilter++;
 			model.filterData(DatasetData.class, datasetIds);
@@ -337,15 +339,17 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 			data = (DataObject) i.next();
 			if (data instanceof ProjectData) {
 				if (ProjectData.class.equals(type)) {
-					if (nodeIds.contains(data.getId()))
+					if (nodeIds.contains(data.getId())) {
 						nodes.add(data);
+					}
 				} else {
 					datasets = ((ProjectData) data).getDatasets();
 					j = datasets.iterator();
 					while (j.hasNext()) {
 						d = j.next();
-						if (nodeIds.contains(d.getId()))
+						if (nodeIds.contains(d.getId())) {
 							nodes.add(d);
+						}
 					}
 				}
 			} else if (data instanceof DatasetData && 
@@ -359,6 +363,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		if (count == totalFilter) {
 			view.setListData(model.getFilteredData());
 			totalFilter = 0;
+			count = 0;
 		}
 	}
 	
@@ -369,6 +374,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	public void setDataLoaded(Collection dataloaded) {
 		if(model.getState() == DISCARDED) return;
 		model.setState(LOADING_DATA);
+		model.clearFilteredData();
 		setDataCollection(dataloaded);
 	}
 
@@ -395,23 +401,19 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		}
 	}
 
-	@Override
-	public void setTags(Collection result) {
-		model.setTags(result);
-	}
-
-	@Override
+	/** 
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#onDataSave()
+	 */
 	public void onDataSave(List<DataObject> data) {
+		model.setState(READY);
 		if (data == null) {
-			model.setState(READY);
 			return;
 		}
 		if (model.getState() == DISCARDED) return;
 		DataObject dataObject = null;
 		if (data.size() == 1) dataObject = data.get(0);
-		if (dataObject != null && model.isSameObject(dataObject)) {
+		if (dataObject != null && model.isSameObject(dataObject))
 			view.removeListItem();
-		} else
-		model.setState(READY);
 	}
 }
