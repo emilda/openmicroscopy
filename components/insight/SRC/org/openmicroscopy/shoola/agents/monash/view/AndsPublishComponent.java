@@ -224,7 +224,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 			if (errMsg != null) {
 				view.setMessage(errMsg);
 			} else {
-				//model.changeTag();
+				model.changeTag();
 				view.setMessage(reply.getSuccessMsg());
 				view.clearData();
 			}
