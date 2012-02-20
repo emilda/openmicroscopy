@@ -25,7 +25,6 @@ package org.openmicroscopy.shoola.agents.monash;
 
 import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
 import org.openmicroscopy.shoola.env.config.Registry;
-import org.openmicroscopy.shoola.env.data.OmeroMetadataService;
 import org.openmicroscopy.shoola.env.data.events.DSCallAdapter;
 import org.openmicroscopy.shoola.env.data.views.DataManagerView;
 import org.openmicroscopy.shoola.env.data.views.MetadataHandlerView;

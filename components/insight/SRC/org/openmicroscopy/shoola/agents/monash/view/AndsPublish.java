@@ -186,4 +186,11 @@ public interface AndsPublish extends ObservableComponent {
 	 */
 	public void setFilteredData(Class type, Collection<Long> nodeIds);
 	
+	/**
+	 * Sets the collection of existing tags.
+	 * 
+	 * @param collection The tags to set.
+	 */
+	public void setExistingTags(Collection collection);
+
 }

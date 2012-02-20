@@ -281,49 +281,10 @@ public class AndsPublishUI extends TopWindow
 	protected void setListData(Collection<DataObject> dataCollection) {
 		clearFields();
 		listmodel = new DefaultListModel();
-
 		Iterator<DataObject> i = dataCollection.iterator();
-		Set<DatasetData> datasets;
-		Iterator<DatasetData> j;
-		DatasetData data;
 		while (i.hasNext()) {
-			DataObject object = (DataObject) i.next();
-			listmodel.addElement(new MonashData(object));
+			listmodel.addElement(new MonashData((DataObject) i.next()));
 		}
-		/*
-		while (i.hasNext()) {
-			object = (DataObject) i.next();
-			if (getTagDetails(object)) {
-				listmodel.addElement(new MonashData(object));
-				if (object instanceof ProjectData) {
-					datasets = ((ProjectData) object).getDatasets();
-					j = datasets.iterator();
-					while (j.hasNext()) {
-						data = j.next();
-						if (getTagDetails(object)) {
-							listmodel.addElement(new MonashData(data));
-						}
-					}
-				}
-=======
-			DataObject object = (DataObject) i.next();
-			if (object instanceof ProjectData) {
-				Set<DatasetData> datasets = ((ProjectData) object).getDatasets();
-				for (DatasetData dataset : datasets) {
-					if (getTagDetails(dataset)) {
-						MonashData listdata = new MonashData(dataset);
-						listmodel.addElement(listdata);
-					}
-				}
-			} else {
-				if (getTagDetails(object)) {
-					MonashData listdata = new MonashData(object);
-					listmodel.addElement(listdata);
-				}
->>>>>>> monash-dev
-			}
-		}
-		*/
 		projectList.setModel(listmodel);
 		if (listmodel.size() > 0) {
 			projectList.setSelectedIndex(0);
@@ -479,7 +440,6 @@ public class AndsPublishUI extends TopWindow
 		JPanel p = new JPanel();
 		p.add(new JButton(controller.getAction(AndsPublishControl.EXIT)));
 		publishButton = new JButton(controller.getAction(AndsPublishControl.PUBLISH));
-		publishButton.setEnabled(false);
 		p.add(publishButton);
 		p.add(Box.createHorizontalStrut(5));
 		return UIUtilities.buildComponentPanelRight(p);

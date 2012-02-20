@@ -1,35 +1,56 @@
-package org.openmicroscopy.shoola.agents.monash.view;
+package org.openmicroscopy.shoola.agents.monash;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 
 import org.openmicroscopy.shoola.agents.monash.PublishLoader;
+import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
 import org.openmicroscopy.shoola.env.data.events.DSCallAdapter;
 import org.openmicroscopy.shoola.env.data.views.CallHandle;
 import org.openmicroscopy.shoola.env.log.LogMessage;
 
+import pojos.AnnotationData;
 import pojos.DataObject;
 
+/** 
+ * Updates the tag of the associated to the passed object.
+ *
+ * @author  Sindhu Emilda &nbsp;&nbsp;&nbsp;&nbsp;
+ * <a href="mailto:sindhu.emilda@monash.edu">sindhu.emilda@monash.edu</a>
+ * @version 1.0
+ * @since Beta4.4
+ */
 public class TagValueSaver extends PublishLoader
 {
 
 	/** Handle to the asynchronous call so that we can cancel it. */
 	private CallHandle	handle;
-	private Collection<DataObject> data;
+	
+	/** The annotation to add to the data object. */
+	private List<AnnotationData> toAdd;
+	
+	/** The annotation to unlink from the data object. */
+	private List<AnnotationData> toRemove;
+	
+	/** The object to update.*/
+	private DataObject data;
 
 	/**
 	 * Creates a new instance.
 	 * 
 	 * @param viewer The viewer this data loader is for.
 	 *               Mustn't be <code>null</code>.
-	 * @param dataObject 
+	 * @param data The data object to update.
 	 */
-	public TagValueSaver(AndsPublish viewer, DataObject object)
+	public TagValueSaver(AndsPublish viewer, DataObject data, 
+			List<AnnotationData> toAdd, List<AnnotationData> toRemove)
 	{
 		super(viewer);
-		this.data = new ArrayList<DataObject>();
-		data.add(object);
+		if (data == null)
+			throw new IllegalArgumentException("No object specified.");
+		this.data = data;
+		this.toAdd = toAdd;
+		this.toRemove = toRemove;
 	}
 
 	/** 
@@ -38,7 +59,9 @@ public class TagValueSaver extends PublishLoader
 	 */
 	public void load()
 	{
-		handle = mhView.saveData(data, null, null, null, -1, this);
+		long userID = PublishAgent.getUserDetails().getId();
+		handle = mhView.saveData(Arrays.asList(data), toAdd, toRemove, null,
+				userID, this);
 	}
 
 	/** 

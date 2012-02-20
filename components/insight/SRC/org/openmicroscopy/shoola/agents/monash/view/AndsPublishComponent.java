@@ -114,6 +114,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		switch (model.getState()) {
 		case NEW:
 			loadParty();
+			model.loadExistingTags();
 			loadDataCollection();
 			view.setOnScreen();
 			view.toFront();
@@ -326,8 +327,13 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		//view.setListData(result);
 	}
 
+	/** 
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#setFilteredData(Class, Collection)
+	 */
 	public void setFilteredData(Class type, Collection<Long> nodeIds)
 	{
+		if (nodeIds == null) nodeIds = new ArrayList<Long>();
 		Collection list = model.getDataCollection();
 		Iterator i = list.iterator();
 		DataObject data;
@@ -416,4 +422,14 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		if (dataObject != null && model.isSameObject(dataObject))
 			view.removeListItem();
 	}
+	
+	/** 
+	 * Implemented as specified by the {@link AndsPublish} interface.
+	 * @see AndsPublish#setExistingTags(Collection)
+	 */
+	public void setExistingTags(Collection tags)
+	{
+		model.setExistingTags(tags);
+	}
+
 }

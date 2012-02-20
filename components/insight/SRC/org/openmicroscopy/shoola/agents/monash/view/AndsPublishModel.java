@@ -27,7 +27,7 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view;
 
-import java.awt.Cursor;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,6 +40,8 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.openmicroscopy.shoola.agents.monash.DataCollectionLoader;
 import org.openmicroscopy.shoola.agents.monash.FilterByTag;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
+import org.openmicroscopy.shoola.agents.monash.TagValueSaver;
+import org.openmicroscopy.shoola.agents.monash.TagsLoader;
 import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
 import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
 import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
@@ -48,15 +50,13 @@ import org.openmicroscopy.shoola.agents.monash.util.Unmarshaller;
 import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
-import org.openmicroscopy.shoola.env.data.DSAccessException;
-import org.openmicroscopy.shoola.env.data.DSOutOfServiceException;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 
 import pojos.AnnotationData;
 import pojos.DataObject;
 import pojos.ExperimenterData;
 import pojos.TagAnnotationData;
-import pojos.WellSampleData;
+
 /** 
  * The Model component in the <code>AndsPublish</code> MVC triad.
  * This class keeps the <code>AndsPublish</code>'s state and data. 
@@ -112,6 +112,9 @@ public class AndsPublishModel {
 	/** The number of filters.*/
 	private List<DataObject> filteredData;
 	
+	/** Collection of existing tags if any. */
+    private Collection existingTags;
+    
 	/**
 	 * Creates a new instance and sets the state to {@link AndsPublish#NEW}.
 	 */
@@ -442,32 +445,31 @@ public class AndsPublishModel {
 	protected void changeTag() {
 		state = AndsPublish.SAVING;
 		DataObject object = metadata.getDataObject();
-		
-		try {
-			Collection tags = PublishAgent.getAnnotations(object);
-			if (tags == null || tags.size() == 0)
-				return;
-			Iterator<AnnotationData> iterator = tags.iterator();
-			TagAnnotationData tag = null;
-			while (iterator.hasNext()){
-				AnnotationData data = (AnnotationData) iterator.next();
-				if (data instanceof TagAnnotationData) {
-					tag = (TagAnnotationData) data;
-					if(Constants.REGISTER_RDA_TAG.equals(tag.getTagValue())) {
-						tag.setTagValue(Constants.SUCCESS_RDA_TAG);
-						break;
-					}
-				}
-			}
-			if (tag != null) {
-				TagValueSaver tagValueSaver = new TagValueSaver(component, tag);
-				tagValueSaver.load();
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (object == null) return;
+		if (existingTags == null) {
+			loadExistingTags();
+			return;//This should not happen.
 		}
-		
+		Iterator i = existingTags.iterator();
+		TagAnnotationData data;
+		//to be on the save side, 
+		//in case several tags with same name were created 
+		List<AnnotationData> registerTag = new ArrayList<AnnotationData>();
+		List<AnnotationData> registeredTag = new ArrayList<AnnotationData>();;
+		while (i.hasNext()) {
+			data = (TagAnnotationData) i.next();
+			if (Constants.REGISTER_RDA_TAG.equals(data.getTagValue())) {
+				registerTag.add(data);
+			} else if (Constants.SUCCESS_RDA_TAG.equals(data.getTagValue())) {
+				registeredTag.add(data);
+			}
+		}
+		if (registeredTag.size() == 0) { //no created so we created it.
+			registeredTag.add(new TagAnnotationData(Constants.SUCCESS_RDA_TAG));
+		}
+		TagValueSaver loader = new TagValueSaver(component, object,
+				registeredTag, registerTag);
+		loader.load();
 	}
 
 	/**
@@ -552,12 +554,29 @@ public class AndsPublishModel {
 	}
 
 	/** clear the filtered data when data reloads */
-	public void clearFilteredData() {
+	void clearFilteredData() {
 		filteredData.clear();
 	}
 
-	public void clearParty() {
+	void clearParty() {
 		partyHtable.clear();
+	}
+
+	/**
+	 * Sets the collection of existing tags.
+	 * 
+	 * @param tags The value to set.
+	 */
+	void setExistingTags(Collection tags)
+	{
+		existingTags = tags;
+	}
+	
+	/** Loads the existing in the tags.*/
+	void loadExistingTags()
+	{
+		TagsLoader loader = new TagsLoader(component);
+		loader.load();
 	}
 
 }

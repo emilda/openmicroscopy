@@ -1,5 +1,5 @@
 /*
- * org.openmicroscopy.shoola.agents.monash.FilterByTag 
+ * org.openmicroscopy.shoola.agents.monash.TagsLoader 
  *
  *------------------------------------------------------------------------------
  *  Copyright (C) 2006-2012 University of Dundee & Open Microscopy Environment.
@@ -23,6 +23,7 @@
  */
 package org.openmicroscopy.shoola.agents.monash;
 
+
 //Java imports
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,40 +35,31 @@ import java.util.List;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
 import org.openmicroscopy.shoola.env.data.views.CallHandle;
+import pojos.ExperimenterData;
 import pojos.TagAnnotationData;
 
 /** 
- * Loads the objects tagged with {@link Constants#REGISTER_RDA_TAG}.
+ * Loads the existing tags.
  *
  * @author Jean-Marie Burel &nbsp;&nbsp;&nbsp;&nbsp;
  * <a href="mailto:j.burel@dundee.ac.uk">j.burel@dundee.ac.uk</a>
  * @since Beta4.4
  */
-public class FilterByTag 
+public class TagsLoader
 	extends PublishLoader
 {
 
-	/** The collection of objects to filter. */
-    private List<Long> nodeIds;
-    
-    /** Handle to the asynchronous call so that we can cancel it. */
-    private CallHandle handle;
-    
-    /** The type of objects.*/
-    private Class nodeType;
-    
-    /**
+	/** Handle to the asynchronous call so that we can cancel it. */
+    private CallHandle	handle;
+
+	/**
      * Creates a new instance.
      * 
      * @param viewer Reference to the viewer. Mustn't be <code>null</code>.
-     * @param nodeType The type of nodes to filter.
-     * @param nodeIds The identifiers of the nodes to filter.
      */
-	public FilterByTag(AndsPublish viewer, Class nodeType, List<Long> nodeIds)
+	public TagsLoader(AndsPublish viewer)
 	{
 		super(viewer);
-		this.nodeIds = nodeIds;
-		this.nodeType = nodeType;
 	}
 	
 	/** 
@@ -82,9 +74,9 @@ public class FilterByTag
 	 */
 	public void load()
 	{
-		handle = mhView.filterByAnnotation(nodeType, nodeIds, 
-				TagAnnotationData.class,
-				Arrays.asList(Constants.REGISTER_RDA_TAG), -1, this);//
+		ExperimenterData exp = PublishAgent.getUserDetails();
+		handle = mhView.loadExistingAnnotations(TagAnnotationData.class, 
+				exp.getId(), exp.getDefaultGroup().getId(), this);
 	}
 	
 	/**
@@ -94,7 +86,6 @@ public class FilterByTag
     public void handleResult(Object result) 
     {
     	if (viewer.getState() == AndsPublish.DISCARDED) return;
-    	viewer.setFilteredData(nodeType, (Collection<Long>) result);
+    	viewer.setExistingTags((Collection) result);
     }
-
 }
