@@ -43,7 +43,6 @@ import java.awt.event.ItemListener;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -66,7 +65,6 @@ import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.openmicroscopy.shoola.agents.editor.uiComponents.CustomFont;
 import org.openmicroscopy.shoola.agents.monash.IconManager;
-import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
@@ -82,11 +80,7 @@ import org.openmicroscopy.shoola.env.ui.TopWindow;
 import org.openmicroscopy.shoola.util.ui.TitlePanel;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
-import pojos.AnnotationData;
 import pojos.DataObject;
-import pojos.DatasetData;
-import pojos.ProjectData;
-import pojos.TagAnnotationData;
 
 /** 
  * The {@link AndsPublish}'s View component. After creation
@@ -268,7 +262,7 @@ public class AndsPublishUI extends TopWindow
 		splitPane.setDividerLocation(150);
 		
 		//Provide minimum sizes for the two components in the split pane.
-		//projListScrollPane.setMinimumSize(new Dimension(150, HEIGHT));
+		projListScrollPane.setMinimumSize(new Dimension(150, HEIGHT));
 		//andsScrollPane.setMinimumSize(new Dimension(500, HEIGHT));
 		//splitPane.setMinimumSize(new Dimension(650, HEIGHT));
 		scrollPane  = new JScrollPane(splitPane);
@@ -488,7 +482,7 @@ public class AndsPublishUI extends TopWindow
 	 * @return 	<code>false</code> goes back to add researcher options page<br>
 	 * 			<code>true</code> goes back to RDA main screen
 	 */
-	protected boolean searchResearcher() 
+	protected void searchResearcher() 
 	{
 		SearchPartyDialog spd = 
 				new SearchPartyDialog(this, "Adding Researcher Options", model);
@@ -499,22 +493,19 @@ public class AndsPublishUI extends TopWindow
 			model.addParty(key, pb);
 			addPartyCheckBox(key, pb);
 			setComponentControls();
-			return true;
-		} else {
-			return false;
 		}
 	}
 	
 	/** Shows the manual input researcher screen */
-	public void manualResearcher() {
+	protected void manualResearcher() {
 		InputPartyDialog ipd = 
-				new InputPartyDialog(this, "Manually Input a Researcher Infoon", model);
+				new InputPartyDialog(this, "Manually Input a Researcher Information");
 		UIUtilities.centerAndShow(ipd);
-		/*PartyBean pb = ipd.getPartyBean();
+		PartyBean pb = ipd.getPartyBean();
 		String key = pb.getPartyKey();
 		model.addParty(key, pb);
 		addPartyCheckBox(key, pb);
-		setComponentControls();*/
+		setComponentControls();
 	}
 
 	/**

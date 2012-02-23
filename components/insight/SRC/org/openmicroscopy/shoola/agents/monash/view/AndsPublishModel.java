@@ -451,20 +451,19 @@ public class AndsPublishModel {
 			return;//This should not happen.
 		}
 		Iterator i = existingTags.iterator();
-		TagAnnotationData data;
-		//to be on the save side, 
+		//to be on the safe side, 
 		//in case several tags with same name were created 
 		List<AnnotationData> registerTag = new ArrayList<AnnotationData>();
 		List<AnnotationData> registeredTag = new ArrayList<AnnotationData>();;
 		while (i.hasNext()) {
-			data = (TagAnnotationData) i.next();
+			TagAnnotationData data = (TagAnnotationData) i.next();
 			if (Constants.REGISTER_RDA_TAG.equals(data.getTagValue())) {
 				registerTag.add(data);
 			} else if (Constants.SUCCESS_RDA_TAG.equals(data.getTagValue())) {
 				registeredTag.add(data);
 			}
 		}
-		if (registeredTag.size() == 0) { //no created so we created it.
+		if (registeredTag.size() == 0) { //not created so we created it.
 			registeredTag.add(new TagAnnotationData(Constants.SUCCESS_RDA_TAG));
 		}
 		TagValueSaver loader = new TagValueSaver(component, object,

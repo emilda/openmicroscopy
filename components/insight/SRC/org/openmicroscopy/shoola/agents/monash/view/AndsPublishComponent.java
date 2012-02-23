@@ -244,16 +244,19 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 */
 	public void showAddResearcher() 
 	{
+		view.searchResearcher();
+		/* Uncomment to show the Party option screen and eventually
+		 * show the search party or manual researcher screen.
 		String option = view.showResearcher();
 		if (null != option) {
-			/** Shows the Search/ Manual add researcher screen 
-			 * based on the user choice. */
+			*//** Shows the Search/ Manual add researcher screen 
+			 * based on the user choice. *//*
 			if (PartyDialog.PARTY_OPTION_SEARCH.equals(option)) {
 				if (!view.searchResearcher()) showAddResearcher();
 			} else if (PartyDialog.PARTY_OPTION_MANUAL.equals(option)) {
 				view.manualResearcher();
 			}
-		}
+		}*/
 	}
 
 	
@@ -295,17 +298,14 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		model.setDataCollection(result);
 		if (result == null) return;
 		Iterator i = result.iterator();
-		DataObject object;
-		Set<DatasetData> datasets;
-		Iterator<DatasetData> j;
 		List<Long> datasetIds = new ArrayList<Long>();
 		List<Long> projectIds = new ArrayList<Long>();
 		while (i.hasNext()) {
-			object = (DataObject) i.next();
+			DataObject object = (DataObject) i.next();
 			if (object instanceof ProjectData) {
 				projectIds.add(object.getId());
-				datasets = ((ProjectData) object).getDatasets();
-				j = datasets.iterator();
+				Set<DatasetData> datasets = ((ProjectData) object).getDatasets();
+				Iterator<DatasetData> j = datasets.iterator();
 				while (j.hasNext()) {
 					datasetIds.add(j.next().getId());
 				}
@@ -323,8 +323,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 			totalFilter++;
 			model.filterData(ProjectData.class, projectIds);
 		}
-		//Filter the nodes
-		//view.setListData(result);
 	}
 
 	/** 
@@ -336,23 +334,20 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		if (nodeIds == null) nodeIds = new ArrayList<Long>();
 		Collection list = model.getDataCollection();
 		Iterator i = list.iterator();
-		DataObject data;
 		List<DataObject> nodes = new ArrayList<DataObject>();
-		Set<DatasetData> datasets;
 		Iterator<DatasetData> j;
-		DatasetData d;
 		while (i.hasNext()) {
-			data = (DataObject) i.next();
+			DataObject data = (DataObject) i.next();
 			if (data instanceof ProjectData) {
 				if (ProjectData.class.equals(type)) {
 					if (nodeIds.contains(data.getId())) {
 						nodes.add(data);
 					}
 				} else {
-					datasets = ((ProjectData) data).getDatasets();
+					Set<DatasetData> datasets = ((ProjectData) data).getDatasets();
 					j = datasets.iterator();
 					while (j.hasNext()) {
-						d = j.next();
+						DatasetData d = j.next();
 						if (nodeIds.contains(d.getId())) {
 							nodes.add(d);
 						}
