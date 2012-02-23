@@ -115,7 +115,8 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		case NEW:
 			loadParty();
 			model.loadExistingTags();
-			loadDataCollection();
+			//loadDataCollection();
+			//setDataCollection(model.getDataCollection());
 			view.setOnScreen();
 			view.toFront();
 			break;
@@ -146,7 +147,8 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	/** Refreshes the view on UserGroupSwitched */
 	public void refresh() {
 		if (model.getState() == DISCARDED) return;
-		loadDataCollection();
+		//loadDataCollection();
+		setDataCollection(model.getDataCollection());
 		//view.refresh();
 	}
 
@@ -234,10 +236,6 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		}
 	}
 
-	void refreshTree() {
-		view.refresh();
-	}
-
 	/** 
 	 * Implemented as specified by the {@link AndsPublish} interface.
 	 * @see AndsPublish#showAddResearcher()
@@ -262,8 +260,8 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * @see AndsPublish#loadDataCollection()
 	 */
 	public void loadDataCollection() {
-		model.setState(LOADING_DATA);
 		model.loadDataCollection();
+		fireStateChange();
 	}
 	
 	/** 
@@ -285,9 +283,11 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 */
 	public void setDataCollection(Collection result) {
 		int state = model.getState();
+		/*
 		if (state != LOADING_DATA)
 			throw new IllegalStateException(
 					"This method can only be invoked in the LOADING_DATA state.");
+					*/
 		/*if (result == null) 
 			throw new NullPointerException("No data available to register with RDA.");*/
 

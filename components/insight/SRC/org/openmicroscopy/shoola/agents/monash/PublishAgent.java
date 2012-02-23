@@ -77,6 +77,9 @@ public class PublishAgent implements Agent, AgentEventListener {
 	/** Name of agent **/
 	public static String	MONASH_AGENT = "Register with RDA";
 
+	/* Map of visible data.*/
+	private Map<Long, List<TreeImageDisplay>> map;
+	
 	//no-arguments constructor required for initialization
 	public PublishAgent() {
 	}
@@ -124,24 +127,37 @@ public class PublishAgent implements Agent, AgentEventListener {
 	}
 
 	/**
+	 * Formats the data to display.
+	 * 
+	 * @param map The list of data to handle.
+	 * @return The value to set.
+	 */
+	private List<Object> formatData(Map<Long, List<TreeImageDisplay>> map)
+	{
+		List<Object> values = new ArrayList<Object>();
+		if (map == null) return values;
+		for (List<TreeImageDisplay> listItem : map.values()) {
+			Iterator<TreeImageDisplay> i = listItem.iterator();
+			while (i.hasNext()) {
+				values.add(i.next().getUserObject());
+			}
+		}
+		return values;
+	}
+	
+	/**
 	 * Handles data loading. Set the viewer with new data loaded.
 	 * 
-	 * @param e The event to handle.
+	 * @param evt The event to handle.
 	 */
 	private void handleExperimenterLoadedDataEvent(ExperimenterLoadedDataEvent evt) {
 		if (evt == null) return;
 		AndsPublish viewer = AndsPublishFactory.getViewer();
 		Map<Long, List<TreeImageDisplay>> map = evt.getData();
 		//List<TreeImageDisplay> objects = map.get(getUserDetails().getId());
+		this.map = map;
 		if (viewer != null) {
-			List<Object> values = new ArrayList<Object>();
-			for (List<TreeImageDisplay> listItem : map.values()) {
-				Iterator<TreeImageDisplay> i = listItem.iterator();
-				while (i.hasNext()) {
-					values.add(i.next().getUserObject());
-				}
-			}
-			viewer.setDataLoaded(values);
+			viewer.setDataLoaded(formatData(map));
 		}
 	}
 
@@ -163,7 +179,10 @@ public class PublishAgent implements Agent, AgentEventListener {
 		long id = -1;
 		if (gp != null) id = gp.getId();
 		AndsPublish viewer = AndsPublishFactory.getViewer(exp, id);
-		if (viewer != null) viewer.activate();
+		if (viewer != null) {
+			viewer.activate();
+			viewer.setDataLoaded(formatData(map));
+		}
 	}
 
 	/**
@@ -236,19 +255,6 @@ public class PublishAgent implements Agent, AgentEventListener {
 		
 		UserCredentials uc = env.getMonashAuth(MONASH_AGENT);
 		AndsPublishFactory.setCookie(uc);
-	}
-
-	/**
-	 * Helper method returning the current project's Annotations.
-	 * TODO remove this method
-	 * @return 
-	 * @throws DSAccessException 
-	 * @throws DSOutOfServiceException 
-	 */
-	public static Collection getAnnotations(DataObject object) throws DSOutOfServiceException, DSAccessException
-	{ 
-		OmeroMetadataService os = registry.getMetadataService();
-		return os.loadStructuredAnnotations(object.getClass(), object.getId(), -1);
 	}
 
 	/**

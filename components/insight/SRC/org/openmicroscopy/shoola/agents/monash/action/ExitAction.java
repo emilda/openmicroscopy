@@ -31,7 +31,6 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
 
-import org.openmicroscopy.shoola.agents.fsimporter.IconManager;
 import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
 /** 

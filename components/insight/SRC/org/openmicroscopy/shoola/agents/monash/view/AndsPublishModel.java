@@ -271,6 +271,7 @@ public class AndsPublishModel {
 	 * Loads the data collections to register with RDA
 	 */
 	protected void loadDataCollection() {
+		state = AndsPublish.LOADING_DATA;
 		dataLoader = new DataCollectionLoader(component);
 		dataLoader.load();
 	}
@@ -280,6 +281,7 @@ public class AndsPublishModel {
 	 */
 	protected void setDataCollection(Collection dataCollection) {
 		this.dataCollection = dataCollection;
+		filteredData.clear();
 	}
 
 	/**

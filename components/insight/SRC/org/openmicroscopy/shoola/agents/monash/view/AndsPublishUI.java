@@ -43,7 +43,7 @@ import java.awt.event.ItemListener;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -64,9 +64,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
-import org.openmicroscopy.shoola.agents.editor.uiComponents.CustomFont;
 import org.openmicroscopy.shoola.agents.monash.IconManager;
-import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
 import org.openmicroscopy.shoola.agents.monash.view.data.MonashData;
@@ -78,15 +76,11 @@ import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.SearchPartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.UDLicenseDialog;
 import org.openmicroscopy.shoola.agents.util.EditorUtil;
+import org.openmicroscopy.shoola.agents.util.ViewerSorter;
 import org.openmicroscopy.shoola.env.ui.TopWindow;
 import org.openmicroscopy.shoola.util.ui.TitlePanel;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
-
-import pojos.AnnotationData;
 import pojos.DataObject;
-import pojos.DatasetData;
-import pojos.ProjectData;
-import pojos.TagAnnotationData;
 
 /** 
  * The {@link AndsPublish}'s View component. After creation
@@ -185,8 +179,12 @@ public class AndsPublishUI extends TopWindow
 	/** Hashtable containing party information */
 	private Hashtable<String, PartyBean>	partyHtable;
 
+	/** Used to sort the nodes.*/
+	private ViewerSorter sorter;
+	
 	protected AndsPublishUI(String title) {
 		super(title);
+		sorter = new ViewerSorter();
 	}
 
 	/**
@@ -196,7 +194,7 @@ public class AndsPublishUI extends TopWindow
 	 * Controller.
 	 */
 	public AndsPublishUI() {
-		super(TITLE);
+		this(TITLE);
 	}
 
 	/**
@@ -280,12 +278,17 @@ public class AndsPublishUI extends TopWindow
 	 */
 	protected void setListData(Collection<DataObject> dataCollection) {
 		clearFields();
-		listmodel = new DefaultListModel();
-		Iterator<DataObject> i = dataCollection.iterator();
+		if (listmodel == null) {
+			listmodel = new DefaultListModel();
+			projectList.setModel(listmodel);
+		}
+		listmodel.clear();
+		List l = sorter.sort(dataCollection);
+		Iterator<DataObject> i = l.iterator();
 		while (i.hasNext()) {
 			listmodel.addElement(new MonashData((DataObject) i.next()));
 		}
-		projectList.setModel(listmodel);
+		
 		if (listmodel.size() > 0) {
 			projectList.setSelectedIndex(0);
 		}
@@ -414,7 +417,8 @@ public class AndsPublishUI extends TopWindow
 
 		JTextArea tc = new JTextArea(TC_TEXT);
 		tc.setRows(10);
-		tc.setFont(new CustomFont());
+		//remove reference to editor agent
+		tc.setFont(new Font("SansSerif", Font.PLAIN, 11));
 		
 		c.insets = new Insets(0, 20, 15, 5);
 		c.gridx = 0;
@@ -439,6 +443,7 @@ public class AndsPublishUI extends TopWindow
 	{
 		JPanel p = new JPanel();
 		p.add(new JButton(controller.getAction(AndsPublishControl.EXIT)));
+		p.add(new JButton(controller.getAction(AndsPublishControl.REFRESH)));
 		publishButton = new JButton(controller.getAction(AndsPublishControl.PUBLISH));
 		p.add(publishButton);
 		p.add(Box.createHorizontalStrut(5));
@@ -555,11 +560,6 @@ public class AndsPublishUI extends TopWindow
 			model.removeParty(cb.getName());
 		}
 		setComponentControls();
-	}
-
-	/** Refreshes the view */
-	public void refresh() {
-		setListData(model.getDataCollection());
 	}
 
 	private void clearFields() {

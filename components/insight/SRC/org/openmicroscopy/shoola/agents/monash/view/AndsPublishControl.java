@@ -41,6 +41,7 @@ import org.openmicroscopy.shoola.agents.monash.action.LicenseAction;
 import org.openmicroscopy.shoola.agents.monash.action.MonashAction;
 import org.openmicroscopy.shoola.agents.monash.action.PartyAction;
 import org.openmicroscopy.shoola.agents.monash.action.PublishAction;
+import org.openmicroscopy.shoola.agents.monash.action.RefreshAction;
 
 /** 
  * The controller component in the <code>AndsPublish</code> MVC triad.
@@ -64,6 +65,9 @@ public class AndsPublishControl implements PropertyChangeListener {
 	
 	/** Action ID indicating to add License. */
 	static final Integer LICENSE = 3;
+	
+	/** Action ID indicating to refresh the view. */
+	static final Integer REFRESH = 4;
 	
 	/** 
 	 * Reference to the {@link AndsPublish} component, which, in this context,
@@ -111,6 +115,7 @@ public class AndsPublishControl implements PropertyChangeListener {
 		actionsMap.put(LICENSE, new LicenseAction(model));
 		actionsMap.put(PARTY, new PartyAction(model));
 		actionsMap.put(EXIT, new ExitAction(model));
+		actionsMap.put(REFRESH, new RefreshAction(model));
 	}
 
 	/**
