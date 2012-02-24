@@ -36,6 +36,7 @@ import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
 
+import org.openmicroscopy.shoola.agents.events.metadata.AnnotatedEvent;
 import org.openmicroscopy.shoola.agents.events.treeviewer.ExperimenterLoadedDataEvent;
 import org.openmicroscopy.shoola.agents.monash.action.RegisterAction;
 import org.openmicroscopy.shoola.agents.monash.events.PublishEvent;
@@ -104,6 +105,7 @@ public class PublishAgent implements Agent, AgentEventListener {
 		EventBus bus = registry.getEventBus();
 		bus.register(this, PublishEvent.class);
 		bus.register(this, ExperimenterLoadedDataEvent.class);
+		bus.register(this, AnnotatedEvent.class);
 		register();
 	}
 
@@ -157,6 +159,17 @@ public class PublishAgent implements Agent, AgentEventListener {
 		}
 	}
 
+	/**
+	 * Handles data loading. Set the viewer with new data loaded.
+	 * 
+	 * @param evt The event to handle.
+	 */
+	private void handleAnnotatedEvent(AnnotatedEvent evt) {
+		if (evt == null) return;
+		AndsPublish viewer = AndsPublishFactory.getViewer();
+		if (viewer != null) viewer.refresh();
+	}
+	
 	/**
 	 * Handles the {@link PublishEvent} event.
 	 * 
@@ -285,6 +298,8 @@ public class PublishAgent implements Agent, AgentEventListener {
 			handlePublishEvent((PublishEvent) e);
 		} else if (e instanceof ExperimenterLoadedDataEvent) {
 			handleExperimenterLoadedDataEvent((ExperimenterLoadedDataEvent) e);
+		} else if (e instanceof AnnotatedEvent) {
+			handleAnnotatedEvent((AnnotatedEvent) e);
 		}
 	}
 }
