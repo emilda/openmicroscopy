@@ -73,7 +73,7 @@ public class PublishAgent implements Agent, AgentEventListener {
 	public static String	MONASH_AGENT = "Register with RDA";
 
 	/* Map of visible data.*/
-	private Map<Long, List<TreeImageDisplay>> map;
+	//private Map<Long, List<TreeImageDisplay>> map;
 	
 	//no-arguments constructor required for initialization
 	public PublishAgent() {
@@ -148,11 +148,12 @@ public class PublishAgent implements Agent, AgentEventListener {
 	private void handleExperimenterLoadedDataEvent(ExperimenterLoadedDataEvent evt) {
 		if (evt == null) return;
 		AndsPublish viewer = AndsPublishFactory.getViewer();
-		Map<Long, List<TreeImageDisplay>> map = evt.getData();
+		//Map<Long, List<TreeImageDisplay>> map = evt.getData();
 		//List<TreeImageDisplay> objects = map.get(getUserDetails().getId());
-		this.map = map;
+		//this.map = map;
 		if (viewer != null) {
-			viewer.setDataLoaded(formatData(map));
+			viewer.refresh();
+			//viewer.setDataLoaded(formatData(map));
 		}
 	}
 
@@ -176,7 +177,8 @@ public class PublishAgent implements Agent, AgentEventListener {
 		AndsPublish viewer = AndsPublishFactory.getViewer(exp, id);
 		if (viewer != null) {
 			viewer.activate();
-			viewer.setDataLoaded(formatData(map));
+			//remove comment so we load all the data from the group.
+			//viewer.setDataLoaded(formatData(map));
 		}
 	}
 

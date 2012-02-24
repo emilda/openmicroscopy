@@ -33,6 +33,7 @@ import org.openmicroscopy.shoola.agents.monash.view.AndsPublish;
 import org.openmicroscopy.shoola.env.data.events.DSCallAdapter;
 import org.openmicroscopy.shoola.env.data.views.CallHandle;
 
+import pojos.ExperimenterData;
 import pojos.ProjectData;
 
 /** 
@@ -78,9 +79,15 @@ public class DataCollectionLoader extends PublishLoader {
 	 * Retrieves the data. Fires an asynchronous data loading.
 	 */
 	public void load() {
-		long id = PublishAgent.getUserDetails().getId();
+		ExperimenterData exp = PublishAgent.getUserDetails();
+		long id = exp.getId();
+		long groupId = exp.getDefaultGroup().getId();
+		//load the user data
+		//handle = dmView.loadContainerHierarchy(ProjectData.class, null, false,
+		//		id, -1, this);
+		//load the group data
 		handle = dmView.loadContainerHierarchy(ProjectData.class, null, false,
-				id, -1, this);	
+				-1, groupId, this);
 	}
 
 	/** Cancels any ongoing data loading. */

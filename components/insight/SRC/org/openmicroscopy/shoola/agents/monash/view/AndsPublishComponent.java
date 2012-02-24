@@ -114,7 +114,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 		case NEW:
 			loadParty();
 			model.loadExistingTags();
-			//loadDataCollection();
+			loadDataCollection();
 			//setDataCollection(model.getDataCollection());
 			view.setOnScreen();
 			view.toFront();
