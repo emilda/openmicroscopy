@@ -50,6 +50,8 @@ import javax.swing.JFrame;
 import omero.model.OriginalFile;
 
 import org.openmicroscopy.shoola.agents.events.iviewer.RndSettingsSaved;
+import org.openmicroscopy.shoola.agents.events.metadata.AnnotatedEvent;
+import org.openmicroscopy.shoola.agents.events.treeviewer.ExperimenterLoadedDataEvent;
 import org.openmicroscopy.shoola.agents.metadata.IconManager;
 import org.openmicroscopy.shoola.agents.metadata.MetadataViewerAgent;
 import org.openmicroscopy.shoola.agents.metadata.RenderingControlLoader;
@@ -446,6 +448,30 @@ class MetadataViewerComponent
 				List<Object> metadata, DataObject data, boolean asynch)
 	{
 		if (data == null) return;
+		Iterator<AnnotationData> k;
+		boolean post = false;
+		if (toAdd != null) {
+			k = toAdd.iterator();
+			while (k.hasNext()) {
+				if (k.next() instanceof TagAnnotationData) {
+					post = true;
+					break;
+				}
+			}
+		}
+		if (toRemove != null && !post) {
+			k = toRemove.iterator();
+			while (k.hasNext()) {
+				if (k.next() instanceof TagAnnotationData) {
+					post = true;
+					break;
+				}
+			}
+		}
+		if (post) {
+			EventBus bus = MetadataViewerAgent.getRegistry().getEventBus();
+			bus.post(new AnnotatedEvent(data));
+		}
 		Object refObject = model.getRefObject();
 		List<DataObject> toSave = new ArrayList<DataObject>();
 		if (refObject instanceof FileData) {
