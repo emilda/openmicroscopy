@@ -442,7 +442,7 @@ public class AndsPublishUI extends TopWindow
 	{
 		JPanel p = new JPanel();
 		p.add(new JButton(controller.getAction(AndsPublishControl.EXIT)));
-		p.add(new JButton(controller.getAction(AndsPublishControl.REFRESH)));
+		//p.add(new JButton(controller.getAction(AndsPublishControl.REFRESH)));
 		publishButton = new JButton(controller.getAction(AndsPublishControl.PUBLISH));
 		p.add(publishButton);
 		p.add(Box.createHorizontalStrut(5));
