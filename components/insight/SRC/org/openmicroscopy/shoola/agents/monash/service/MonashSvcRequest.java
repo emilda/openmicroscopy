@@ -58,12 +58,10 @@ public class MonashSvcRequest extends Request {
 	 * Creates a new instance using String parameters
 	 * 
 	 * @param cookie	The cookie to set.
-	 * @param params		The parameters to set.
+	 * @param params	The parameters to set.
 	 */
 	public MonashSvcRequest(String cookie, Map<String, String> params) {
-		this.params = params;
-		this.cookie = cookie;
-		nvp = null;
+		this(cookie, null, params);
 	}
 
 	/**
@@ -71,13 +69,25 @@ public class MonashSvcRequest extends Request {
 	 * as <code>NameValuePair</code>
 	 * 
 	 * @param cookie	The cookie to set.
-	 * @param params		The parameters to set.
+	 * @param nvp		The parameters to set as as <code>NameValuePair</code>
 	 */
 	public MonashSvcRequest(String cookie, NameValuePair[] nvp) {
+		this(cookie, nvp, null);
+	}
+	
+	/**
+	 * Creates a new instance
+	 * 
+	 * @param cookie	The cookie to set.
+	 * @param nvp		The parameters to set as as <code>NameValuePair</code>
+	 * @param params	The parameters to set.
+	 */
+	private MonashSvcRequest(String cookie, NameValuePair[] nvp, Map<String, String> params) {
 		this.nvp = nvp;
 		this.cookie = cookie;
-		params = null;
+		this.params = params;
 	}
+	
 
 	/**
 	 * Prepares the <code>method</code> to post.
