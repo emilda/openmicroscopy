@@ -97,8 +97,8 @@ public abstract class MonashDialog extends JDialog
 		setTitle(title);
 		initComponents();
 		buildGUI(subtitle);
-		pack();
 		setSize(DEFAULT_SIZE);
+		//pack();
 	}
 
 	private void buildGUI(String subtitle) 

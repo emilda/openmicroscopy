@@ -28,6 +28,7 @@
 package org.openmicroscopy.shoola.agents.monash.view.dialog;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -62,6 +63,9 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
  */
 public class InputPartyDialog extends MonashDialog {
 
+	/** The default size of the window. */
+	private static final Dimension 	PANEL_SIZE = new Dimension(700, 600);
+	
 	/** Description of the panel. */
 	private static final String 	DESCRIPTION = "This page is under construction";
 
@@ -77,8 +81,18 @@ public class InputPartyDialog extends MonashDialog {
 	/** Action ID to go to the next page and close the dialog. */
 	private static final int		ADD = 1;
 
-	/** Max character length */
-	private static final String MAX_TWENTY = "(Maximum 20 characters in length)";
+	/** Field description of the {@link #titleField}. */
+	private static final String MAX_TWENTY = "*(Maximum 20 characters in length)";
+
+	private static final String VALID_EMAIL = "*(A valid email required, e.g. yourname@example.com)";
+
+	private static final String URL_REQD = "*(A valid web URL required, e.g. http://www.sample.com/profile)";
+
+	private static final String GROUP_NAME = "*(Maximum 100 characters in length, e.g. Monash University)";
+
+	private static final String GROUP_URL = "*(A valid web URL required, e.g. http://www.monash.edu.au)";
+
+	private static final String ADD_DETAIL = "*(Maximum 255 characters in length, a physical address)";
 
 	/** Button to close and dispose of the window. */
 	private JButton 				backButton;
@@ -95,9 +109,6 @@ public class InputPartyDialog extends MonashDialog {
 	/** The field holding the last name of the party to add. */
 	private JTextField				lName;
 	
-	/** Reference to the model. */
-	private AndsPublishModel 		model;
-
 	/** Search if successful sets <code>PartyBean</code>. */
 	private PartyBean 				partyBean;
 
@@ -108,9 +119,8 @@ public class InputPartyDialog extends MonashDialog {
 	 * @param title		title of the dialog
 	 * @param model		Reference to the model
 	 */
-	public InputPartyDialog(JFrame parent, String title, AndsPublishModel model) {
+	public InputPartyDialog(JFrame parent, String title) {
 		super(parent, title, "", null);
-		this.model = model;
 	}
 	
 	/**
@@ -153,12 +163,17 @@ public class InputPartyDialog extends MonashDialog {
 		c.weightx = 0.1;
 		c.gridy = 0;
 
-		JLabel label = new JLabel(DESCRIPTION);
-		box.add(label, c);
+		//JLabel label = new JLabel(DESCRIPTION);
+		//box.add(label, c);
 
-		/*addField(box, c, "Title", MAX_TWENTY, titleField);
+		addField(box, c, "Title", MAX_TWENTY, titleField);
 		addField(box, c, "First Name", MAX_TWENTY, fName);
-		addField(box, c, "Last Name", MAX_TWENTY, lName);*/
+		addField(box, c, "Last Name", MAX_TWENTY, lName);
+		addField(box, c, "Email", VALID_EMAIL, lName);
+		addField(box, c, "Address", ADD_DETAIL, lName);
+		addField(box, c, "Web URL", URL_REQD, lName);
+		addField(box, c, "Group Name", GROUP_NAME, lName);
+		addField(box, c, "Group Wb Site", GROUP_URL, lName);
 
 		c.gridy++;
 		c.weighty = 1.0;
@@ -176,9 +191,9 @@ public class InputPartyDialog extends MonashDialog {
 		c.gridy++;
 		
 		JLabel infoLabel = new JLabel(info);
-		//Font f = new Font("Serif", Font.PLAIN, 10);
-		//infoLabel.setFont(f);
-		infoLabel.setFont(infoLabel.getFont().deriveFont(10));
+		Font f = new Font("Serif", Font.PLAIN, 10);
+		infoLabel.setFont(f);
+		//infoLabel.setFont(infoLabel.getFont().deriveFont(4));
 		infoLabel.setForeground(Color.GRAY);
 		
 		box.add(infoLabel, c);
@@ -209,6 +224,8 @@ public class InputPartyDialog extends MonashDialog {
 	 */
 	protected void initComponents() {
 
+		setSize(PANEL_SIZE);
+		
 		partyBean = null;
 		
 		titleField = new JTextField(20);
@@ -238,5 +255,10 @@ public class InputPartyDialog extends MonashDialog {
 	 */
 	public PartyBean getPartyBean() {
 		return partyBean;
+	}
+	
+	public static void main(String[] args) {
+		InputPartyDialog ld = new InputPartyDialog(null, "Manually Input a Researcher Information");
+		UIUtilities.centerAndShow(ld);
 	}
 }
