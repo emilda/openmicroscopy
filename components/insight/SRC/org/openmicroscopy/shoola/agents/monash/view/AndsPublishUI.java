@@ -459,7 +459,7 @@ public class AndsPublishUI extends TopWindow
 		IconManager icons = IconManager.getInstance();
 		tp = new TitlePanel(TITLE, "", 
 				"Register the following collection with RDA", 
-				icons.getIcon(IconManager.MONASH ));
+				icons.getIcon(IconManager.LOGO_MU));
 		JXPanel p = new JXPanel();
 		JXPanel lp = new JXPanel();
 		lp.setLayout(new FlowLayout(FlowLayout.LEFT));

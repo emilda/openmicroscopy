@@ -59,12 +59,18 @@ public class IconManager
     /** The <code>information</code> icon. */
     public  static final int	INFO = 2;
     
+    /** The <code>MERC</code> logo. */
+    public  static final int	LOGO_MERC = 3;
+    
+    /** The <code>Monash University</code> logo. */
+    public  static final int	LOGO_MU = 4;
+    
     
     /** 
      * The maximum ID used for the icon IDs.
      * Allows to correctly build arrays for direct indexing. 
      */
-    private static final int	MAX_ID = 2;
+    private static final int	MAX_ID = 4;
     
     /** Paths of the icon files. */
     private static String[]     relPaths = new String[MAX_ID+1];
@@ -73,6 +79,8 @@ public class IconManager
     	relPaths[MONASH] = "mon_reg.png";	// monash.ico
         relPaths[LOGO_ANDS] = "logo_ands.png";
         relPaths[INFO] = "info.png";
+        relPaths[LOGO_MERC] = "logo.jpg";
+        relPaths[LOGO_MU] = "monash-logo.png";
     }
     
     /** The sole instance. */
