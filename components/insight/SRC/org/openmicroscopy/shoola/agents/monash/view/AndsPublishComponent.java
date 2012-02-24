@@ -146,8 +146,8 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	/** Refreshes the view on UserGroupSwitched */
 	public void refresh() {
 		if (model.getState() == DISCARDED) return;
-		//loadDataCollection();
-		setDataCollection(model.getDataCollection());
+		loadDataCollection();
+		//setDataCollection(model.getDataCollection());
 		//view.refresh();
 	}
 

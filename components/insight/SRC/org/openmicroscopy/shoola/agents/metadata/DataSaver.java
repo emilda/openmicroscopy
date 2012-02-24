@@ -25,15 +25,20 @@ package org.openmicroscopy.shoola.agents.metadata;
 
 //Java imports
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 //Third-party libraries
 
 //Application-internal dependencies
+import org.openmicroscopy.shoola.agents.events.metadata.AnnotatedEvent;
 import org.openmicroscopy.shoola.agents.metadata.view.MetadataViewer;
 import org.openmicroscopy.shoola.env.data.views.CallHandle;
+import org.openmicroscopy.shoola.env.event.EventBus;
+
 import pojos.AnnotationData;
 import pojos.DataObject;
+import pojos.TagAnnotationData;
 
 /** 
  * Saves the structured annotations.
@@ -118,6 +123,31 @@ public class DataSaver
     {
     	if (viewer.getState() == MetadataViewer.DISCARDED) return;  //Async cancel.
     	viewer.onDataSave((List) data);
+    	Iterator<AnnotationData> k;
+		boolean post = false;
+		if (toAdd != null) {
+			k = toAdd.iterator();
+			while (k.hasNext()) {
+				if (k.next() instanceof TagAnnotationData) {
+					post = true;
+					break;
+				}
+			}
+		}
+		if (toRemove != null && !post) {
+			k = toRemove.iterator();
+			while (k.hasNext()) {
+				if (k.next() instanceof TagAnnotationData) {
+					post = true;
+					break;
+				}
+			}
+		}
+		if (post) {
+			EventBus bus = 
+				MetadataViewerAgent.getRegistry().getEventBus();
+			bus.post(new AnnotatedEvent(data));
+		}
     }
     
 }

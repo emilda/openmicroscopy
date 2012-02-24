@@ -37,6 +37,7 @@ import java.util.Map.Entry;
 //Third-party libraries
 
 //Application-internal dependencies
+import org.openmicroscopy.shoola.agents.events.metadata.AnnotatedEvent;
 import org.openmicroscopy.shoola.agents.metadata.AdminEditor;
 import org.openmicroscopy.shoola.agents.metadata.DataBatchSaver;
 import org.openmicroscopy.shoola.agents.metadata.DataSaver;
@@ -60,6 +61,7 @@ import org.openmicroscopy.shoola.env.data.OmeroMetadataService;
 import org.openmicroscopy.shoola.env.data.model.AdminObject;
 import org.openmicroscopy.shoola.env.data.model.MovieExportParam;
 import org.openmicroscopy.shoola.env.data.util.StructuredDataResults;
+import org.openmicroscopy.shoola.env.event.EventBus;
 import org.openmicroscopy.shoola.env.log.LogMessage;
 import org.openmicroscopy.shoola.env.rnd.RndProxyDef;
 import org.openmicroscopy.shoola.env.ui.UserNotifier;
@@ -74,6 +76,7 @@ import pojos.ImageData;
 import pojos.PlateData;
 import pojos.ProjectData;
 import pojos.ScreenData;
+import pojos.TagAnnotationData;
 import pojos.WellSampleData;
 
 /** 
@@ -501,6 +504,31 @@ class MetadataViewerModel
 						os.saveAcquisitionData(i.next()) ;
             	}
             	os.saveData(data, toAdd, toRemove, userID);
+            	Iterator<AnnotationData> k;
+        		boolean post = false;
+        		if (toAdd != null) {
+        			k = toAdd.iterator();
+        			while (k.hasNext()) {
+        				if (k.next() instanceof TagAnnotationData) {
+        					post = true;
+        					break;
+        				}
+        			}
+        		}
+        		if (toRemove != null && !post) {
+        			k = toRemove.iterator();
+        			while (k.hasNext()) {
+        				if (k.next() instanceof TagAnnotationData) {
+        					post = true;
+        					break;
+        				}
+        			}
+        		}
+        		if (post) {
+        			EventBus bus = 
+        				MetadataViewerAgent.getRegistry().getEventBus();
+        			bus.post(new AnnotatedEvent(data));
+        		}
 			} catch (Exception e) {
 				LogMessage msg = new LogMessage();
 				msg.print("Unable to save annotation and/or edited data");

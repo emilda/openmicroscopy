@@ -29,6 +29,8 @@ package org.openmicroscopy.shoola.agents.events.metadata;
 //Third-party libraries
 
 //Application-internal dependencies
+import java.util.Collection;
+
 import org.openmicroscopy.shoola.env.event.RequestEvent;
 import pojos.DataObject;
 
@@ -44,14 +46,14 @@ public class AnnotatedEvent
 {
 
 	/** The data object annotated.*/
-	private DataObject data;
+	private Collection<DataObject> data;
 	
 	/**
 	 * Creates a new instance.
 	 * 
 	 * @param data The annotated object.
 	 */
-	public AnnotatedEvent(DataObject data)
+	public AnnotatedEvent(Collection<DataObject> data)
 	{
 		this.data = data;
 	}

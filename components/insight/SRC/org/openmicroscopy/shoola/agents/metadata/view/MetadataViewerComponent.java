@@ -448,30 +448,6 @@ class MetadataViewerComponent
 				List<Object> metadata, DataObject data, boolean asynch)
 	{
 		if (data == null) return;
-		Iterator<AnnotationData> k;
-		boolean post = false;
-		if (toAdd != null) {
-			k = toAdd.iterator();
-			while (k.hasNext()) {
-				if (k.next() instanceof TagAnnotationData) {
-					post = true;
-					break;
-				}
-			}
-		}
-		if (toRemove != null && !post) {
-			k = toRemove.iterator();
-			while (k.hasNext()) {
-				if (k.next() instanceof TagAnnotationData) {
-					post = true;
-					break;
-				}
-			}
-		}
-		if (post) {
-			EventBus bus = MetadataViewerAgent.getRegistry().getEventBus();
-			bus.post(new AnnotatedEvent(data));
-		}
 		Object refObject = model.getRefObject();
 		List<DataObject> toSave = new ArrayList<DataObject>();
 		if (refObject instanceof FileData) {
