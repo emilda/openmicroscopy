@@ -192,6 +192,8 @@ class OmeroDataServiceImpl
 						LookupNames.CURRENT_USER_DETAILS);
 			if (userID < 0) userID = exp.getId();
 			param.exp(omero.rtypes.rlong(userID));
+			if (groupID > 0) param.grp(omero.rtypes.rlong(groupID));
+			else param.exp(omero.rtypes.rlong(userID));
 		}
 		if (withLeaves) param.leaves();
 		else param.noLeaves();
