@@ -281,7 +281,6 @@ public class CCLicenseDialog extends MonashDialog {
 	 * @see MonashDialog#initComponents()
 	 */
 	protected void initComponents() {
-
 		license = null;
 		
 		cclWs = PublishAgent.getCCLUrl();

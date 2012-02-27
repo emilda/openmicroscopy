@@ -27,6 +27,7 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view.dialog;
 
+import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -127,7 +128,13 @@ public class SearchPartyDialog extends MonashDialog {
 			setMessage(Constants.ERROR_NULL_FIELD);
 		} else {
 			try {
-				MonashSvcReply reply = model.searchRM(party);
+				MonashSvcReply reply;
+				try {
+					this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					reply = model.searchRM(party);
+				} finally {
+					this.setCursor(Cursor.getDefaultCursor());
+				}
 				String errMsg = reply.getErrMsg();
 				if (errMsg != null) {
 					setMessage(errMsg);

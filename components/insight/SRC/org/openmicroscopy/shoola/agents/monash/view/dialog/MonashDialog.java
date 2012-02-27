@@ -28,13 +28,10 @@
 package org.openmicroscopy.shoola.agents.monash.view.dialog;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.ComponentOrientation;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
@@ -45,8 +42,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import org.jdesktop.swingx.JXLabel;
-import org.jdesktop.swingx.JXPanel;
 import org.openmicroscopy.shoola.agents.monash.IconManager;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
@@ -64,17 +59,17 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
  * @since OME3.3
  */
 public abstract class MonashDialog extends JDialog
-		implements ActionListener {
-	
+implements ActionListener {
+
 	/** The default size of the window. */
 	protected static final Dimension 	DEFAULT_SIZE = new Dimension(700, 400);
-	
+
 	/** The icon to use for the dialog. */
 	private Icon 						icon;
-	
+
 	/** Title panel for displaying title as well as other messages in sub-title */
 	private TitlePanel tp;
-	
+
 	/**
 	 * Creates a new instance.
 	 * @param parent	the component
@@ -94,11 +89,16 @@ public abstract class MonashDialog extends JDialog
 	private void initialize(String title, String subtitle) 
 	{
 		//if (icon == null) icon = UIManager.getIcon("monashIcon");
-		setTitle(title);
-		initComponents();
-		buildGUI(subtitle);
-		setSize(DEFAULT_SIZE);
-		//pack();
+		try {
+			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			setTitle(title);
+			initComponents();
+			buildGUI(subtitle);
+			setSize(DEFAULT_SIZE);
+			//pack();
+		} finally {
+			this.setCursor(Cursor.getDefaultCursor());
+		}
 	}
 
 	private void buildGUI(String subtitle) 
@@ -107,14 +107,14 @@ public abstract class MonashDialog extends JDialog
 		component = buildContentPane();
 		component.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 0));
 		Container c = getContentPane();
-        tp = new TitlePanel(getTitle(), subtitle, icon);
-        c.setLayout(new BorderLayout(0, 0));
-        
-        c.add(tp, BorderLayout.NORTH);
+		tp = new TitlePanel(getTitle(), subtitle, icon);
+		c.setLayout(new BorderLayout(0, 0));
+
+		c.add(tp, BorderLayout.NORTH);
 		c.add(component, BorderLayout.LINE_START);
 		c.add(UIUtilities.buildComponentPanelRight(buildToolBar()), BorderLayout.SOUTH);
 	}
-	
+
 	/**
 	 * Formats the specified button.
 	 * 
@@ -128,39 +128,39 @@ public abstract class MonashDialog extends JDialog
 			actionID, MonashDialog parent)
 	{
 		b.setMnemonic(mnemonic);
-        b.setOpaque(false);
-        b.setToolTipText(tooltip);
-        b.addActionListener(parent);
-        b.setActionCommand(""+actionID);
+		b.setOpaque(false);
+		b.setToolTipText(tooltip);
+		b.addActionListener(parent);
+		b.setActionCommand(""+actionID);
 	}
-	
+
 	/** Hides the window and disposes. */
 	protected void close()
 	{
 		setVisible(false);
 		dispose();
 		//firePropertyChange(ppty_name, oldV, newV);
-		
+
 		//Handle window closing correctly.
-        //setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		//setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 	}
 
 	/** 
-     * Subclasses implement this method.
-     * Initialize here all the components used to build the GUI
-     */
+	 * Subclasses implement this method.
+	 * Initialize here all the components used to build the GUI
+	 */
 	protected abstract void initComponents();
-	
+
 	/** 
-     * Subclasses implement this method.
-     * Build the Dialog GUI in this method
-     */
+	 * Subclasses implement this method.
+	 * Build the Dialog GUI in this method
+	 */
 	protected abstract JComponent buildContentPane();
-	
+
 	/** 
-     * Subclasses implement this method.
-     * Build the controls component required for the GUI
-     */
+	 * Subclasses implement this method.
+	 * Build the controls component required for the GUI
+	 */
 	protected abstract JComponent buildToolBar();
 
 	/**
@@ -173,16 +173,16 @@ public abstract class MonashDialog extends JDialog
 	public static void showErrDialog(Component parent, String message, Exception ex)
 	{
 		LogMessage msg = new LogMessage();
-        msg.println(message);
-        msg.println("Reason: " + ex.getMessage());
-        Logger logger = PublishAgent.getRegistry().getLogger();
-        logger.error(parent, msg);
-        IconManager icons = IconManager.getInstance();
-        JOptionPane.showMessageDialog(parent, msg.toString(), 
-        		Constants.BACKEND_ERROR, 	//	the title string for the dialog
-        		JOptionPane.ERROR_MESSAGE);	// WARNING_MESSAGE, PLAIN_MESSAGE
+		msg.println(message);
+		msg.println("Reason: " + ex.getMessage());
+		Logger logger = PublishAgent.getRegistry().getLogger();
+		logger.error(parent, msg);
+		IconManager icons = IconManager.getInstance();
+		JOptionPane.showMessageDialog(parent, msg.toString(), 
+				Constants.BACKEND_ERROR, 	//	the title string for the dialog
+				JOptionPane.ERROR_MESSAGE);	// WARNING_MESSAGE, PLAIN_MESSAGE
 	}
-	
+
 	public Icon getIcon() {
 		return icon;
 	}
