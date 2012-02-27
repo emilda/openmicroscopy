@@ -27,6 +27,7 @@
  */
 package org.openmicroscopy.shoola.agents.monash.view.dialog;
 
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -89,28 +90,28 @@ public class CCLicenseDialog extends MonashDialog {
 
 	/** URI to Creative Commons Web Services accessible via REST interface. */
 	private String 					cclWs;
-	
+
 	/** Label for commercial */
 	private JLabel 					commLabel;
-	
+
 	/** Description for field, commercial */
 	private String 					commDescr;
-	
+
 	/** To group commercial field options. */
 	private ButtonGroup 			commBtnGroup;
 
 	/** Commercial use options */
 	private JRadioButton[] 			commOptRBtn;
-	
+
 	/** Description for commercial use options **/
 	private String[] 				commOpDesc;
 
 	/** Label for modification */
 	private JLabel 					modLabel;
-	
+
 	/** Description for field, modification */
 	private String 					modDescr;
-	
+
 	/** To group modification field buttons. */
 	private ButtonGroup 			modfBtnGroup;
 
@@ -119,16 +120,16 @@ public class CCLicenseDialog extends MonashDialog {
 
 	/** Description for modification use options **/
 	private String[] 				modOptDesc;
-	
+
 	/** Label for Jurisdiction */
 	private JLabel 					jLabel;
-	
+
 	/** Description for field, modification */
 	private String 					jDescr;
-	
+
 	/** The creative commons license */
 	private LicenceBean				license;
-	
+
 	/** List of Jurisdiction for the license */
 	private JComboBox 				jList;
 
@@ -149,7 +150,7 @@ public class CCLicenseDialog extends MonashDialog {
 	public void actionPerformed(ActionEvent e) 
 	{
 		int index = Integer.parseInt(e.getActionCommand());
-		
+
 		switch (index) {
 		case BACK:
 			license = null;
@@ -165,15 +166,21 @@ public class CCLicenseDialog extends MonashDialog {
 		String C = commBtnGroup.getSelection().getActionCommand();
 		String D = modfBtnGroup.getSelection().getActionCommand();
 		CCLFieldEnumValues J = (CCLFieldEnumValues)jList.getSelectedItem();
-	     
+
 		try {
 			String jId = J.getId();
 			if (jId.equals(Constants.INTERNATIONAL)) jId = "";
 			String licenseParams = 
 					"commercial=" + C + "&derivatives=" + D + "&jurisdiction=" + jId;
 			String uri = cclWs  + "/get?" + licenseParams;
-			String str  = Unmarshaller.getCCLicense(uri);
-			
+			String str;
+			try {
+				this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				str  = Unmarshaller.getCCLicense(uri);
+			} finally {
+				this.setCursor(Cursor.getDefaultCursor());
+			}
+
 			license = new LicenceBean();
 			license.setCommercial(C);
 			license.setDerivatives(D);
@@ -226,28 +233,28 @@ public class CCLicenseDialog extends MonashDialog {
 		box.add(getInfoLabel(descr), c);
 		c.gridx = 0;
 	}
-	
+
 	private JLabel getInfoLabel(String descr) {
 		JLabel info = new JLabel();
-        info.setFont(info.getFont().deriveFont(Font.ITALIC));
-        info.setHorizontalAlignment(JLabel.CENTER);
-        IconManager icons = IconManager.getInstance();
-        Icon icon = icons.getIcon(IconManager.INFO);
-        //ImageIcon icon = createImageIcon("info.png");
+		info.setFont(info.getFont().deriveFont(Font.ITALIC));
+		info.setHorizontalAlignment(JLabel.CENTER);
+		IconManager icons = IconManager.getInstance();
+		Icon icon = icons.getIcon(IconManager.INFO);
+		//ImageIcon icon = createImageIcon("info.png");
 		info.setIcon(icon);
-        info.setToolTipText(descr);
-        return info;
+		info.setToolTipText(descr);
+		return info;
 	}
 
 	/** Returns an ImageIcon, or null if the path was invalid. */
-    protected static ImageIcon createImageIcon(String path) {
-        java.net.URL imgURL = CCLicenseDialog.class.getResource(path);
-        if (imgURL != null) {
-            return new ImageIcon(imgURL);
-        } else {
-            return null;
-        }
-    }
+	protected static ImageIcon createImageIcon(String path) {
+		java.net.URL imgURL = CCLicenseDialog.class.getResource(path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL);
+		} else {
+			return null;
+		}
+	}
 
 	private void addOptions(JPanel box, JRadioButton[] optionsRBtn,
 			String[] opDesc, GridBagConstraints c) {
@@ -282,7 +289,7 @@ public class CCLicenseDialog extends MonashDialog {
 	 */
 	protected void initComponents() {
 		license = null;
-		
+
 		cclWs = PublishAgent.getCCLUrl();
 		//cclWs = "http://api.creativecommons.org/rest/1.5/license/standard";
 
@@ -313,7 +320,7 @@ public class CCLicenseDialog extends MonashDialog {
 					jLabel = new JLabel(field.getLabel());
 					jDescr = field.getDescription();
 					String[] opStrings = new String[options.size()];
-					
+
 					for (int i = 0; i < options.size(); i++) {
 						opStrings[i] = options.get(i).getLabel();
 					}
@@ -322,13 +329,13 @@ public class CCLicenseDialog extends MonashDialog {
 							(CCLFieldEnumValues[]) options.toArray(
 									new CCLFieldEnumValues[options.size()]);
 					jList = new JComboBox(optionsArray);
-			        jList.setSelectedIndex(0);
+					jList.setSelectedIndex(0);
 				}
 			}
 		} catch (Exception e) {
 			showErrDialog(this, Constants.ERROR_CCL, e);
 		}
-		
+
 
 	}
 
