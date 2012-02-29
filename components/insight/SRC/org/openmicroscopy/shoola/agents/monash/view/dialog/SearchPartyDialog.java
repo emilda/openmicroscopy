@@ -211,6 +211,7 @@ public class SearchPartyDialog extends MonashDialog {
 
 		searchButton = new JButton("Next");
 		formatButton(searchButton, 'N', SEARCH_TOOLTIP, SEARCH, this);
+		this.getRootPane().setDefaultButton(searchButton);
 
 	}
 

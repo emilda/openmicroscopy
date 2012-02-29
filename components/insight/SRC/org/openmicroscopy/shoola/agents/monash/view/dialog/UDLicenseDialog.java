@@ -193,6 +193,7 @@ public class UDLicenseDialog extends MonashDialog {
 
 		saveButton = new JButton("Next");
 		formatButton(saveButton, 'N', SAVE_TOOLTIP, SAVE, this);
+		this.getRootPane().setDefaultButton(saveButton);
 	}
 
 	/**

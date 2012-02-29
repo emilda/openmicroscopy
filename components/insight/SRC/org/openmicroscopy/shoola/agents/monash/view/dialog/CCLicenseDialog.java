@@ -298,6 +298,7 @@ public class CCLicenseDialog extends MonashDialog {
 
 		nextButton = new JButton("Next");
 		formatButton(nextButton, 'N', NEXT_TOOLTIP, NEXT, this);
+		this.getRootPane().setDefaultButton(nextButton);
 
 		try {
 			List<CCLField> fields = Unmarshaller.getLicenseFields(cclWs);

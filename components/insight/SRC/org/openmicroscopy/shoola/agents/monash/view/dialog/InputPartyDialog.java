@@ -239,10 +239,12 @@ public class InputPartyDialog extends MonashDialog {
 
 		backButton = new JButton("Back");
 		formatButton(backButton, 'B', BACK_TOOLTIP, BACK, this);
+		this.getRootPane().setDefaultButton(backButton);
 
 		addButton = new JButton("Next");
 		formatButton(addButton, 'A', ADD_TOOLTIP, ADD, this);
 		addButton.setEnabled(false);
+		
 
 	}
 

@@ -168,6 +168,7 @@ public class PartyDialog extends MonashDialog {
 		
 		nextButton = new JButton("Next");
 		formatButton(nextButton, 'N', NEXT_TOOLTIP, NEXT, this);
+		this.getRootPane().setDefaultButton(nextButton);
 		
 		OPTIONS = new Hashtable<String, String>();
 		OPTIONS.put(PARTY_OPTION_MANUAL, MANUAL);
