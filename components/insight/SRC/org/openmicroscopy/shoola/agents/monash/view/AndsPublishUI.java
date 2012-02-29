@@ -332,6 +332,7 @@ public class AndsPublishUI extends TopWindow
 			MonashData object = (MonashData) list.getModel().getElementAt(index);
 			updateLabel(object);
 			model.setMetadata(object);
+			clearData();
 		}
 		//updateLabel((String) list.getSelectedValue());
 	}
@@ -525,7 +526,6 @@ public class AndsPublishUI extends TopWindow
 	 * @param pb	the <code>PartyBean</code> object
 	 */
 	protected void addPartyCheckBox(String key, PartyBean pb) {
-
 		JCheckBox rcb = new JCheckBox(pb.toString(), true);
 		rcb.setBackground(UIUtilities.BACKGROUND_COLOR);
 		rcb.setEnabled(true);
@@ -572,8 +572,18 @@ public class AndsPublishUI extends TopWindow
 		model.setLicense(null);
 		model.clearParty();
 		noLicense.setText("");
-		partyHtable.clear();
-		researcherPanel.removeAll();
+		
+		PartyBean defaulParty = model.getPartybean();
+		if (defaulParty != null && partyHtable.containsKey(defaulParty.getPartyKey())) {
+			// partyHtable is cleared if it contains the logged in party info
+			if (partyHtable.size() > 1) {
+				partyHtable.clear();
+				researcherPanel.removeAll();
+				addPartyCheckBox(defaulParty.getPartyKey(), defaulParty);
+			}
+		} else {
+			researcherPanel.removeAll();
+		}
 		//researcherPanel.updateUI();
 	}
 
@@ -661,7 +671,7 @@ public class AndsPublishUI extends TopWindow
 	/**
 	 * Removes the registered collection from the explorer
 	 */
-	public void removeListItem() {
+	void removeListItem() {
 		listmodel.remove(projectList.getSelectedIndex());
 		if (listmodel.size() > 0) {
 			projectList.setSelectedIndex(0);

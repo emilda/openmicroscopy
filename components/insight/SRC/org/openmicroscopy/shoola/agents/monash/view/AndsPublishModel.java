@@ -81,6 +81,9 @@ public class AndsPublishModel {
 
 	/** The currently selected experimenter. */
 	private ExperimenterData	experimenter;
+	
+	/** Party info for the logged in user */
+	private PartyBean 			partybean;
 
 	/** Flag indicating if the {@link TreeViewer} is recycled or not. */
 	private boolean				recycled;
@@ -94,7 +97,7 @@ public class AndsPublishModel {
 	 */
 	private DataCollectionLoader dataLoader;
 
-	/** Collection of Project/ Dataset tagged as <i>Register with RDA</i> */
+	/** Collection of Project/ Dataset tagged {@link Constants.REGISTER_RDA_TAG} */
 	private Collection 			dataCollection = null;
 
 	/** Cookie to connect to Monash DS */
@@ -560,7 +563,14 @@ public class AndsPublishModel {
 	}
 
 	void clearParty() {
-		partyHtable.clear();
+		if (partybean != null && partyHtable.containsKey(partybean.getPartyKey())) {
+			if (partyHtable.size() > 1) {
+				partyHtable.clear();
+				partyHtable.put(partybean.getPartyKey(), partybean);
+			}
+		} else {
+			partyHtable.clear();
+		}
 	}
 
 	/**
@@ -578,6 +588,20 @@ public class AndsPublishModel {
 	{
 		TagsLoader loader = new TagsLoader(component);
 		loader.load();
+	}
+
+	/**
+	 * @return the partybean
+	 */
+	PartyBean getPartybean() {
+		return partybean;
+	}
+
+	/**
+	 * @param partybean the partybean to set
+	 */
+	void setPartybean(PartyBean partybean) {
+		this.partybean = partybean;
 	}
 
 }

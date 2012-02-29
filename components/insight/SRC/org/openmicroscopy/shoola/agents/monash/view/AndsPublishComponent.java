@@ -273,6 +273,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	public void loadParty() {
 		PartyBean pb = model.searchParty();
 		if (null != pb) {
+			model.setPartybean(pb);
 			String key = pb.getPartyKey();
 			model.addParty(key, pb);
 			view.addPartyCheckBox(key, pb);
