@@ -64,20 +64,20 @@ public class SearchPartyDialog extends MonashDialog {
 	/** Description of the panel. */
 	private static final String 	DESCRIPTION = "Enter the researcher name or email below:";
 
-	/** The tooltip of the {@link #backButton}. */
-	private static final String		BACK_TOOLTIP = "Go back to previous page.";
+	/** The tooltip of the {@link #cancelButton}. */
+	private static final String		CANCEL_TOOLTIP = "Go back to previous page.";
 
 	/** The tooltip of the {@link #searchButton}. */
 	private static final String		SEARCH_TOOLTIP = "Search for Party in the Research Master.";
 
 	/** Action ID to close the dialog. */
-	private static final int		BACK = 0;
+	private static final int		CANCEL = 0;
 
 	/** Action ID to go to the next page and close the dialog. */
 	private static final int		SEARCH = 1;
 
 	/** Button to close and dispose of the window. */
-	private JButton 				backButton;
+	private JButton 				cancelButton;
 
 	/** Button to search for Party in the Research Master. */
 	private JButton					searchButton;
@@ -111,7 +111,7 @@ public class SearchPartyDialog extends MonashDialog {
 
 		int index = Integer.parseInt(e.getActionCommand());
 		switch (index) {
-		case BACK:
+		case CANCEL:
 			close();
 			break;
 		case SEARCH:
@@ -186,7 +186,7 @@ public class SearchPartyDialog extends MonashDialog {
 	protected JComponent buildToolBar() {
 		JPanel bar = new JPanel();
 		bar.setLayout(new BoxLayout(bar, BoxLayout.X_AXIS));
-		bar.add(backButton);
+		bar.add(cancelButton);
 		bar.add(Box.createHorizontalStrut(5));
 		bar.add(searchButton);
 		bar.add(Box.createHorizontalStrut(10));
@@ -206,8 +206,8 @@ public class SearchPartyDialog extends MonashDialog {
 		searchField.setEnabled(true);
 		searchField.setEditable(true);
 
-		backButton = new JButton("Back");
-		formatButton(backButton, 'B', BACK_TOOLTIP, BACK, this);
+		cancelButton = new JButton("Cancel");
+		formatButton(cancelButton, 'B', CANCEL_TOOLTIP, CANCEL, this);
 
 		searchButton = new JButton("Next");
 		formatButton(searchButton, 'N', SEARCH_TOOLTIP, SEARCH, this);

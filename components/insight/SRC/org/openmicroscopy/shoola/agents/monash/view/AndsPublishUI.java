@@ -496,7 +496,7 @@ public class AndsPublishUI extends TopWindow
 	protected void searchResearcher() 
 	{
 		SearchPartyDialog spd = 
-				new SearchPartyDialog(this, "Adding Researcher Options", model);
+				new SearchPartyDialog(this, "Add Researcher", model);
 		UIUtilities.centerAndShow(spd);
 		PartyBean pb = spd.getPartyBean();
 		if (null != pb) {
