@@ -231,7 +231,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 				view.showInfoDialog(reply.getSuccessMsg());
 			}
 		} catch (TransportException e) {
-			MonashDialog.showErrDialog(null, Constants.ERROR_PARTY_NF, e);
+			view.showErrDialog(e.getMessage());
 		}
 	}
 
