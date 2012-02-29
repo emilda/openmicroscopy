@@ -72,6 +72,7 @@ import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.CCLicenseDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.InputPartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.LicenseDialog;
+import org.openmicroscopy.shoola.agents.monash.view.dialog.MonashDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.PartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.SearchPartyDialog;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.UDLicenseDialog;
@@ -677,5 +678,21 @@ public class AndsPublishUI extends TopWindow
 			projectList.setSelectedIndex(0);
 		}
 		setComponentControls();
+	}
+
+	/**
+	 * Shows information dialog 
+	 * @param message	the message to display
+	 */
+	public void showInfoDialog(String message) {
+		MonashDialog.showInfoDialog(this, message);
+	}
+
+	/**
+	 * Shows error dialog 
+	 * @param message	the error message to display
+	 */
+	public void showErrDialog(String message) {
+		MonashDialog.showErrDialog(this, message, null);
 	}
 }

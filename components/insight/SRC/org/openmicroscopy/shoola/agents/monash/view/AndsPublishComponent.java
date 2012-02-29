@@ -224,11 +224,11 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 			MonashSvcReply reply = mSvc.mdReg(cookie, nvp);
 			String errMsg = reply.getErrMsg();
 			if (errMsg != null) {
-				view.setMessage(errMsg);
+				view.showErrDialog(errMsg);
 			} else {
 				model.changeTag();
-				view.setMessage(reply.getSuccessMsg());
 				view.clearData();
+				view.showInfoDialog(reply.getSuccessMsg());
 			}
 		} catch (TransportException e) {
 			MonashDialog.showErrDialog(null, Constants.ERROR_PARTY_NF, e);

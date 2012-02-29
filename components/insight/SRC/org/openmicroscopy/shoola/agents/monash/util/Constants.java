@@ -69,6 +69,12 @@ public class Constants {
     /** Error message when <code>Monash DS</code> is not available */
 	public static final String BACKEND_ERROR = "Monash Data Server Error";
 
+	/** Warning message */
+	public static final String WARN_MESSAGE = "Warning Message";
+	
+	/** Information message */
+	public static final String INFO_MESSAGE = "Information";
+	
 	/** Blank field */
 	public static final String SPACE = "";
 

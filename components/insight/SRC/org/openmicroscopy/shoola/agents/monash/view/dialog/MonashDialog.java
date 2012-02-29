@@ -59,7 +59,8 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
  * @since OME3.3
  */
 public abstract class MonashDialog extends JDialog
-implements ActionListener {
+						implements ActionListener 
+{
 
 	/** The default size of the window. */
 	protected static final Dimension 	DEFAULT_SIZE = new Dimension(700, 400);
@@ -164,25 +165,65 @@ implements ActionListener {
 	protected abstract JComponent buildToolBar();
 
 	/**
-	 * @param parent	determines the Frame in which the dialog is displayed; 
+	 * Show dialog based on input parameters
+	 * 
+	 * @param parent	the Frame in which the dialog is displayed; 
 	 * 					if null, or if the parentComponent has no Frame, a 
 	 * 					default Frame is used
+	 * @param dialog_title	the title string for the dialog
 	 * @param message	the error message to display
+	 * @param messageType	the type of message to be displayed, {@link JOptionPane}
+	 * 		possible values are ERROR_MESSAGE, WARNING_MESSAGE, INFORMATION_MESSAGE
 	 * @param ex		the exception
 	 */
-	public static void showErrDialog(Component parent, String message, Exception ex)
+	public static void showDialog(Component parent, String dialog_title,
+			String message, int messageType, Exception ex)
 	{
 		LogMessage msg = new LogMessage();
 		msg.println(message);
-		msg.println("Reason: " + ex.getMessage());
+		if (null != ex)
+			msg.println("Reason: " + ex.getMessage());
 		Logger logger = PublishAgent.getRegistry().getLogger();
 		logger.error(parent, msg);
 		IconManager icons = IconManager.getInstance();
 		JOptionPane.showMessageDialog(parent, msg.toString(), 
-				Constants.BACKEND_ERROR, 	//	the title string for the dialog
-				JOptionPane.ERROR_MESSAGE);	// WARNING_MESSAGE, PLAIN_MESSAGE
+				dialog_title, 	//	the title string for the dialog
+				messageType);
+	}
+	
+	/**
+	 * Shows error dialog 
+	 * @param parent	the Frame in which the dialog is displayed
+	 * @param message	the error message to display
+	 * @param ex		the exception that caused the error
+	 */
+	public static void showErrDialog(Component parent, String message, Exception ex)
+	{
+		showDialog(parent, Constants.BACKEND_ERROR, message, JOptionPane.ERROR_MESSAGE, ex);
+	}
+	
+	/**
+	 * Shows warning dialog 
+	 * @param parent	the Frame in which the dialog is displayed
+	 * @param message	the warning message to display
+	 * @param ex		the exception that caused the error
+	 */
+	public static void showWarnDialog(Component parent, String message, Exception ex)
+	{
+		showDialog(parent, Constants.WARN_MESSAGE, message, JOptionPane.WARNING_MESSAGE, ex);
+	}
+	
+	/**
+	 * Shows information dialog 
+	 * @param parent	the Frame in which the dialog is displayed
+	 * @param message	the message to display
+	 */
+	public static void showInfoDialog(Component parent, String message)
+	{
+		showDialog(parent, Constants.INFO_MESSAGE, message, JOptionPane.PLAIN_MESSAGE, null);
 	}
 
+	/** Return the icon for the dialog */
 	public Icon getIcon() {
 		return icon;
 	}
