@@ -27,17 +27,21 @@
  */
 package org.openmicroscopy.shoola.agents.monash.service;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.io.IOUtils;
+import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.util.XMLReader;
 import org.openmicroscopy.shoola.svc.proxy.Reply;
 import org.openmicroscopy.shoola.svc.transport.HttpChannel;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
+import org.xml.sax.SAXException;
 /** 
  * Reply from Monash DS
  *
@@ -77,7 +81,7 @@ public class MonashSvcReply extends Reply {
 	MonashSvcReply(StringBuilder reply)
 	{
 		if (reply == null) 
-			throw new NullPointerException("Cannot instantiate MonashSvcReply using null reply field.");
+			throw new NullPointerException("Cannot instantiate MonashSvcReply using null parameter.");
 		this.reply = reply;
 	}
 
@@ -119,6 +123,14 @@ public class MonashSvcReply extends Reply {
 		return getResponseMsg(RESPONSE_SUCCESS);
 	}
 	
+	/** Returns the reply XML from Monash DS */
+	public String getReply() {
+		if (getSuccessMsg() != null) {
+			return reply.toString();
+		}
+		return null;
+	}
+	
 	/**
 	 * return the value of the element, message in the response.
 	 * @param status the value for the element, status
@@ -126,7 +138,16 @@ public class MonashSvcReply extends Reply {
 	 * @return see above
 	 */
 	private String getResponseMsg(String status) {
-		if (reader == null ) initReader();
+		if (reader == null ) {
+			try {
+				initReader();
+			} catch (Exception e) {
+				if (status.equals(RESPONSE_ERROR)) {
+					return Constants.BACKEND_ERROR;
+				}
+				return null;
+			}
+		}
 		String value = compileExpression(RESPONSE_STATUS);
 		if (value.equals(status)) {
 			return compileExpression(RESPONSE_MESSAGE);
@@ -134,22 +155,13 @@ public class MonashSvcReply extends Reply {
 		return null;
 	}
 
-	/** Returns the reply XML from Monash DS */
-	public String getReply() {
-		if (reader == null ) initReader();
-		String value = compileExpression(RESPONSE_STATUS);
-		if (value.equals(RESPONSE_SUCCESS)) {
-			return reply.toString();
-		}
-		return null;
-	}
-	
-	/** Initialize the reader */
-	private void initReader() {
-		try {
-			InputStream is = IOUtils.toInputStream(reply.toString(), "UTF-8");
-			reader = new XMLReader(is);
-		} catch (Exception e) {}
+	/** Initialize the reader 
+	 * @throws IOException 
+	 * @throws ParserConfigurationException 
+	 * @throws SAXException */
+	private void initReader() throws Exception {
+		InputStream is = IOUtils.toInputStream(reply.toString(), "UTF-8");
+		reader = new XMLReader(is);
 	}
 
 	/**

@@ -171,7 +171,7 @@ public class AndsPublishModel {
 	 *          with the same display as the one in which this model belongs;
 	 *          <code>false</code> otherwise.
 	 */
-	public boolean isSameDisplay(AndsPublishModel other) {
+	protected boolean isSameDisplay(AndsPublishModel other) {
 		if (other == null) return false;
 		return ((other.rootID == rootID) && (other.userGroupID == userGroupID));
 	}
@@ -208,7 +208,7 @@ public class AndsPublishModel {
 	 * 
 	 * @return One of the flags defined by the {@link AndsPublish} interface.  
 	 */
-	public int getState() {
+	protected int getState() {
 		return state;
 	}
 
@@ -298,7 +298,7 @@ public class AndsPublishModel {
 	/**
 	 * @return the cookie
 	 */
-	public String getCookie() {
+	protected String getCookie() {
 		return cookie;
 	}
 

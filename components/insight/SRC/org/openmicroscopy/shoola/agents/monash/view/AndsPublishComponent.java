@@ -40,10 +40,8 @@ import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.service.MonashServices;
 import org.openmicroscopy.shoola.agents.monash.service.MonashSvcReply;
 import org.openmicroscopy.shoola.agents.monash.service.ServiceFactory;
-import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.agents.monash.view.data.PartyBean;
 import org.openmicroscopy.shoola.agents.monash.view.dialog.LicenseDialog;
-import org.openmicroscopy.shoola.agents.monash.view.dialog.MonashDialog;
 import org.openmicroscopy.shoola.svc.transport.TransportException;
 import org.openmicroscopy.shoola.util.ui.component.AbstractComponent;
 
@@ -99,7 +97,7 @@ public class AndsPublishComponent extends AbstractComponent implements AndsPubli
 	 * Links up the MVC triad. 
 	 * 
 	 */
-	public void initialize() {
+	protected void initialize() {
 		controller.initialize(view);
 		view.initialize(model, controller);
 	}

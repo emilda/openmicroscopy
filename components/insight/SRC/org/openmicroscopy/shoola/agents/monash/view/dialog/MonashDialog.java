@@ -42,7 +42,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import org.openmicroscopy.shoola.agents.monash.IconManager;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
 import org.openmicroscopy.shoola.env.log.LogMessage;
@@ -181,13 +180,15 @@ public abstract class MonashDialog extends JDialog
 	{
 		LogMessage msg = new LogMessage();
 		msg.println(message);
-		if (null != ex)
-			msg.println("Reason: " + ex.getMessage());
-		Logger logger = PublishAgent.getRegistry().getLogger();
-		logger.error(parent, msg);
-		IconManager icons = IconManager.getInstance();
+		if (messageType == JOptionPane.ERROR_MESSAGE) {
+			if (ex != null) {
+				msg.println("Reason: " + ex.getMessage());
+			}
+			Logger logger = PublishAgent.getRegistry().getLogger();
+			logger.error(parent, msg);
+		}
 		JOptionPane.showMessageDialog(parent, msg.toString(), 
-				dialog_title, 	//	the title string for the dialog
+				dialog_title, 	//	the title for the dialog
 				messageType);
 	}
 	
