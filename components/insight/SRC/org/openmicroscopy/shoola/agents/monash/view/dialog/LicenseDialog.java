@@ -45,8 +45,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import org.openmicroscopy.shoola.util.ui.UIUtilities;
-
 /** 
  * Dialog showing the options for license associated with the data collection.
  * @see #OPTIONS

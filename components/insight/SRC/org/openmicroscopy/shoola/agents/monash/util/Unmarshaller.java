@@ -172,6 +172,17 @@ public class Unmarshaller {
 		return html + " (" + luri + ").";
 	}
 
+	/**
+	 * Calls the creative commons web service and populates 
+     * the list of fields which must that must be supplied 
+     * in order to issue a license.
+     * 
+	 * @param uri the web service url for creative commons license fields
+	 * @return	the list of license fields to populate the user interface
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws ParserConfigurationException
+	 */
 	public static List<CCLField> getLicenseFields(String uri) 
 			throws SAXException, IOException, ParserConfigurationException 
 	{

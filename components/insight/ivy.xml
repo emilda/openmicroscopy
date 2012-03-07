@@ -72,6 +72,10 @@
     <dependency org="loci" name="netcdf" rev="4.0"/>
     <dependency org="importer" name="slf4j-api" rev="${versions.slf4j}"/>
     <dependency org="importer" name="slf4j-log4j12" rev="${versions.slf4j}"/>
+
+    <!-- Monash -->
+    <dependency org="monash" name="jaxen" rev="${versions.jaxen}"/>
+    <dependency org="monash" name="jdom" rev="${versions.jdom}"/>
     
   </dependencies>
 </ivy-module>

@@ -23,7 +23,7 @@
      </fonts>
 </resources>
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * General set up for the data manager
+   * General set up for accessing data registration services
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <entry name="/services/monash/loginToken">https://vera143.its.monash.edu.au/omeromd/user/userLogin.jspx</entry>
 <entry name="/services/monash/mdregToken">https://vera143.its.monash.edu.au//omeromd/data/mdReg.jspx</entry>
