@@ -50,8 +50,8 @@ import javax.swing.JRadioButton;
 
 import org.openmicroscopy.shoola.agents.monash.IconManager;
 import org.openmicroscopy.shoola.agents.monash.PublishAgent;
-import org.openmicroscopy.shoola.agents.monash.util.CCLClient;
 import org.openmicroscopy.shoola.agents.monash.util.Constants;
+import org.openmicroscopy.shoola.agents.monash.util.Unmarshaller;
 import org.openmicroscopy.shoola.agents.monash.view.data.CCLField;
 import org.openmicroscopy.shoola.agents.monash.view.data.CCLFieldEnumValues;
 import org.openmicroscopy.shoola.agents.monash.view.data.LicenceBean;
@@ -134,7 +134,7 @@ public class CCLicenseDialog extends MonashDialog {
 	private JComboBox 				jList;
 
 	/** Client providing creative commons license services */
-	private CCLClient 				ccclient;
+	//private CCLClient 			ccclient;
 
 	/**
 	 * Instantiates the dialog to create the Creative Commons License. 
@@ -175,10 +175,11 @@ public class CCLicenseDialog extends MonashDialog {
 			if (jId.equals(Constants.INTERNATIONAL)) jId = "";
 			String licenseParams = 
 					"commercial=" + C + "&derivatives=" + D + "&jurisdiction=" + jId;
+			String uri = cclWs  + "/get?" + licenseParams;
 			String str;
 			try {
 				this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				str = ccclient.getCCLicense(licenseParams);
+				str  = Unmarshaller.getCCLicense(uri);
 			} finally {
 				this.setCursor(Cursor.getDefaultCursor());
 			}
@@ -293,6 +294,7 @@ public class CCLicenseDialog extends MonashDialog {
 		license = null;
 
 		cclWs = PublishAgent.getCCLUrl();
+		//cclWs = "http://api.creativecommons.org/rest/1.5/license/standard";
 
 		backButton = new JButton("Back");
 		formatButton(backButton, 'B', BACK_TOOLTIP, BACK, this);
@@ -302,8 +304,7 @@ public class CCLicenseDialog extends MonashDialog {
 		this.getRootPane().setDefaultButton(nextButton);
 
 		try {
-			ccclient = new CCLClient(cclWs);
-			List<CCLField> fields = ccclient.generateLicenseFields();
+			List<CCLField> fields = Unmarshaller.getLicenseFields(cclWs);
 			for (CCLField field : fields) {
 				String id = field.getId();
 				List<CCLFieldEnumValues> options = field.getEnumValues();
@@ -338,8 +339,6 @@ public class CCLicenseDialog extends MonashDialog {
 		} catch (Exception e) {
 			showErrDialog(this, Constants.ERROR_CCL, e);
 		}
-
-
 	}
 
 	/**

@@ -103,7 +103,7 @@ public class AndsPublishUI extends TopWindow
 	private static final String TITLE = "Register with RDA";
 	
 	/** Default height of the window */
-	private static final int 	HEIGHT = 350;
+	private static final int 	HEIGHT = 550;
 
 	/** Message to display when there is no data collections available to register with RDA */
 	private static final String NO_DATA = "No data collections available to register with RDA";
@@ -142,7 +142,7 @@ public class AndsPublishUI extends TopWindow
 	private JXLabel				titleLabel;
 
 	/** The field hosting the login name. */
-	private JTextArea			descriptionTxt;	// JTextField
+	private JTextArea			descriptionTxt;
 
 	/** Register with RDA */
 	private JButton 			publishButton;
@@ -159,9 +159,6 @@ public class AndsPublishUI extends TopWindow
 	 */
 	private JSplitPane 			splitPane;
 
-	/** Scrollpane to hold {@link #splitPane}. */
-	private JScrollPane 			scrollPane;
-	
 	/** contains details about collection to register with ANDS  */
 	private JPanel 				projectPanel;
 
@@ -229,7 +226,7 @@ public class AndsPublishUI extends TopWindow
 
 		titleLabel = new JXLabel();
 
-		descriptionTxt = new JTextArea(5, 20);
+		descriptionTxt = new JTextArea(3, 20);
 		descriptionTxt.setText("");
 		descriptionTxt.setEnabled(true);
 		descriptionTxt.setBorder(new LineBorder(Color.LIGHT_GRAY, 1));
@@ -262,15 +259,13 @@ public class AndsPublishUI extends TopWindow
 
 		//Create a split pane with the two scroll panes in it.
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				projListScrollPane, projectPanel);
+				projListScrollPane, andsScrollPane);
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setDividerLocation(150);
 		
-		//Provide minimum sizes for the two components in the split pane.
-		projListScrollPane.setMinimumSize(new Dimension(150, HEIGHT));
-		//andsScrollPane.setMinimumSize(new Dimension(500, HEIGHT));
-		//splitPane.setMinimumSize(new Dimension(650, HEIGHT));
-		scrollPane  = new JScrollPane(splitPane);
+		//Provide minimum sizes for the split pane.
+		splitPane.setPreferredSize(new Dimension(900, HEIGHT));
+		splitPane.setMinimumSize(new Dimension(900, HEIGHT));
 	}
 
 	/**
@@ -471,7 +466,7 @@ public class AndsPublishUI extends TopWindow
 		p.setBackgroundPainter(tp.getBackgroundPainter());
 		lp.setBackgroundPainter(tp.getBackgroundPainter());
 		container.add(p, BorderLayout.NORTH);
-		container.add(scrollPane, BorderLayout.CENTER);	// splitPane
+		container.add(splitPane, BorderLayout.CENTER);	// splitPane
 		container.add(controlsBar, BorderLayout.SOUTH);
 	}
 
@@ -538,8 +533,10 @@ public class AndsPublishUI extends TopWindow
 		researcherPanel.add(rcb);
 		researcherPanel.add(Box.createVerticalStrut(5));
 		researcherPanel.revalidate();
-		int ht = this.getHeight() + 20;
-		this.setSize(new Dimension(this.getWidth(), ht));
+		int ht = projectPanel.getHeight() + 20;
+		projectPanel.setSize(new Dimension(projectPanel.getWidth(), ht));
+		System.out.println("after adding check box, ht: " + this.getHeight() + " Width: " + this.getWidth()
+						+ "prj Ht: " + projectPanel.getHeight() + " wd: " + projectPanel.getWidth());
 	}
 
 	/**
@@ -614,7 +611,7 @@ public class AndsPublishUI extends TopWindow
 		if (udl != null) {
 			model.setLicense(udl);
 			noLicense.setText(udl.toString());
-			setComponentControls();
+			publishButton.setEnabled(model.hasAllData());
 			return true;
 		} else {
 			return false;
@@ -637,7 +634,7 @@ public class AndsPublishUI extends TopWindow
 		if (ccl != null) {
 			model.setLicense(ccl);
 			noLicense.setText(ccl.toString());
-			setComponentControls();
+			publishButton.setEnabled(model.hasAllData());
 			return true;
 		} else {
 			return false;

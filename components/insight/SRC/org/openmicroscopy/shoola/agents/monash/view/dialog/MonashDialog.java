@@ -62,7 +62,7 @@ public abstract class MonashDialog extends JDialog
 {
 
 	/** The default size of the window. */
-	protected static final Dimension 	DEFAULT_SIZE = new Dimension(700, 400);
+	protected static final Dimension 	DEFAULT_SIZE = new Dimension(700, 500);
 
 	/** The icon to use for the dialog. */
 	private Icon 						icon;
