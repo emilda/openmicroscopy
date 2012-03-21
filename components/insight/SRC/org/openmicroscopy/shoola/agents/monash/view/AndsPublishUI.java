@@ -330,6 +330,7 @@ public class AndsPublishUI extends TopWindow
 			model.setMetadata(object);
 			clearData();
 		}
+		setComponentControls();
 		//updateLabel((String) list.getSelectedValue());
 	}
 
@@ -535,8 +536,6 @@ public class AndsPublishUI extends TopWindow
 		researcherPanel.revalidate();
 		int ht = projectPanel.getHeight() + 20;
 		projectPanel.setSize(new Dimension(projectPanel.getWidth(), ht));
-		System.out.println("after adding check box, ht: " + this.getHeight() + " Width: " + this.getWidth()
-						+ "prj Ht: " + projectPanel.getHeight() + " wd: " + projectPanel.getWidth());
 	}
 
 	/**
