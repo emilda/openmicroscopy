@@ -1,5 +1,9 @@
+Checkout the metadata registration server component from Google Code
+svn checkout http://monashmie.googlecode.com/svn/trunk/ 
 
-For the impatient, see docs/QUICKSTART.txt
+To setup and deploy OMERO:
+
+Read docs/QUICKSTART.txt
 
 For extensive information on installation and developing omero,
 please see the OMERO development Trac:
