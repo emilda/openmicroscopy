@@ -1,11 +1,13 @@
-Checkout the metadata registration server component from Google Code
+To setup and deploy:
+
+Installation guide is available at http://monashmie.googlecode.com/files/installation-guide.docx
+
+Checkout the metadata registration server component from Google Code:
 svn checkout http://monashmie.googlecode.com/svn/trunk/ 
 
-To setup and deploy OMERO:
+Check out the OMERO Insight client customized version for ANDS funded Monash ARDC-EIF project from Github.
 
-Read docs/QUICKSTART.txt
-
-For extensive information on installation and developing omero,
+For extensive information on installation and developing OMERO,
 please see the OMERO development Trac:
 
   http://trac.openmicroscopy.org.uk/omero/wiki/OmeroInstall
