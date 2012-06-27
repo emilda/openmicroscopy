@@ -7,6 +7,9 @@ svn checkout http://monashmie.googlecode.com/svn/trunk/
 
 Check out the OMERO Insight client customized version for ANDS funded Monash ARDC-EIF project from Github.
 
+The OMERO user guide is at:
+  https://confluence-vre.its.monash.edu.au/display/ANDSMonashDataCapture/OMERO+User+Guide+-+Essentials
+
 For extensive information on installation and developing OMERO,
 please see the OMERO development Trac:
 
