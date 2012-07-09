@@ -1,11 +1,12 @@
 To setup and deploy:
 
-Installation guide is available at http://monashmie.googlecode.com/files/installation-guide.docx
+Java API documentation and installation documents are available at
+https://github.com/emilda/monashmie/downloads
 
-Checkout the metadata registration server component from Google Code:
-svn checkout http://monashmie.googlecode.com/svn/trunk/ 
+Read the document installation-guide.docx, for the installation instructions.
 
-Check out the OMERO Insight client customized version for ANDS funded Monash ARDC-EIF project from Github.
+This project contains the Insight client customized version for ANDS funded Monash 
+ARDC-EIF project
 
 The OMERO user guide is at:
   https://confluence-vre.its.monash.edu.au/display/ANDSMonashDataCapture/OMERO+User+Guide+-+Essentials
@@ -16,3 +17,4 @@ please see the OMERO development Trac:
   http://trac.openmicroscopy.org.uk/omero/wiki/OmeroInstall
   http://trac.openmicroscopy.org.uk/omero/wiki/OmeroBuild
 
+Check out the server component for the metadata registration from https://github.com/emilda/monashmie
